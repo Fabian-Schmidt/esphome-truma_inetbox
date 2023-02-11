@@ -1,0 +1,461 @@
+#pragma once
+
+#include <vector>
+#include "LinBusProtocol.h"
+#include "esphome/core/automation.h"
+#include "esphome/components/time/real_time_clock.h"
+
+namespace esphome {
+namespace truma_inetbox {
+
+#define LIN_PID_TRUMA_INET_BOX 0x18
+#define LIN_SID_RESPONSE 0x40
+#define LIN_SID_READ_STATE_BUFFER 0xBA
+#define LIN_SID_FIll_STATE_BUFFFER 0xBB
+
+// Response to init are the following frames:
+// - 2 * STATUS_FRAME_DEVICES
+// - STATUS_FRAME_HEATER
+// - STATUS_FRAME_TIMER
+// - STAUTS_FRAME_CONFIG
+// - STATUS_FRAME_CLOCK
+#define STATUS_FRAME_RESPONSE_INIT_REQUEST 0x0A
+#define STATUS_FRAME_DEVICES 0x0B
+#define STATUS_FRAME_RESPONSE_ACK 0x0D
+#define STATUS_FRAME_CLOCK 0x15
+#define STATUS_FRAME_CLOCK_RESPONSE (STATUS_FRAME_CLOCK - 1)
+#define STAUTS_FRAME_CONFIG 0x17
+#define STAUTS_FRAME_CONFIG_RESPONSE (STAUTS_FRAME_CONFIG - 1)
+// Why can I send 0x33 as response?
+#define STATUS_FRAME_HEATER 0x33
+#define STATUS_FRAME_HEATER_RESPONSE (STATUS_FRAME_HEATER - 1)
+// Error response
+#define STATUS_FRAME_UNKOWN_34 0x34
+// Error response
+#define STATUS_FRAME_UNKOWN_36 0x36
+#define STATUS_FRAME_TIMER 0x3D
+#define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
+// Error response
+#define STATUS_FRAME_UNKOWN_3E 0x3E
+
+enum class HeatingMode : u_int8_t {
+  HEATING_MODE_OFF = 0x0,
+  HEATING_MODE_ECO = 0x1,
+  HEATING_MODE_HIGH = 0xA,
+  HEATING_MODE_BOOST = 0xB,
+};
+
+enum class ElectricPowerLevel : u_int16_t {
+  ELECTRIC_POWER_LEVEL_0 = 0,
+  ELECTRIC_POWER_LEVEL_900 = 900,
+  ELECTRIC_POWER_LEVEL_1800 = 1800,
+};
+
+enum class TargetTemp : u_int16_t {
+  TARGET_TEMP_OFF = 0x0,
+
+  // 40C
+  TARGET_TEMP_WATER_ECO = (40 + 273) * 10,
+  // 60C
+  TARGET_TEMP_WATER_HIGH = (60 + 273) * 10,
+  // 200C
+  TARGET_TEMP_WATER_BOOST = (200 + 273) * 10,
+
+  TARGET_TEMP_ROOM_MIN = (5 + 273) * 10,
+  TARGET_TEMP_ROOM_05C = (5 + 273) * 10,
+  TARGET_TEMP_ROOM_06C = (6 + 273) * 10,
+  TARGET_TEMP_ROOM_07C = (7 + 273) * 10,
+  TARGET_TEMP_ROOM_08C = (8 + 273) * 10,
+  TARGET_TEMP_ROOM_09C = (9 + 273) * 10,
+  TARGET_TEMP_ROOM_10C = (10 + 273) * 10,
+  TARGET_TEMP_ROOM_11C = (11 + 273) * 10,
+  TARGET_TEMP_ROOM_12C = (12 + 273) * 10,
+  TARGET_TEMP_ROOM_13C = (13 + 273) * 10,
+  TARGET_TEMP_ROOM_14C = (14 + 273) * 10,
+  TARGET_TEMP_ROOM_15C = (15 + 273) * 10,
+  TARGET_TEMP_ROOM_16C = (16 + 273) * 10,
+  TARGET_TEMP_ROOM_17C = (17 + 273) * 10,
+  TARGET_TEMP_ROOM_18C = (18 + 273) * 10,
+  TARGET_TEMP_ROOM_19C = (19 + 273) * 10,
+  TARGET_TEMP_ROOM_20C = (20 + 273) * 10,
+  TARGET_TEMP_ROOM_21C = (21 + 273) * 10,
+  TARGET_TEMP_ROOM_22C = (22 + 273) * 10,
+  TARGET_TEMP_ROOM_23C = (23 + 273) * 10,
+  TARGET_TEMP_ROOM_24C = (24 + 273) * 10,
+  TARGET_TEMP_ROOM_25C = (25 + 273) * 10,
+  TARGET_TEMP_ROOM_26C = (26 + 273) * 10,
+  TARGET_TEMP_ROOM_27C = (27 + 273) * 10,
+  TARGET_TEMP_ROOM_28C = (28 + 273) * 10,
+  TARGET_TEMP_ROOM_29C = (29 + 273) * 10,
+  TARGET_TEMP_ROOM_30C = (30 + 273) * 10,
+  TARGET_TEMP_ROOM_MAX = (30 + 273) * 10,
+};
+
+enum class EnergyMix : u_int8_t {
+  ENERGY_MIX_NONE = 0b00,
+  ENERGY_MIX_GAS = 0b01,
+  ENERGY_MIX_ELECTRICITY = 0b10,
+  ENERGY_MIX_MIX = 0b11,
+};
+
+enum class OperatingStatus : u_int8_t {
+  OPERATING_STATUS_UNSET = 0x0,
+  OPERATING_STATUS_OFF = 0x0,
+  OPERATING_STATUS_WARNING = 0x1,
+  OPERATING_STATUS_START_OR_COOL_DOWN = 0x4,
+  // ON - Heater off
+  OPERATING_STATUS_ON_5 = 0x5,
+  OPERATING_STATUS_ON_6 = 0x6,
+  OPERATING_STATUS_ON_7 = 0x7,
+  OPERATING_STATUS_ON_8 = 0x8,
+  OPERATING_STATUS_ON_9 = 0x9,
+};
+
+enum class OperatingUnits : u_int8_t {
+  OPERATING_UNITS_CELSIUS = 0x0,
+  OPERATING_UNITS_FAHRENHEIT = 0x1,
+};
+
+enum class Language : u_int8_t {
+  LANGUAGE_GERMAN = 0x0,
+  LANGUAGE_ENGLISH = 0x1,
+  LANGUAGE_FRENCH = 0x2,
+  LANGUAGE_ITALY = 0x3,
+};
+
+enum class ResponseAckResult : u_int8_t {
+  RESPONSE_ACK_RESULT_OKAY = 0x0,
+  RESPONSE_ACK_RESULT_ERROR_INVALID_MSG = 0x2,
+  // The response status frame `message_type` is unkown.
+  RESPONSE_ACK_RESULT_ERROR_INVALID_ID = 0x3,
+};
+
+enum class TempOffset : u_int8_t {
+  TEMP_OFFSET_0_0C = (u_int8_t) ((-0.0f + 17) * 10),
+  TEMP_OFFSET_0_5C = (u_int8_t) ((-0.5f + 17) * 10),
+  TEMP_OFFSET_1_0C = (u_int8_t) ((-1.0f + 17) * 10),
+  TEMP_OFFSET_1_5C = (u_int8_t) ((-1.5f + 17) * 10),
+  TEMP_OFFSET_2_0C = (u_int8_t) ((-2.0f + 17) * 10),
+  TEMP_OFFSET_2_5C = (u_int8_t) ((-2.5f + 17) * 10),
+  TEMP_OFFSET_3_0C = (u_int8_t) ((-3.0f + 17) * 10),
+  TEMP_OFFSET_3_5C = (u_int8_t) ((-3.5f + 17) * 10),
+  TEMP_OFFSET_4_0C = (u_int8_t) ((-4.0f + 17) * 10),
+  TEMP_OFFSET_4_5C = (u_int8_t) ((-4.5f + 17) * 10),
+  TEMP_OFFSET_5_0C = (u_int8_t) ((-5.0f + 17) * 10),
+};
+
+enum class ClockMode : u_int8_t {
+  CLOCK_MODE_24H = 0x0,
+  CLOCK_MODE_12H = 0x1,
+};
+
+enum class TimerActive : u_int8_t {
+  TIMER_ACTIVE_ON = 0x1,
+  TIMER_ACTIVE_OFF = 0x0,
+};
+
+enum class ClockSource : u_int8_t {
+  // Set by user
+  CLOCK_SOURCE_MANUAL = 0x1,
+  // Set by message
+  CLOCK_SOURCE_PROG = 0x2,
+};
+
+struct StatusFrameHeader {  // NOLINT(altera-struct-pack-align)
+  // sid
+  u_int8_t service_identifier;
+  u_int8_t header[10];
+  u_int8_t header_2;
+  u_int8_t header_3;
+  // after checksum
+  u_int8_t message_length;
+  u_int8_t message_type;
+  u_int8_t command_counter;
+  u_int8_t checksum;
+} __attribute__((packed));
+
+// Length 20 (0x14)
+struct StatusFrameHeater {  // NOLINT(altera-struct-pack-align)
+  TargetTemp target_temp_room;
+  // Room
+  HeatingMode heating_mode;
+  u_int8_t heater_unkown_1;
+  ElectricPowerLevel el_power_level_a;
+  TargetTemp target_temp_water;
+  ElectricPowerLevel el_power_level_b;
+  EnergyMix energy_mix_a;
+  // Ignored by response
+  EnergyMix energy_mix_b;
+  u_int16_t current_temp_water;
+  u_int16_t current_temp_room;
+  OperatingStatus operating_status;
+  u_int16_t error_code;
+  u_int8_t heater_unkown_2;
+} __attribute__((packed));
+
+// Length 12 (0x0C)
+struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
+  TargetTemp target_temp_room;
+  // Room
+  HeatingMode heating_mode;
+  u_int8_t recv_status_u3;
+  ElectricPowerLevel el_power_level_a;
+  TargetTemp target_temp_water;
+  ElectricPowerLevel el_power_level_b;
+  EnergyMix energy_mix_a;
+  // Ignored?
+  EnergyMix energy_mix_b;
+} __attribute__((packed));
+
+// Length 24 (0x18)
+struct StatusFrameTimer {  // NOLINT(altera-struct-pack-align)
+  TargetTemp timer_target_temp_room;
+  HeatingMode timer_heating_mode;
+  u_int8_t timer_unkown_1;
+  ElectricPowerLevel timer_el_power_level_a;
+  TargetTemp timer_target_temp_water;
+  ElectricPowerLevel timer_el_power_level_b;
+  EnergyMix timer_energy_mix_a;
+  EnergyMix timer_energy_mix_b;
+  // used by timer response message
+  u_int8_t unused[5];
+  u_int8_t timer_unknown_3;
+  u_int8_t timer_unknown_4;
+  TimerActive timer_active;
+  u_int8_t timer_start_minutes;
+  u_int8_t timer_start_hours;
+  u_int8_t timer_stop_minutes;
+  u_int8_t timer_stop_hours;
+} __attribute__((packed));
+
+// Length 13 (0x0D)
+struct StatusFrameTimerResponse {  // NOLINT(altera-struct-pack-align)
+  TargetTemp timer_target_temp_room;
+  HeatingMode timer_heating_mode;
+  u_int8_t timer_unkown_1;
+  ElectricPowerLevel timer_el_power_level_a;
+  TargetTemp timer_target_temp_water;
+  ElectricPowerLevel timer_el_power_level_b;
+  EnergyMix timer_energy_mix_a;
+  EnergyMix timer_energy_mix_b;
+  // set by response message to active timer
+  TimerActive timer_resp_active;
+  // set by response message to active timer
+  u_int8_t timer_resp_start_minutes;
+  // set by response message to active timer
+  u_int8_t timer_resp_start_hours;
+  // set by response message to active timer
+  u_int8_t timer_resp_stop_minutes;
+  // set by response message to active timer
+  u_int8_t timer_resp_stop_hours;
+} __attribute__((packed));
+
+// Length 2 (0x02)
+struct StatusFrameResponseAck {  // NOLINT(altera-struct-pack-align)
+  ResponseAckResult error_code;
+  u_int8_t unkown;
+} __attribute__((packed));
+
+// Length 10 (0x0A)
+struct StatusFrameClock {  // NOLINT(altera-struct-pack-align)
+  u_int8_t clock_hour;
+  u_int8_t clock_minute;
+  u_int8_t clock_second;
+  // MUST be 0x1, 0x2, 0x3..? (lower than 0x9)
+  u_int8_t display_1;
+  // MUST be 0x1
+  u_int8_t display_2;
+  u_int8_t display_3;
+  ClockMode clock_mode;
+  ClockSource clock_source;
+  u_int8_t display_4;
+  u_int8_t display_5;
+} __attribute__((packed));
+
+// Length 10 (0x0A)
+struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
+  // 0x01 .. 0x0A
+  u_int8_t display_brightness;
+  Language language;
+  u_int8_t unkown_2;  // 0xB4
+  u_int8_t unkown_3;  // 0x0A
+  TempOffset temp_offset;
+  u_int8_t unkown_5;  // 0x0A
+  OperatingUnits temp_units;
+  u_int8_t unkown_6;
+  u_int8_t unkown_7;
+  u_int8_t unkown_8;
+} __attribute__((packed));
+
+// Length 12 (0x0C)
+struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
+  u_int8_t device_count;
+  u_int8_t device_id;
+  // 0x01 - Maybe active or found
+  u_int8_t unkown_0;
+  // 0x00
+  u_int8_t unkown_1;
+  u_int16_t hardware_revision_major;
+  u_int8_t hardware_revision_minor;
+  // `software_revision[0].software_revision[1].software_revision[2]`
+  u_int8_t software_revision[3];
+  // 0xAD on CPplus
+  // 0x00 on Combi4
+  u_int8_t unkown_2;
+  // 0x10 on CPplus
+  // 0x00 on Combi4
+  u_int8_t unkown_3;
+
+} __attribute__((packed));
+
+union StatusFrame {  // NOLINT(altera-struct-pack-align)
+  u_int8_t raw[41];
+  struct inner {  // NOLINT(altera-struct-pack-align)
+    StatusFrameHeader genericHeader;
+    union {  // NOLINT(altera-struct-pack-align)
+      StatusFrameHeater heater;
+      StatusFrameHeaterResponse heaterResponse;
+      StatusFrameTimer timer;
+      StatusFrameTimerResponse timerResponse;
+      StatusFrameResponseAck responseAck;
+      StatusFrameClock clock;
+      StatusFrameConfig config;
+      StatusFrameDevice device;
+    } __attribute__((packed));
+  } inner;
+} __attribute__((packed));
+
+struct StatusFrameListener {
+  std::function<void(const StatusFrameHeater *)> on_heater_change;
+  std::function<void(const StatusFrameTimer *)> on_timer_change;
+  std::function<void(const StatusFrameClock *)> on_clock_change;
+  std::function<void(const StatusFrameConfig *)> on_config_change;
+};
+
+class TrumaiNetBoxApp : public LinBusProtocol {
+ public:
+  TrumaiNetBoxApp(u_int8_t expected_listener_count);
+
+  void update() override;
+
+  const std::array<u_int8_t, 4> lin_identifier() override;
+  void lin_reset_device() override;
+
+  void set_time(time::RealTimeClock *time) { time_ = time; }
+  time::RealTimeClock *get_time() const { return time_; }
+
+  bool get_status_heater_valid() { return this->status_heater_valid_; }
+  const StatusFrameHeater *get_status_heater() { return &this->status_heater_; }
+  void register_listener(const std::function<void(const StatusFrameHeater *)> &func);
+
+  bool get_status_timer_valid() { return this->status_timer_valid_; }
+  const StatusFrameTimer *get_status_timer() { return &this->status_timer_; }
+  void register_listener(const std::function<void(const StatusFrameTimer *)> &func);
+
+  bool get_status_clock_valid() { return this->status_clock_valid_; }
+  const StatusFrameClock *get_status_clock() { return &this->status_clock_; }
+  void register_listener(const std::function<void(const StatusFrameClock *)> &func);
+
+  bool get_status_config_valid() { return this->status_config_valid_; }
+  const StatusFrameConfig *get_status_config() { return &this->status_config_; }
+  void register_listener(const std::function<void(const StatusFrameConfig *)> &func);
+
+  bool truma_heater_can_update() { return this->status_heater_valid_; }
+  StatusFrameHeaterResponse *update_heater_prepare();
+  void update_heater_submit() { this->update_status_heater_unsubmitted_ = true; }
+
+  bool truma_timer_can_update() { return this->status_timer_valid_; }
+  StatusFrameTimerResponse *update_timer_prepare();
+  void update_timer_submit() { this->update_status_timer_unsubmitted_ = true; }
+
+  bool truma_clock_can_update() { return this->status_clock_valid_; }
+  void update_clock_submit() { this->update_status_clock_unsubmitted_ = true; }
+
+  int64_t get_last_cp_plus_request() { return this->device_registered_; }
+
+  // Automation
+  void add_on_heater_message_callback(std::function<void(const StatusFrameHeater *)> callback) {
+    this->state_heater_callback_.add(std::move(callback));
+  }
+  bool action_heater_room(u_int8_t temperature, HeatingMode mode = HeatingMode::HEATING_MODE_OFF);
+  bool action_heater_water(u_int8_t temperature);
+  bool action_heater_water(TargetTemp temperature);
+  bool action_heater_electric_power_level(u_int16_t value);
+  bool action_heater_energy_mix(EnergyMix energy_mix,
+                                ElectricPowerLevel el_power_level = ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0);
+  bool action_timer_disable();
+  bool action_timer_activate(u_int16_t start, u_int16_t stop, u_int8_t room_temperature,
+                             HeatingMode mode = HeatingMode::HEATING_MODE_OFF, u_int8_t water_temperature = 0,
+                             EnergyMix energy_mix = EnergyMix::ENERGY_MIX_NONE,
+                             ElectricPowerLevel el_power_level = ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0);
+  bool action_read_time();
+  bool action_write_time();
+
+ protected:
+  time::RealTimeClock *time_;
+
+  // Truma CP Plus needs init (reset). This device is not registered.
+  int64_t device_registered_ = 0;
+  int64_t init_requested_ = 0;
+  int64_t init_recieved_ = 0;
+  u_int8_t message_counter = 1;
+
+  std::vector<StatusFrameListener> listeners_heater_;
+  CallbackManager<void(const StatusFrameHeater *)> state_heater_callback_{};
+
+  bool status_heater_valid_ = false;
+  // Value has changed notify listeners.
+  bool status_heater_updated_ = false;
+  StatusFrameHeater status_heater_;
+
+  bool status_timer_valid_ = false;
+  // Value has changed notify listeners.
+  bool status_timer_updated_ = false;
+  StatusFrameTimer status_timer_;
+
+  bool status_clock_valid_ = false;
+  // Value has changed notify listeners.
+  bool status_clock_updated_ = false;
+  StatusFrameClock status_clock_;
+
+  bool status_config_valid_ = false;
+  // Value has changed notify listeners.
+  bool status_config_updated_ = false;
+  StatusFrameConfig status_config_;
+
+  // last time CP plus was informed I got an update msg.
+  int64_t update_time_ = 0;
+  // Prepared means `update_status_heater_` was copied from `status_heater_`.
+  bool update_status_heater_prepared_ = false;
+  // Prepared means an update is already awating fetch from CP plus.
+  bool update_status_heater_unsubmitted_ = false;
+  // I have submitted my update request to CP plus, but I have not recieved an update with new heater values from CP
+  // plus.
+  bool update_status_heater_stale_ = false;
+  StatusFrameHeaterResponse update_status_heater_;
+
+  // Prepared means `update_status_timer_` was copied from `status_timer_`.
+  bool update_status_timer_prepared_ = false;
+  // Prepared means an update is already awating fetch from CP plus.
+  bool update_status_timer_unsubmitted_ = false;
+  // I have submitted my update request to CP plus, but I have not recieved an update with new timer values from CP
+  // plus.
+  bool update_status_timer_stale_ = false;
+  StatusFrameTimerResponse update_status_timer_;
+
+  // The behaviour of `update_status_clock_unsubmitted_` is special.
+  // Just an update is marked. The actual package is prepared when CP Plus asks for the data in the
+  // `lin_multiframe_recieved` method.
+  bool update_status_clock_unsubmitted_ = false;
+
+  bool answer_lin_order_(const u_int8_t pid) override;
+
+  bool lin_read_field_by_identifier_(u_int8_t identifier, std::array<u_int8_t, 5> *response) override;
+  const u_int8_t *lin_multiframe_recieved(const u_int8_t *message, const u_int8_t message_len,
+                                          u_int8_t *return_len) override;
+
+  bool has_update_to_submit_();
+};
+
+}  // namespace truma_inetbox
+}  // namespace esphome
