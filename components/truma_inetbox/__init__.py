@@ -325,6 +325,11 @@ async def truma_inetbox_timer_disable_to_code(config, action_id, template_arg, a
     ),
 )
 async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, args):
+    # Run interrupt on core 0. ESP Home runs on core 1.
+    cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE=0")
+    # Default Stack Size is 2048. Not enough for my operation.
+    cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096")
+
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
 

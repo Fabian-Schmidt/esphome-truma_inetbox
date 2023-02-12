@@ -4,11 +4,6 @@
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 
-#ifdef USE_ESP32
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#endif
-
 namespace esphome {
 namespace truma_inetbox {
 
@@ -56,23 +51,26 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   bool fault_on_lin_bus_reported_ = false;
   bool can_write_lin_answer_ = false;
 
+  enum read_state {
+    READ_STATE_BREAK,
+    READ_STATE_SYNC,
+    READ_STATE_SID,
+    READ_STATE_DATA,
+    READ_STATE_ACT,
+  };
+  read_state current_state_ = READ_STATE_BREAK;
   u_int8_t current_PID_with_parity_ = 0x00;
   u_int8_t current_PID_ = 0x00;
   bool current_data_valid = true;
   u_int8_t current_data_count_ = 0;
   // up to 8 byte data frame + CRC
   u_int8_t current_data_[9] = {};
-  // Total wait time for this LIN Frame (Break, SYNC, Data, CRC)
-  u_int32_t total_wait_;
-  // Time when the last LIN data was available.
-  int64_t last_data_recieved_;
-
-  TaskHandle_t read_task_handle = NULL;
-  static void read_task(void *params);
+  // // Time when the last LIN data was available.
+  // int64_t last_data_recieved_;
 
   void read_lin_frame_();
   void clear_uart_buffer_();
-  bool wait_for_data_available_with_timeout_(u_int32_t timeout);
+  void setup_framework();
 };
 
 }  // namespace truma_inetbox

@@ -54,15 +54,39 @@ void LinBusProtocol::lin_message_recieved_(const u_int8_t pid, const u_int8_t *m
     //   this->prepare_update_msg_(response);
     // }
 
-    this->lin_message_recieved_diagnostic_(message, length);
+    {
+      // auto node_address = message[0];
+      bool my_node_address = message[0] == this->lin_node_address_;
+      bool broadcast_address = message[0] == LIN_NAD_BROADCAST;
+      if (!my_node_address && !broadcast_address) {
+        return;
+      }
+    }
+    u_int8_t protocol_control_information = message[1];
+    if ((protocol_control_information & 0xF0) == 0x00) {
+      // Single Frame mode
+      {
+        // End any open Multi frame mode message
+        this->multi_pdu_message_expected_size_ = 0;
+        this->multi_pdu_message_len_ = 0;
+        this->multi_pdu_message_frame_counter_ = 0;
+      }
+      this->lin_msg_diag_single_(message, length);
+    } else if ((protocol_control_information & 0xF0) == 0x10) {
+      // First Frame of multi PDU message
+      this->lin_msg_diag_first_(message, length);
+    } else if ((protocol_control_information & 0xF0) == 0x20) {
+      // Consecutive Frames
+      this->lin_msg_diag_consecutive_(message, length);
+      // Check if this was the last consecutive message.
+      if (this->multi_pdu_message_len_ == this->multi_pdu_message_expected_size_) {
+        this->lin_msg_diag_multi_();
+      }
+    }
 
   } else if (pid == this->lin_node_address_) {
     ESP_LOGW(TAG, "Unhandled message for me.");
   }
-}
-
-void LinBusProtocol::prepare_update_msg_(const std::array<u_int8_t, 8> message) {
-  this->updates_to_send_.push(message);
 }
 
 bool LinBusProtocol::is_matching_identifier_(const u_int8_t *message) {
@@ -71,72 +95,16 @@ bool LinBusProtocol::is_matching_identifier_(const u_int8_t *message) {
          message[3] == lin_identifier[3];
 }
 
-void LinBusProtocol::lin_message_recieved_diagnostic_(const u_int8_t *message, u_int8_t length) {
-  u_int8_t node_address = message[0];
-  bool my_node_address = node_address == this->lin_node_address_;
-  bool broadcast_address = node_address == LIN_NAD_BROADCAST;
-  if (!my_node_address && !broadcast_address) {
-    return;
-  }
-  u_int8_t protocol_control_information = message[1];
-  u_int16_t message_length = 0;
-  u_int8_t service_identifier = 0;
-  if ((protocol_control_information & 0xF0) == 0x00) {
-    // Single Frame mode
-    {
-      // End any open Multi frame mode message
-      this->multi_pdu_message_expected_size_ = 0;
-      this->multi_pdu_message_len_ = 0;
-      this->multi_pdu_message_frame_counter_ = 0;
-    }
-    message_length = protocol_control_information;
-    service_identifier = message[2];
-    if (message_length > 6) {
-      ESP_LOGE(TAG, "LIN Protocol issue: Single frame message too long.");
-      // ignore invalid message
-      return;
-    }
-  } else if ((protocol_control_information & 0xF0) == 0x10) {
-    // First Frame of multi PDU message
-    message_length = (protocol_control_information & 0x0F << 8) + message[2];
-    service_identifier = message[3];
-    if (message_length < 7) {
-      ESP_LOGE(TAG, "LIN Protocol issue: Multi frame message too short.");
-      // ignore invalid message
-      return;
-    }
-    if (message_length > sizeof(this->multi_pdu_message_)) {
-      ESP_LOGE(TAG, "LIN Protocol issue: Multi frame message too long.");
-      // ignore invalid message
-      return;
-    }
-    this->multi_pdu_message_expected_size_ = message_length;
-    this->multi_pdu_message_len_ = 0;
-    this->multi_pdu_message_frame_counter_ = 1;
-    for (size_t i = 3; i < 8; i++) {
-      this->multi_pdu_message_[this->multi_pdu_message_len_++] = message[i];
-    }
-    // Message is handeld
-    return;
-  } else if ((protocol_control_information & 0xF0) == 0x20) {
-    // Consecutive Frames
-    if (this->multi_pdu_message_len_ >= this->multi_pdu_message_expected_size_) {
-      // ignore, because i don't await a consecutive frame
-      return;
-    }
-    u_int8_t frame_counter = protocol_control_information & 0x0F;
-    if (frame_counter != this->multi_pdu_message_frame_counter_) {
-      // ignore, because i don't await this consecutive frame
-      return;
-    }
-    this->multi_pdu_message_frame_counter_++;
-    if (this->multi_pdu_message_frame_counter_ > 0x0F) {
-      // Frame counter has only 4 bit and wraps around.
-      this->multi_pdu_message_frame_counter_ = 0x00;
-    }
+void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t length) {
+  // auto node_address = message[0];
+  bool my_node_address = message[0] == this->lin_node_address_;
+  bool broadcast_address = message[0] == LIN_NAD_BROADCAST;
 
-    this->lin_message_recieved_diagnostic_multi_(message, length, protocol_control_information);
-    // Message is handeld
+  u_int8_t message_length = message[1];
+  u_int8_t service_identifier = message[2];
+  if (message_length > 6) {
+    ESP_LOGE(TAG, "LIN Protocol issue: Single frame message too long.");
+    // ignore invalid message
     return;
   }
 
@@ -201,68 +169,102 @@ void LinBusProtocol::lin_message_recieved_diagnostic_(const u_int8_t *message, u
   }
 }
 
-void LinBusProtocol::lin_message_recieved_diagnostic_multi_(const u_int8_t *message, u_int8_t length,
-                                                            u_int8_t protocol_control_information) {
+void LinBusProtocol::lin_msg_diag_first_(const u_int8_t *message, u_int8_t length) {
+  u_int8_t protocol_control_information = message[1];
+  u_int16_t message_length = (protocol_control_information & 0x0F << 8) + message[2];
+  if (message_length < 7) {
+    ESP_LOGE(TAG, "LIN Protocol issue: Multi frame message too short.");
+    // ignore invalid message
+    return;
+  }
+  if (message_length > sizeof(this->multi_pdu_message_)) {
+    ESP_LOGE(TAG, "LIN Protocol issue: Multi frame message too long.");
+    // ignore invalid message
+    return;
+  }
+  this->multi_pdu_message_expected_size_ = message_length;
+  this->multi_pdu_message_len_ = 0;
+  this->multi_pdu_message_frame_counter_ = 1;
+
+  // Copy recieved message over to `multi_pdu_message_` buffer.
+  for (size_t i = 3; i < 8; i++) {
+    this->multi_pdu_message_[this->multi_pdu_message_len_++] = message[i];
+  }
+}
+
+void LinBusProtocol::lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t length) {
+  if (this->multi_pdu_message_len_ >= this->multi_pdu_message_expected_size_) {
+    // ignore, because i don't await a consecutive frame
+    return;
+  }
+  u_int8_t protocol_control_information = message[1];
+  u_int8_t frame_counter = protocol_control_information & 0x0F;
+  if (frame_counter != this->multi_pdu_message_frame_counter_) {
+    // ignore, because i don't await this consecutive frame
+    return;
+  }
+  this->multi_pdu_message_frame_counter_++;
+  if (this->multi_pdu_message_frame_counter_ > 0x0F) {
+    // Frame counter has only 4 bit and wraps around.
+    this->multi_pdu_message_frame_counter_ = 0x00;
+  }
+
   // Copy recieved message over to `multi_pdu_message_` buffer.
   for (u_int8_t i = 2; i < 8; i++) {
     if (this->multi_pdu_message_len_ < this->multi_pdu_message_expected_size_) {
       this->multi_pdu_message_[this->multi_pdu_message_len_++] = message[i];
     }
   }
+}
 
-  if (this->multi_pdu_message_len_ == this->multi_pdu_message_expected_size_) {
-    ESP_LOGD(TAG, "Multi package request  %s",
-             format_hex_pretty(this->multi_pdu_message_, this->multi_pdu_message_len_).c_str());
+void LinBusProtocol::lin_msg_diag_multi_() {
+  ESP_LOGD(TAG, "Multi package request  %s",
+           format_hex_pretty(this->multi_pdu_message_, this->multi_pdu_message_len_).c_str());
 
-    u_int8_t answer_len = 0;
-    // Ask handling class what to answer to this request.
-    auto answer = this->lin_multiframe_recieved(this->multi_pdu_message_, this->multi_pdu_message_len_, &answer_len);
-    if (answer_len > 0) {
-      ESP_LOGD(TAG, "Multi package response %s", format_hex_pretty(answer, answer_len).c_str());
+  u_int8_t answer_len = 0;
+  // Ask handling class what to answer to this request.
+  auto answer = this->lin_multiframe_recieved(this->multi_pdu_message_, this->multi_pdu_message_len_, &answer_len);
+  if (answer_len > 0) {
+    ESP_LOGD(TAG, "Multi package response %s", format_hex_pretty(answer, answer_len).c_str());
 
-      std::array<u_int8_t, 8> response = this->lin_empty_response_;
-      if (answer_len <= 6) {
-        // Single Frame response - first frame
+    std::array<u_int8_t, 8> response = this->lin_empty_response_;
+    if (answer_len <= 6) {
+      // Single Frame response - first frame
+      response[0] = this->lin_node_address_;
+      response[1] = answer_len; /* bytes length */
+      response[2] = answer[0] | LIN_SID_RESPONSE;
+      for (u_int8_t i = 1; i < answer_len; i++) {
+        response[i + 2] = answer[i];
+      }
+      this->prepare_update_msg_(response);
+    } else {
+      // Multi Frame response
+      response[0] = this->lin_node_address_;
+      response[1] = 0x10 | ((answer_len >> 8) & 0x0F);
+      response[2] = answer_len & 0xFF;
+      response[3] = answer[0] | LIN_SID_RESPONSE;
+      for (u_int8_t i = 1; i < 5; i++) {
+        response[i + 3] = answer[i];
+      }
+      this->prepare_update_msg_(response);
+
+      // Multi Frame response - consecutive frame
+      u_int16_t answer_position = 5;      // The first 5 bytes are sent in First frame of multi frame response.
+      u_int8_t answer_frame_counter = 0;  // Each answer frame can contain 6 bytes
+      while (answer_position < answer_len) {
+        response = this->lin_empty_response_;
         response[0] = this->lin_node_address_;
-        response[1] = answer_len; /* bytes length */
-        response[2] = answer[0] | LIN_SID_RESPONSE;
-        for (u_int8_t i = 1; i < answer_len; i++) {
-          response[i + 2] = answer[i];
-        }
-        this->prepare_update_msg_(response);
-      } else {
-        // Multi Frame response
-        response[0] = this->lin_node_address_;
-        response[1] = 0x10 | ((answer_len >> 8) & 0x0F);
-        response[2] = answer_len & 0xFF;
-        response[3] = answer[0] | LIN_SID_RESPONSE;
-        for (u_int8_t i = 1; i < 5; i++) {
-          response[i + 3] = answer[i];
-        }
-        this->prepare_update_msg_(response);
-
-        // Multi Frame response - consecutive frame
-        u_int16_t answer_position = 5;      // The first 5 bytes are sent in First frame of multi frame response.
-        u_int8_t answer_frame_counter = 0;  // Each answer frame can contain 6 bytes
-        while (answer_position < answer_len) {
-          response = this->lin_empty_response_;
-          response[0] = this->lin_node_address_;
-          response[1] = ((answer_frame_counter + 1) & 0x0F) | 0x20;
-          for (u_int8_t i = 0; i < 6; i++) {
-            if (answer_position < answer_len) {
-              response[i + 2] = answer[answer_position++];
-            }
+        response[1] = ((answer_frame_counter + 1) & 0x0F) | 0x20;
+        for (u_int8_t i = 0; i < 6; i++) {
+          if (answer_position < answer_len) {
+            response[i + 2] = answer[answer_position++];
           }
-          this->prepare_update_msg_(response);
-          answer_frame_counter++;
         }
+        this->prepare_update_msg_(response);
+        answer_frame_counter++;
       }
     }
   }
-}
-
-void LinBusProtocol::lin_message_recieved_diagnostic_single_(const u_int8_t *message, u_int8_t length) {
-  // TODO: Split up `lin_message_recieved_diagnostic_` method.
 }
 
 }  // namespace truma_inetbox

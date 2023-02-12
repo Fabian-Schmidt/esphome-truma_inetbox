@@ -26,17 +26,17 @@ class LinBusProtocol : public LinBusListener {
  private:
   u_int8_t lin_node_address_ = /*LIN initial node address*/ 0x03;
 
-  void prepare_update_msg_(const std::array<u_int8_t, 8> message);
+  void prepare_update_msg_(const std::array<u_int8_t, 8> message) { this->updates_to_send_.push(std::move(message)); }
   bool is_matching_identifier_(const u_int8_t *message);
 
   u_int16_t multi_pdu_message_expected_size_ = 0;
   u_int8_t multi_pdu_message_len_ = 0;
   u_int8_t multi_pdu_message_frame_counter_ = 0;
   u_int8_t multi_pdu_message_[64];
-  void lin_message_recieved_diagnostic_(const u_int8_t *message, u_int8_t length);
-  void lin_message_recieved_diagnostic_multi_(const u_int8_t *message, u_int8_t length,
-                                              u_int8_t protocol_control_information);
-  void lin_message_recieved_diagnostic_single_(const u_int8_t *message, u_int8_t length);
+  void lin_msg_diag_single_(const u_int8_t *message, u_int8_t length);
+  void lin_msg_diag_first_(const u_int8_t *message, u_int8_t length);
+  void lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t length);
+  void lin_msg_diag_multi_();
 };
 
 }  // namespace truma_inetbox
