@@ -87,6 +87,7 @@ void LinBusProtocol::lin_message_recieved_diagnostic_(const u_int8_t *message, u
       // End any open Multi frame mode message
       this->multi_pdu_message_expected_size_ = 0;
       this->multi_pdu_message_len_ = 0;
+      this->multi_pdu_message_frame_counter_ = 0;
     }
     message_length = protocol_control_information;
     service_identifier = message[2];
@@ -111,6 +112,7 @@ void LinBusProtocol::lin_message_recieved_diagnostic_(const u_int8_t *message, u
     }
     this->multi_pdu_message_expected_size_ = message_length;
     this->multi_pdu_message_len_ = 0;
+    this->multi_pdu_message_frame_counter_ = 1;
     for (size_t i = 3; i < 8; i++) {
       this->multi_pdu_message_[this->multi_pdu_message_len_++] = message[i];
     }
@@ -122,6 +124,17 @@ void LinBusProtocol::lin_message_recieved_diagnostic_(const u_int8_t *message, u
       // ignore, because i don't await a consecutive frame
       return;
     }
+    u_int8_t frame_counter = protocol_control_information & 0x0F;
+    if (frame_counter != this->multi_pdu_message_frame_counter_) {
+      // ignore, because i don't await this consecutive frame
+      return;
+    }
+    this->multi_pdu_message_frame_counter_++;
+    if (this->multi_pdu_message_frame_counter_ > 0x0F) {
+      // Frame counter has only 4 bit and wraps around.
+      this->multi_pdu_message_frame_counter_ = 0x00;
+    }
+
     this->lin_message_recieved_diagnostic_multi_(message, length, protocol_control_information);
     // Message is handeld
     return;
@@ -190,50 +203,52 @@ void LinBusProtocol::lin_message_recieved_diagnostic_(const u_int8_t *message, u
 
 void LinBusProtocol::lin_message_recieved_diagnostic_multi_(const u_int8_t *message, u_int8_t length,
                                                             u_int8_t protocol_control_information) {
-  u_int8_t frame_counter = protocol_control_information - 0x21;
-  for (size_t i = 2; i < 8; i++) {
+  // Copy recieved message over to `multi_pdu_message_` buffer.
+  for (u_int8_t i = 2; i < 8; i++) {
     if (this->multi_pdu_message_len_ < this->multi_pdu_message_expected_size_) {
       this->multi_pdu_message_[this->multi_pdu_message_len_++] = message[i];
     }
   }
+
   if (this->multi_pdu_message_len_ == this->multi_pdu_message_expected_size_) {
     ESP_LOGD(TAG, "Multi package request  %s",
              format_hex_pretty(this->multi_pdu_message_, this->multi_pdu_message_len_).c_str());
 
     u_int8_t answer_len = 0;
+    // Ask handling class what to answer to this request.
     auto answer = this->lin_multiframe_recieved(this->multi_pdu_message_, this->multi_pdu_message_len_, &answer_len);
     if (answer_len > 0) {
       ESP_LOGD(TAG, "Multi package response %s", format_hex_pretty(answer, answer_len).c_str());
 
+      std::array<u_int8_t, 8> response = this->lin_empty_response_;
       if (answer_len <= 6) {
-        // Single Frame response
-        std::array<u_int8_t, 8> response = this->lin_empty_response_;
+        // Single Frame response - first frame
         response[0] = this->lin_node_address_;
         response[1] = answer_len; /* bytes length */
         response[2] = answer[0] | LIN_SID_RESPONSE;
-        for (size_t i = 1; i < answer_len; i++) {
+        for (u_int8_t i = 1; i < answer_len; i++) {
           response[i + 2] = answer[i];
         }
         this->prepare_update_msg_(response);
       } else {
         // Multi Frame response
-        std::array<u_int8_t, 8> response = this->lin_empty_response_;
         response[0] = this->lin_node_address_;
         response[1] = 0x10 | ((answer_len >> 8) & 0x0F);
         response[2] = answer_len & 0xFF;
         response[3] = answer[0] | LIN_SID_RESPONSE;
-        for (size_t i = 1; i < 5; i++) {
+        for (u_int8_t i = 1; i < 5; i++) {
           response[i + 3] = answer[i];
         }
         this->prepare_update_msg_(response);
 
+        // Multi Frame response - consecutive frame
         u_int16_t answer_position = 5;      // The first 5 bytes are sent in First frame of multi frame response.
         u_int8_t answer_frame_counter = 0;  // Each answer frame can contain 6 bytes
         while (answer_position < answer_len) {
           response = this->lin_empty_response_;
           response[0] = this->lin_node_address_;
           response[1] = ((answer_frame_counter + 1) & 0x0F) | 0x20;
-          for (size_t i = 0; i < 6; i++) {
+          for (u_int8_t i = 0; i < 6; i++) {
             if (answer_position < answer_len) {
               response[i + 2] = answer[answer_position++];
             }

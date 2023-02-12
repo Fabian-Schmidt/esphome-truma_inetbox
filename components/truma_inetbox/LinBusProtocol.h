@@ -31,6 +31,7 @@ class LinBusProtocol : public LinBusListener {
 
   u_int16_t multi_pdu_message_expected_size_ = 0;
   u_int8_t multi_pdu_message_len_ = 0;
+  u_int8_t multi_pdu_message_frame_counter_ = 0;
   u_int8_t multi_pdu_message_[64];
   void lin_message_recieved_diagnostic_(const u_int8_t *message, u_int8_t length);
   void lin_message_recieved_diagnostic_multi_(const u_int8_t *message, u_int8_t length,

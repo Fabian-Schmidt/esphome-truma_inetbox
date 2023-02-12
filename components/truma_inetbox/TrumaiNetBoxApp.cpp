@@ -230,16 +230,18 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   }
 
   if (message[0] == LIN_SID_READ_STATE_BUFFER) {
+    ESP_LOGI(TAG, "Requested read update");
     // Example: BA.00.1F.00.1E.00.00.22.FF.FF.FF (11)
     memset(response, 0, sizeof(response));
     auto response_frame = reinterpret_cast<StatusFrame *>(response);
 
     // The order must match with the method 'has_update_to_submit_'.
     if (this->init_recieved_ == 0) {
+      ESP_LOGI(TAG, "Sending init");
       status_frame_create_init(response_frame, return_len, this->message_counter++);
       return response;
-    }
-    if (this->update_status_heater_unsubmitted_) {
+    } else if (this->update_status_heater_unsubmitted_) {
+      ESP_LOGI(TAG, "Sending heater update");
       status_frame_create_update_heater(
           response_frame, return_len, this->message_counter++, this->update_status_heater_.target_temp_room,
           this->update_status_heater_.target_temp_water, this->update_status_heater_.heating_mode,
@@ -250,8 +252,8 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->update_status_heater_unsubmitted_ = false;
       this->update_status_heater_stale_ = true;
       return response;
-    }
-    if (this->update_status_timer_unsubmitted_) {
+    } else if (this->update_status_timer_unsubmitted_) {
+      ESP_LOGI(TAG, "Sending timer update");
       status_frame_create_update_timer(
           response_frame, return_len, this->message_counter++, this->update_status_timer_.timer_resp_active,
           this->update_status_timer_.timer_resp_start_hours, this->update_status_timer_.timer_resp_start_minutes,
@@ -265,8 +267,8 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->update_status_timer_unsubmitted_ = false;
       this->update_status_timer_stale_ = true;
       return response;
-    }
-    if (this->update_status_clock_unsubmitted_) {
+    } else if (this->update_status_clock_unsubmitted_) {
+      ESP_LOGI(TAG, "Sending clock update");
       // read time live
       auto now = this->time_->now();
 
@@ -275,6 +277,8 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
       this->update_status_clock_unsubmitted_ = false;
       return response;
+    } else {
+      ESP_LOGW(TAG, "CP Plus asks for an update, but I have none.");
     }
   }
 
@@ -298,7 +302,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   if (header->message_type == STATUS_FRAME_HEATER && header->message_length == sizeof(StatusFrameHeater)) {
     ESP_LOGI(TAG, "StatusFrameHeater");
     // Example:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|cWate|cRoom|st|err  |  |
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|cWate|cRoom|st|err  |  |
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.14.33.00.12.00.00.00.00.00.00.00.00.00.00.01.01.CC.0B.6C.0B.00.00.00.00
     this->status_heater_ = statusFrame->inner.heater;
     this->status_heater_valid_ = true;
@@ -309,7 +313,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   } else if (header->message_type == STATUS_FRAME_TIMER && header->message_length == sizeof(StatusFrameTimer)) {
     ESP_LOGI(TAG, "StatusFrameTimer");
     // EXAMPLE:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|<--response-->|  |  |on|start|stop |
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|??|elecA|tWate|elecB|mi|mi|<--response-->|??|??|on|start|stop-|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.1D.18.0B.01.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.13.18.0B.0B.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     this->status_timer_ = statusFrame->inner.timer;
@@ -328,7 +332,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   } else if (header->message_type == STATUS_FRAME_RESPONSE_ACK &&
              header->message_length == sizeof(StatusFrameResponseAck)) {
     // Example:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.02.0D.01.98.02.00
     auto data = statusFrame->inner.responseAck;
 
@@ -350,7 +354,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   } else if (header->message_type == STATUS_FRAME_CLOCK && header->message_length == sizeof(StatusFrameClock)) {
     ESP_LOGI(TAG, "StatusFrameClock");
     // Example:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.5B.0D.20.00.01.01.00.00.01.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.71.16.00.00.01.01.00.00.02.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.2B.16.1F.28.01.01.00.00.01.00.00
@@ -365,7 +369,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   } else if (header->message_type == STAUTS_FRAME_CONFIG && header->message_length == sizeof(StatusFrameConfig)) {
     ESP_LOGI(TAG, "StatusFrameConfig");
     // Example:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.41.06.01.B4.0A.78.0A.00.00.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
@@ -380,7 +384,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     ESP_LOGI(TAG, "StatusFrameDevice");
     // This message is special. I recieve one response per registered (at CP plus) device.
     // Example:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.79.02.00.01.00.50.00.00.04.03.02.AD.10 - C4.03.02 0050.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.27.02.01.01.00.40.03.22.02.00.01.00.00 - H2.00.01 0340.22
     auto device = statusFrame->inner.device;
