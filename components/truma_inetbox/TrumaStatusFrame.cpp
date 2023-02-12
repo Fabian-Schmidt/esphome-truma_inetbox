@@ -24,14 +24,17 @@ void status_frame_calculate_checksum(StatusFrame *response) {
   response->inner.genericHeader.checksum = data_checksum(&response->raw[10], sizeof(StatusFrame) - 10, 0);
 }
 
-void status_frame_create_init(StatusFrame *response, u_int8_t command_counter) {
+void status_frame_create_init(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter) {
   status_frame_create_empty(response, STATUS_FRAME_RESPONSE_INIT_REQUEST, 0, command_counter);
 
+  // Init frame is empty.
+
   status_frame_calculate_checksum(response);
+  (*response_len) = sizeof(StatusFrameHeader) + 0;
 }
 
-void status_frame_create_update_clock(StatusFrame *response, u_int8_t command_counter, u_int8_t hour, u_int8_t minute,
-                                      u_int8_t second, ClockMode clockMode) {
+void status_frame_create_update_clock(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter,
+                                      u_int8_t hour, u_int8_t minute, u_int8_t second, ClockMode clockMode) {
   status_frame_create_empty(response, STATUS_FRAME_CLOCK_RESPONSE, sizeof(StatusFrameClock), command_counter);
 
   response->inner.clock.clock_hour = hour;
@@ -42,12 +45,13 @@ void status_frame_create_update_clock(StatusFrame *response, u_int8_t command_co
   response->inner.clock.clock_mode = clockMode;
 
   status_frame_calculate_checksum(response);
+  (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameClock);
 }
 
-void status_frame_create_update_timer(StatusFrame *response, u_int8_t command_counter, TimerActive active,
-                                      u_int8_t start_hour, u_int8_t start_minute, u_int8_t stop_hour,
-                                      u_int8_t stop_minute, TargetTemp room, TargetTemp water, HeatingMode mode,
-                                      EnergyMix energy, ElectricPowerLevel elPower) {
+void status_frame_create_update_timer(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter,
+                                      TimerActive active, u_int8_t start_hour, u_int8_t start_minute,
+                                      u_int8_t stop_hour, u_int8_t stop_minute, TargetTemp room, TargetTemp water,
+                                      HeatingMode mode, EnergyMix energy, ElectricPowerLevel elPower) {
   status_frame_create_empty(response, STATUS_FRAME_TIMER_RESPONSE, sizeof(StatusFrameTimerResponse), command_counter);
 
   response->inner.timerResponse.timer_target_temp_room = room;
@@ -64,10 +68,11 @@ void status_frame_create_update_timer(StatusFrame *response, u_int8_t command_co
   response->inner.timerResponse.timer_resp_stop_minutes = stop_minute;
 
   status_frame_calculate_checksum(response);
+  (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameTimerResponse);
 }
 
-void status_frame_create_update_heater(StatusFrame *response, u_int8_t command_counter, TargetTemp room,
-                                       TargetTemp water, HeatingMode mode, EnergyMix energy,
+void status_frame_create_update_heater(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter,
+                                       TargetTemp room, TargetTemp water, HeatingMode mode, EnergyMix energy,
                                        ElectricPowerLevel elPower) {
   status_frame_create_empty(response, STATUS_FRAME_HEATER_RESPONSE, sizeof(StatusFrameHeaterResponse), command_counter);
 
@@ -80,6 +85,7 @@ void status_frame_create_update_heater(StatusFrame *response, u_int8_t command_c
   response->inner.heaterResponse.el_power_level_b = elPower;
 
   status_frame_calculate_checksum(response);
+  (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameHeaterResponse);
 }
 
 }  // namespace truma_inetbox

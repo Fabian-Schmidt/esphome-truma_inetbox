@@ -47,6 +47,7 @@ void TrumaiNetBoxApp::update() {
 }
 
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
+  // Supplier Id: 0x4617 - Truma (Phone: +49 (0)89 4617-0)
   // Unkown:
   // 17.46.01.03 - Unkown more comms required for init.
   // 17.46.10.03 - Unkown more comms required for init.
@@ -235,14 +236,12 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     // The order must match with the method 'has_update_to_submit_'.
     if (this->init_recieved_ == 0) {
-      status_frame_create_init(response_frame, this->message_counter++);
-      // TODO: can I create a shorter (quicker) messsage here?
-      (*return_len) = sizeof(StatusFrame);
+      status_frame_create_init(response_frame, return_len, this->message_counter++);
       return response;
     }
     if (this->update_status_heater_unsubmitted_) {
       status_frame_create_update_heater(
-          response_frame, this->message_counter++, this->update_status_heater_.target_temp_room,
+          response_frame, return_len, this->message_counter++, this->update_status_heater_.target_temp_room,
           this->update_status_heater_.target_temp_water, this->update_status_heater_.heating_mode,
           this->update_status_heater_.energy_mix_a, this->update_status_heater_.el_power_level_a);
 
@@ -250,14 +249,11 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->update_status_heater_prepared_ = false;
       this->update_status_heater_unsubmitted_ = false;
       this->update_status_heater_stale_ = true;
-      // Remove last 12 bytes (2 Frames), because they are always 0.
-      // This cannot be done on the first message, but later messages it is fine.
-      (*return_len) = sizeof(StatusFrame);
       return response;
     }
     if (this->update_status_timer_unsubmitted_) {
       status_frame_create_update_timer(
-          response_frame, this->message_counter++, this->update_status_timer_.timer_resp_active,
+          response_frame, return_len, this->message_counter++, this->update_status_timer_.timer_resp_active,
           this->update_status_timer_.timer_resp_start_hours, this->update_status_timer_.timer_resp_start_minutes,
           this->update_status_timer_.timer_resp_stop_hours, this->update_status_timer_.timer_resp_stop_minutes,
           this->update_status_timer_.timer_target_temp_room, this->update_status_timer_.timer_target_temp_water,
@@ -268,18 +264,16 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->update_status_timer_prepared_ = false;
       this->update_status_timer_unsubmitted_ = false;
       this->update_status_timer_stale_ = true;
-      (*return_len) = sizeof(StatusFrame);
       return response;
     }
     if (this->update_status_clock_unsubmitted_) {
       // read time live
       auto now = this->time_->now();
 
-      status_frame_create_update_clock(response_frame, this->message_counter++, now.hour, now.minute, now.second,
-                                       this->status_clock_.clock_mode);
+      status_frame_create_update_clock(response_frame, return_len, this->message_counter++, now.hour, now.minute,
+                                       now.second, this->status_clock_.clock_mode);
 
       this->update_status_clock_unsubmitted_ = false;
-      (*return_len) = sizeof(StatusFrame);
       return response;
     }
   }

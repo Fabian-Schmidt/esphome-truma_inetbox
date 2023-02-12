@@ -103,7 +103,7 @@ enum class OperatingStatus : u_int8_t {
   OPERATING_STATUS_OFF = 0x0,
   OPERATING_STATUS_WARNING = 0x1,
   OPERATING_STATUS_START_OR_COOL_DOWN = 0x4,
-  // ON - Heater off
+  // ? Gas Heating mode ?
   OPERATING_STATUS_ON_5 = 0x5,
   OPERATING_STATUS_ON_6 = 0x6,
   OPERATING_STATUS_ON_7 = 0x7,
