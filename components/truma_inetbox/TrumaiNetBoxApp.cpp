@@ -309,7 +309,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   } else if (header->message_type == STATUS_FRAME_TIMER && header->message_length == sizeof(StatusFrameTimer)) {
     ESP_LOGI(TAG, "StatusFrameTimer");
     // EXAMPLE:
-    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|
+    // SID<---------PREAMBLE --------->|<---MSG HEAD --->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|<--response-->|  |  |on|start|stop |
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.1D.18.0B.01.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.13.18.0B.0B.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     this->status_timer_ = statusFrame->inner.timer;
