@@ -66,7 +66,7 @@ const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
 }
 
 void TrumaiNetBoxApp::lin_reset_device() {
-  this->device_registered_ = esp_timer_get_time();
+  this->device_registered_ = micros();
   this->init_recieved_ = 0;
 
   this->status_heater_valid_ = false;
@@ -90,9 +90,8 @@ void TrumaiNetBoxApp::lin_reset_device() {
 }
 
 void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameHeater *)> &func) {
-  auto listener = StatusFrameListener{
-      .on_heater_change = func,
-  };
+  StatusFrameListener listener = {};
+  listener.on_heater_change = func;
   this->listeners_heater_.push_back(std::move(listener));
 
   if (this->status_heater_valid_) {
@@ -100,9 +99,8 @@ void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFra
   }
 }
 void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameTimer *)> &func) {
-  auto listener = StatusFrameListener{
-      .on_timer_change = func,
-  };
+  StatusFrameListener listener = {};
+  listener.on_timer_change = func;
   this->listeners_heater_.push_back(std::move(listener));
 
   if (this->status_timer_valid_) {
@@ -110,9 +108,8 @@ void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFra
   }
 }
 void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameClock *)> &func) {
-  auto listener = StatusFrameListener{
-      .on_clock_change = func,
-  };
+  StatusFrameListener listener = {};
+  listener.on_clock_change = func;
   this->listeners_heater_.push_back(std::move(listener));
 
   if (this->status_clock_valid_) {
@@ -120,9 +117,8 @@ void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFra
   }
 }
 void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameConfig *)> &func) {
-  auto listener = StatusFrameListener{
-      .on_config_change = func,
-  };
+  StatusFrameListener listener = {};
+  listener.on_config_change = func;
   this->listeners_heater_.push_back(std::move(listener));
 
   if (this->status_config_valid_) {
@@ -190,7 +186,7 @@ bool TrumaiNetBoxApp::answer_lin_order_(const u_int8_t pid) {
 }
 
 bool TrumaiNetBoxApp::lin_read_field_by_identifier_(u_int8_t identifier, std::array<u_int8_t, 5> *response) {
-  this->device_registered_ = esp_timer_get_time();
+  this->device_registered_ = micros();
   if (identifier == 0x00 /* LIN Product Identification */) {
     auto lin_identifier = this->lin_identifier();
     (*response)[0] = lin_identifier[0];
@@ -389,7 +385,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.27.02.01.01.00.40.03.22.02.00.01.00.00 - H2.00.01 0340.22
     auto device = statusFrame->inner.device;
 
-    this->init_recieved_ = esp_timer_get_time();
+    this->init_recieved_ = micros();
 
     ESP_LOGV(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04x.%02x", device.device_id + 1, device.device_count,
              device.software_revision[0], device.software_revision[1], device.software_revision[2],
@@ -405,28 +401,28 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
 bool TrumaiNetBoxApp::has_update_to_submit_() {
   if (this->init_requested_ == 0) {
-    this->init_requested_ = esp_timer_get_time();
+    this->init_requested_ = micros();
     ESP_LOGV(TAG, "Requesting initial data.");
     return true;
   } else if (this->init_recieved_ == 0) {
-    auto init_wait_time = esp_timer_get_time() - this->init_requested_;
+    auto init_wait_time = micros() - this->init_requested_;
     // it has been 5 seconds and i am still awaiting the init data.
     if (init_wait_time > 1000 * 1000 * 5) {
       ESP_LOGV(TAG, "Requesting initial data again.");
-      this->init_requested_ = esp_timer_get_time();
+      this->init_requested_ = micros();
       return true;
     }
   } else if (this->update_status_heater_unsubmitted_ || this->update_status_timer_unsubmitted_ ||
              this->update_status_clock_unsubmitted_) {
     if (this->update_time_ == 0) {
       ESP_LOGV(TAG, "Notify CP Plus I got updates.");
-      this->update_time_ = esp_timer_get_time();
+      this->update_time_ = micros();
       return true;
     }
-    auto update_wait_time = esp_timer_get_time() - this->update_time_;
+    auto update_wait_time = micros() - this->update_time_;
     if (update_wait_time > 1000 * 1000 * 5) {
       ESP_LOGV(TAG, "Notify CP Plus again I still got updates.");
-      this->update_time_ = esp_timer_get_time();
+      this->update_time_ = micros();
       return true;
     }
   }

@@ -13,7 +13,7 @@ void TrumaCpPlusBinarySensor::update() {
     return;
   }
   auto timeout = this->parent_->get_last_cp_plus_request() + 30 * 1000 * 1000 /* 30 seconds*/;
-  this->publish_state(esp_timer_get_time() < timeout);
+  this->publish_state(micros() < timeout);
 }
 
 void TrumaCpPlusBinarySensor::dump_config() { ESP_LOGCONFIG("", "Truma CP Plus Binary Sensor"); }

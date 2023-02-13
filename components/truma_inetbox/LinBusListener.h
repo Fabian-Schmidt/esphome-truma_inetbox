@@ -4,6 +4,11 @@
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 
+#ifdef USE_ESP32_FRAMEWORK_ESP_IDF
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif  // USE_ESP32_FRAMEWORK_ESP_IDF
+
 namespace esphome {
 namespace truma_inetbox {
 
@@ -34,19 +39,19 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   virtual void lin_message_recieved_(const u_int8_t pid, const u_int8_t *message, u_int8_t length) = 0;
 
  private:
-  // Microseconds per UART Baud
-  u_int32_t time_per_baud_;
-  // 9.. 15
-  u_int8_t lin_break_length = 13;
-  // Microseconds per LIN Break
-  u_int32_t time_per_lin_break_;
-  u_int8_t frame_length_ = (8 /* bits */ + 1 /* Start bit */ + 2 /* Stop bits */);
-  // Microseconds per UART Byte (UART Frame)
-  u_int32_t time_per_pid_;
-  // Microseconds per UART Byte (UART Frame)
-  u_int32_t time_per_first_byte_;
-  // Microseconds per UART Byte (UART Frame)
-  u_int32_t time_per_byte_;
+  // // Microseconds per UART Baud
+  // u_int32_t time_per_baud_;
+  // // 9.. 15
+  // u_int8_t lin_break_length = 13;
+  // // Microseconds per LIN Break
+  // u_int32_t time_per_lin_break_;
+  // u_int8_t frame_length_ = (8 /* bits */ + 1 /* Start bit */ + 2 /* Stop bits */);
+  // // Microseconds per UART Byte (UART Frame)
+  // u_int32_t time_per_pid_;
+  // // Microseconds per UART Byte (UART Frame)
+  // u_int32_t time_per_first_byte_;
+  // // Microseconds per UART Byte (UART Frame)
+  // u_int32_t time_per_byte_;
 
   bool fault_on_lin_bus_reported_ = false;
   bool can_write_lin_answer_ = false;
@@ -66,11 +71,17 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   // up to 8 byte data frame + CRC
   u_int8_t current_data_[9] = {};
   // // Time when the last LIN data was available.
-  // int64_t last_data_recieved_;
+  // uint32_t last_data_recieved_;
 
+  void onReceive_();
   void read_lin_frame_();
   void clear_uart_buffer_();
   void setup_framework();
+
+#ifdef USE_ESP32_FRAMEWORK_ESP_IDF
+  TaskHandle_t _eventTask;
+  static void _uartEventTask(void *args);
+#endif  // USE_ESP32_FRAMEWORK_ESP_IDF
 };
 
 }  // namespace truma_inetbox

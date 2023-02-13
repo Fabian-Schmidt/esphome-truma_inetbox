@@ -16,7 +16,7 @@ void LinBusListener::setup_framework() {
   auto uartComp = static_cast<esphome::uart::truma_ESP32ArduinoUARTComponent *>(this->parent_);
 
   auto uart_num = uartComp->get_hw_serial_number();
-  auto hwSerial = uartComp->get_hw_serial();
+  auto hw_serial = uartComp->get_hw_serial();
 
   // Extract from `uartSetFastReading` - Can't call it because I don't have access to `uart_t` object.
 
@@ -34,32 +34,10 @@ void LinBusListener::setup_framework() {
   uart_intr.txfifo_empty_intr_thresh = 10;  // UART_EMPTY_THRESH_DEFAULT
   uart_intr_config(uart_num, &uart_intr);
 
-  hwSerial->onReceive(
-      [this]() {
-        // Check if Lin Bus is faulty.
-        if (this->fault_pin_ != nullptr) {
-          if (!this->fault_pin_->digital_read()) {
-            if (!this->fault_on_lin_bus_reported_) {
-              this->fault_on_lin_bus_reported_ = true;
-              ESP_LOGE(TAG, "Fault on LIN BUS detected.");
-            }
-            // Ignore any data present in buffer
-            this->clear_uart_buffer_();
-          } else if (this->fault_on_lin_bus_reported_) {
-            this->fault_on_lin_bus_reported_ = false;
-            ESP_LOGI(TAG, "Fault on LIN BUS fixed.");
-          }
-        }
-
-        if (!this->fault_on_lin_bus_reported_) {
-          while (this->available()) {
-            // this->last_data_recieved_ = esp_timer_get_time();
-            this->read_lin_frame_();
-          }
-        }
-      },
-      false);
-  hwSerial->onReceiveError([this](hardwareSerial_error_t val) {
+  hw_serial->onReceive([this]() { this->onReceive_(); }, false);
+  hw_serial->onReceiveError([this](hardwareSerial_error_t val) {
+    // Ignore any data present in buffer
+    this->clear_uart_buffer_();
     if (val == UART_BREAK_ERROR) {
       // If the break is valid the `onReceive` is called first and the break is handeld. Therfore the expectation is
       // that the state should be in waiting for `SYNC`.
@@ -67,14 +45,6 @@ void LinBusListener::setup_framework() {
         this->current_state_ = READ_STATE_BREAK;
       }
       return;
-    } else if (val == UART_BUFFER_FULL_ERROR) {
-      ESP_LOGW(TAG, "UART_BUFFER_FULL_ERROR");
-    } else if (val == UART_FIFO_OVF_ERROR) {
-      ESP_LOGW(TAG, "UART_FIFO_OVF_ERROR");
-    } else if (val == UART_FRAME_ERROR) {
-      ESP_LOGW(TAG, "UART_FRAME_ERROR");
-    } else if (val == UART_PARITY_ERROR) {
-      ESP_LOGW(TAG, "UART_PARITY_ERROR");
     }
   });
 }

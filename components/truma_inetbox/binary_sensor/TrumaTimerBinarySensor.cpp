@@ -19,6 +19,8 @@ void TrumaTimerBinarySensor::setup() {
       case TRUMA_BINARY_SENSOR_TYPE::TIMER_WATER:
         this->publish_state(status_timer->timer_target_temp_water != TargetTemp::TARGET_TEMP_OFF);
         break;
+      default:
+        break;
     }
   });
 }

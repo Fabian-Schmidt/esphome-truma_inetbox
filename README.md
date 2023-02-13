@@ -172,7 +172,6 @@ The following [ESP Home actions](https://esphome.io/guides/automations.html#acti
 ## TODO
 
 - [ ] This file
-- [ ] ESP32 IDF support
 - [ ] RP2040 support
 - [ ] Testing of Combi 4E / Combi 6E and Alde devices (I only have access to an Combi 4)
 - [ ] More Testing

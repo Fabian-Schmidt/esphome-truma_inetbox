@@ -30,6 +30,8 @@ void TrumaHeaterBinarySensor::setup() {
       case TRUMA_BINARY_SENSOR_TYPE::HEATER_ELECTRICITY:
         this->publish_state(status_heater->energy_mix_a == EnergyMix::ENERGY_MIX_ELECTRICITY);
         break;
+      default:
+        break;
     }
   });
 }

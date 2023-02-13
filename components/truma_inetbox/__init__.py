@@ -6,7 +6,6 @@ from esphome.const import (
     CONF_ID,
     CONF_CS_PIN,
     CONF_TEMPERATURE,
-    CONF_ON_MESSAGE,
     CONF_TRIGGER_ID,
     CONF_STOP,
     CONF_TIME_ID,
@@ -62,7 +61,6 @@ CONFIG_SCHEMA = cv.All(
     # Reading and communication is done in a seperate thread/core.
     .extend(cv.polling_component_schema("500ms"))
     .extend(uart.UART_DEVICE_SCHEMA),
-    cv.only_with_arduino,
     cv.only_on(["esp32"]),
 )
 FINAL_VALIDATE_SCHEMA = cv.All(

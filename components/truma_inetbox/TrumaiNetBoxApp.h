@@ -326,10 +326,10 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
 } __attribute__((packed));
 
 struct StatusFrameListener {
-  std::function<void(const StatusFrameHeater *)> on_heater_change;
-  std::function<void(const StatusFrameTimer *)> on_timer_change;
-  std::function<void(const StatusFrameClock *)> on_clock_change;
-  std::function<void(const StatusFrameConfig *)> on_config_change;
+  std::function<void(const StatusFrameHeater *)> on_heater_change = nullptr;
+  std::function<void(const StatusFrameTimer *)> on_timer_change = nullptr;
+  std::function<void(const StatusFrameClock *)> on_clock_change = nullptr;
+  std::function<void(const StatusFrameConfig *)> on_config_change = nullptr;
 };
 
 class TrumaiNetBoxApp : public LinBusProtocol {
@@ -395,9 +395,9 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   time::RealTimeClock *time_;
 
   // Truma CP Plus needs init (reset). This device is not registered.
-  int64_t device_registered_ = 0;
-  int64_t init_requested_ = 0;
-  int64_t init_recieved_ = 0;
+  uint32_t device_registered_ = 0;
+  uint32_t init_requested_ = 0;
+  uint32_t init_recieved_ = 0;
   u_int8_t message_counter = 1;
 
   std::vector<StatusFrameListener> listeners_heater_;
@@ -424,7 +424,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   StatusFrameConfig status_config_;
 
   // last time CP plus was informed I got an update msg.
-  int64_t update_time_ = 0;
+  uint32_t update_time_ = 0;
   // Prepared means `update_status_heater_` was copied from `status_heater_`.
   bool update_status_heater_prepared_ = false;
   // Prepared means an update is already awating fetch from CP plus.

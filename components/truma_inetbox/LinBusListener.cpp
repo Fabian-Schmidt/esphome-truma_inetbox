@@ -21,11 +21,11 @@ void LinBusListener::dump_config() {
 
 void LinBusListener::setup() {
   ESP_LOGCONFIG(TAG, "Setting up LIN BUS...");
-  this->time_per_baud_ = (1000.0f * 1000.0f / this->parent_->get_baud_rate());
-  this->time_per_lin_break_ = this->time_per_baud_ * this->lin_break_length * 1.1;
-  this->time_per_pid_ = this->time_per_baud_ * this->frame_length_ * 1.1;
-  this->time_per_first_byte_ = this->time_per_baud_ * this->frame_length_ * 3.0;
-  this->time_per_byte_ = this->time_per_baud_ * this->frame_length_ * 1.1;
+  // this->time_per_baud_ = (1000.0f * 1000.0f / this->parent_->get_baud_rate());
+  // this->time_per_lin_break_ = this->time_per_baud_ * this->lin_break_length * 1.1;
+  // this->time_per_pid_ = this->time_per_baud_ * this->frame_length_ * 1.1;
+  // this->time_per_first_byte_ = this->time_per_baud_ * this->frame_length_ * 3.0;
+  // this->time_per_byte_ = this->time_per_baud_ * this->frame_length_ * 1.1;
 
   // call device specific function
   this->setup_framework();
@@ -55,12 +55,42 @@ void LinBusListener::write_lin_answer_(const u_int8_t *data, size_t len) {
     data_CRC = data_checksum(data, len, this->current_PID_with_parity_);
   }
 
+  // I am answering too quick ~50-60us after stop bit. Normal communication has a ~100us pause (second stop bits).
+  // The heater is answering after ~500-600us.
+  // If there is any issue I might have to add a delay here.
+  // Check when last byte was read from buffer and wait at least one baud time.
+  // It is working when I answer quicker.
+
   if (!this->observer_mode_) {
     this->write_array(data, len);
     this->write(data_CRC);
     this->flush();
   }
   ESP_LOGV(TAG, "RESPONSE %02x %s %02x", this->current_PID_, format_hex_pretty(data, len).c_str(), data_CRC);
+}
+
+void LinBusListener::onReceive_() {
+  // Check if Lin Bus is faulty.
+  if (this->fault_pin_ != nullptr) {
+    if (!this->fault_pin_->digital_read()) {
+      if (!this->fault_on_lin_bus_reported_) {
+        this->fault_on_lin_bus_reported_ = true;
+        ESP_LOGE(TAG, "Fault on LIN BUS detected.");
+      }
+      // Ignore any data present in buffer
+      this->clear_uart_buffer_();
+    } else if (this->fault_on_lin_bus_reported_) {
+      this->fault_on_lin_bus_reported_ = false;
+      ESP_LOGI(TAG, "Fault on LIN BUS fixed.");
+    }
+  }
+
+  if (!this->fault_on_lin_bus_reported_) {
+    while (this->available()) {
+      // this->last_data_recieved_ = micros();
+      this->read_lin_frame_();
+    }
+  }
 }
 
 void LinBusListener::read_lin_frame_() {
@@ -127,6 +157,8 @@ void LinBusListener::read_lin_frame_() {
         // End of data reached. There cannot be more than 9 bytes in a LIN frame.
         this->current_state_ = READ_STATE_ACT;
       }
+      break;
+    default:
       break;
   }
 
