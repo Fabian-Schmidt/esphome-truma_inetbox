@@ -6,6 +6,20 @@
 namespace esphome {
 namespace truma_inetbox {
 
+/* LIN Packet Format:
+    _________ __________ _________ ____________ __________
+   |         |          |         |           |||         |
+   |  Break  |Sync 0x55 |PID byte |Data Bytes |||Checksum |
+   |_________|__________|_________|___________|||_________|
+
+   Every byte has start bit and stop bit and it is send LSB first.
+   Break - 13 bits of dominant state ("0"), followed by 1 bit recesive state ("1")
+   Sync Byte - Byte for Bound rate syncronization, always 0x55
+   ID Byte - consist of parity, length and address; parity is determined by LIN standard and depends from address and
+   message length Data Bytes - user defined; depend on devices on LIN bus Checksum - inverted 256 checksum; data bytes
+   are summed up and then inverted
+*/
+
 static const char *const TAG = "truma_inetbox.LinBusListener";
 
 #define LIN_BREAK 0x00
@@ -14,8 +28,12 @@ static const char *const TAG = "truma_inetbox.LinBusListener";
 #define DIAGNOSTIC_FRAME_SLAVE 0x3d
 
 void LinBusListener::dump_config() {
-  ESP_LOGCONFIG(TAG, "TODO");
-
+  ESP_LOGCONFIG(TAG, "LinBusListener:");
+  LOG_PIN("  CS Pin: ", this->cs_pin_);
+  LOG_PIN("  FAULT Pin: ", this->fault_pin_);
+  LOG_UPDATE_INTERVAL(this);
+  ESP_LOGCONFIG(TAG, "  LIN checksum Version: %d", this->lin_checksum_ == LIN_CHECKSUM::LIN_CHECKSUM_VERSION_1 ? 1 : 2);
+  ESP_LOGCONFIG(TAG, "  Observer mode: %s", YESNO(this->observer_mode_));
   this->check_uart_settings(9600, 2, esphome::uart::UART_CONFIG_PARITY_NONE, 8);
 }
 
@@ -132,7 +150,8 @@ void LinBusListener::read_lin_frame_() {
       if (this->current_PID_with_parity_ != 0x00 && this->current_PID_ != 0x00 && this->current_data_valid) {
         if (this->current_PID_order_answered_ && this->current_data_count_ < 8) {
           // Expectation is that I can see an echo of my data from the lin driver chip.
-          ESP_LOGE(TAG, "PID %02X (%02X) order - unable to send response", this->current_PID_, this->current_PID_with_parity_);
+          ESP_LOGE(TAG, "PID %02X (%02X) order - unable to send response", this->current_PID_,
+                   this->current_PID_with_parity_);
         } else if (this->current_data_count_ == 0) {
           ESP_LOGV(TAG, "PID %02X (%02X) order no answer", this->current_PID_, this->current_PID_with_parity_);
         } else if (this->current_data_count_ < 8) {
