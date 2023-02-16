@@ -75,10 +75,12 @@ template<typename... Ts> class TimerActivateAction : public Action<Ts...>, publi
   }
 };
 
+#ifdef USE_TIME
 template<typename... Ts> class WriteTimeAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
  public:
   void play(Ts... x) override { this->parent_->action_write_time(); }
 };
+#endif // USE_TIME
 
 class TrumaiNetBoxAppHeaterMessageTrigger : public Trigger<const StatusFrameHeater *> {
  public:

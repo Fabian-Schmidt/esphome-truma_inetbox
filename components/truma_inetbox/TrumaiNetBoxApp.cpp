@@ -44,6 +44,7 @@ void TrumaiNetBoxApp::update() {
     this->status_clock_updated_ = false;
     this->status_config_updated_ = false;
   }
+  LinBusProtocol::update();
 }
 
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
@@ -64,6 +65,8 @@ const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
   // 17.46.00.1F - T23.70.0 - 1F00.xx iNet Box
   return {0x17 /*Supplied Id*/, 0x46 /*Supplied Id*/, 0x00 /*Function Id*/, 0x1F /*Function Id*/};
 }
+
+void TrumaiNetBoxApp::lin_heartbeat() { this->device_registered_ = micros(); }
 
 void TrumaiNetBoxApp::lin_reset_device() {
   this->device_registered_ = micros();
@@ -186,7 +189,6 @@ bool TrumaiNetBoxApp::answer_lin_order_(const u_int8_t pid) {
 }
 
 bool TrumaiNetBoxApp::lin_read_field_by_identifier_(u_int8_t identifier, std::array<u_int8_t, 5> *response) {
-  this->device_registered_ = micros();
   if (identifier == 0x00 /* LIN Product Identification */) {
     auto lin_identifier = this->lin_identifier();
     (*response)[0] = lin_identifier[0];
@@ -226,18 +228,17 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   }
 
   if (message[0] == LIN_SID_READ_STATE_BUFFER) {
-    ESP_LOGI(TAG, "Requested read update");
     // Example: BA.00.1F.00.1E.00.00.22.FF.FF.FF (11)
     memset(response, 0, sizeof(response));
     auto response_frame = reinterpret_cast<StatusFrame *>(response);
 
     // The order must match with the method 'has_update_to_submit_'.
     if (this->init_recieved_ == 0) {
-      ESP_LOGI(TAG, "Sending init");
+      ESP_LOGD(TAG, "Requested read: Sending init");
       status_frame_create_init(response_frame, return_len, this->message_counter++);
       return response;
     } else if (this->update_status_heater_unsubmitted_) {
-      ESP_LOGI(TAG, "Sending heater update");
+      ESP_LOGD(TAG, "Requested read: Sending heater update");
       status_frame_create_update_heater(
           response_frame, return_len, this->message_counter++, this->update_status_heater_.target_temp_room,
           this->update_status_heater_.target_temp_water, this->update_status_heater_.heating_mode,
@@ -249,7 +250,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->update_status_heater_stale_ = true;
       return response;
     } else if (this->update_status_timer_unsubmitted_) {
-      ESP_LOGI(TAG, "Sending timer update");
+      ESP_LOGD(TAG, "Requested read: Sending timer update");
       status_frame_create_update_timer(
           response_frame, return_len, this->message_counter++, this->update_status_timer_.timer_resp_active,
           this->update_status_timer_.timer_resp_start_hours, this->update_status_timer_.timer_resp_start_minutes,
@@ -263,18 +264,21 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->update_status_timer_unsubmitted_ = false;
       this->update_status_timer_stale_ = true;
       return response;
+#ifdef USE_TIME
     } else if (this->update_status_clock_unsubmitted_) {
-      ESP_LOGI(TAG, "Sending clock update");
-      // read time live
-      auto now = this->time_->now();
+      if (this->time_ != nullptr) {
+        ESP_LOGD(TAG, "Requested read: Sending clock update");
+        // read time live
+        auto now = this->time_->now();
 
-      status_frame_create_update_clock(response_frame, return_len, this->message_counter++, now.hour, now.minute,
-                                       now.second, this->status_clock_.clock_mode);
-
+        status_frame_create_update_clock(response_frame, return_len, this->message_counter++, now.hour, now.minute,
+                                         now.second, this->status_clock_.clock_mode);
+      }
       this->update_status_clock_unsubmitted_ = false;
       return response;
+#endif  // USE_TIME
     } else {
-      ESP_LOGW(TAG, "CP Plus asks for an update, but I have none.");
+      ESP_LOGW(TAG, "Requested read: CP Plus asks for an update, but I have none.");
     }
   }
 
@@ -337,7 +341,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     } else {
       ESP_LOGI(TAG, "StatusFrameResponseAck");
     }
-    ESP_LOGV(TAG, "StatusFrameResponseAck %02x %s %02x", statusFrame->inner.genericHeader.command_counter,
+    ESP_LOGV(TAG, "StatusFrameResponseAck %02X %s %02X", statusFrame->inner.genericHeader.command_counter,
              data.error_code == ResponseAckResult::RESPONSE_ACK_RESULT_OKAY ? " OKAY " : " FAILED ",
              (u_int8_t) data.error_code);
 
@@ -387,13 +391,13 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     this->init_recieved_ = micros();
 
-    ESP_LOGV(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04x.%02x", device.device_id + 1, device.device_count,
+    ESP_LOGV(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X", device.device_id + 1, device.device_count,
              device.software_revision[0], device.software_revision[1], device.software_revision[2],
              device.hardware_revision_major, device.hardware_revision_minor);
 
     return response;
   } else {
-    ESP_LOGW(TAG, "Unkown message type %02x", header->message_type);
+    ESP_LOGW(TAG, "Unkown message type %02X", header->message_type);
   }
   (*return_len) = 1;
   return nullptr;
@@ -402,26 +406,26 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 bool TrumaiNetBoxApp::has_update_to_submit_() {
   if (this->init_requested_ == 0) {
     this->init_requested_ = micros();
-    ESP_LOGV(TAG, "Requesting initial data.");
+    ESP_LOGD(TAG, "Requesting initial data.");
     return true;
   } else if (this->init_recieved_ == 0) {
     auto init_wait_time = micros() - this->init_requested_;
     // it has been 5 seconds and i am still awaiting the init data.
     if (init_wait_time > 1000 * 1000 * 5) {
-      ESP_LOGV(TAG, "Requesting initial data again.");
+      ESP_LOGD(TAG, "Requesting initial data again.");
       this->init_requested_ = micros();
       return true;
     }
   } else if (this->update_status_heater_unsubmitted_ || this->update_status_timer_unsubmitted_ ||
              this->update_status_clock_unsubmitted_) {
     if (this->update_time_ == 0) {
-      ESP_LOGV(TAG, "Notify CP Plus I got updates.");
+      ESP_LOGD(TAG, "Notify CP Plus I got updates.");
       this->update_time_ = micros();
       return true;
     }
     auto update_wait_time = micros() - this->update_time_;
     if (update_wait_time > 1000 * 1000 * 5) {
-      ESP_LOGV(TAG, "Notify CP Plus again I still got updates.");
+      ESP_LOGD(TAG, "Notify CP Plus again I still got updates.");
       this->update_time_ = micros();
       return true;
     }

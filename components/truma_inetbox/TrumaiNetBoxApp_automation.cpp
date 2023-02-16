@@ -217,21 +217,18 @@ bool TrumaiNetBoxApp::action_timer_activate(u_int16_t start, u_int16_t stop, u_i
   return true;
 }
 
-bool TrumaiNetBoxApp::action_read_time() {
-  // int ret = settimeofday(&timev, &tz);
-  //   if (ret == EINVAL) {
-  //     // Some ESP8266 frameworks abort when timezone parameter is not NULL
-  //     // while ESP32 expects it not to be NULL
-  //     ret = settimeofday(&timev, nullptr);
-  //   }
-  return false;
-}
-
+#ifdef USE_TIME
 bool TrumaiNetBoxApp::action_write_time() {
   if (!this->truma_clock_can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
+
+  if (this->time_ == nullptr) {
+    ESP_LOGW(TAG, "Missing system time component.");
+    return false;
+  }
+
   auto now = this->time_->now();
   if (!now.is_valid()) {
     ESP_LOGW(TAG, "Invalid system time, not syncing to CP Plus.");
@@ -245,6 +242,7 @@ bool TrumaiNetBoxApp::action_write_time() {
   this->update_clock_submit();
   return true;
 }
+#endif // USE_TIME
 
 }  // namespace truma_inetbox
 }  // namespace esphome

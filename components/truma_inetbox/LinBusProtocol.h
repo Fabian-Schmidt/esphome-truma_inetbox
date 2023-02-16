@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <queue>
 #include "LinBusListener.h"
 
@@ -9,6 +8,7 @@ namespace truma_inetbox {
 class LinBusProtocol : public LinBusListener {
  public:
   virtual const std::array<u_int8_t, 4> lin_identifier() = 0;
+  virtual void lin_heartbeat() = 0;
   virtual void lin_reset_device() = 0;
 
  protected:
@@ -35,7 +35,7 @@ class LinBusProtocol : public LinBusListener {
   u_int8_t multi_pdu_message_[64];
   void lin_msg_diag_single_(const u_int8_t *message, u_int8_t length);
   void lin_msg_diag_first_(const u_int8_t *message, u_int8_t length);
-  void lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t length);
+  bool lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t length);
   void lin_msg_diag_multi_();
 };
 

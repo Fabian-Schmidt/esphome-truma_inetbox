@@ -18,10 +18,6 @@ static const char *const TAG = "truma_inetbox.LinBusProtocol";
 #define LIN_SID_READ_BY_IDENTIFIER_RESPONSE (LIN_SID_READ_BY_IDENTIFIER | LIN_SID_RESPONSE)
 #define LIN_SID_HEARTBEAT 0xB9
 #define LIN_SID_HEARTBEAT_RESPONSE (LIN_SID_HEARTBEAT | LIN_SID_RESPONSE)
-#define LIN_SID_READ_STATE_BUFFER 0xBA
-#define LIN_SID_READ_STATE_BUFFER_RESPONSE (LIN_SID_READ_STATE_BUFFER | LIN_SID_RESPONSE)
-#define LIN_SID_FIll_STATE_BUFFFER 0xBB
-#define LIN_SID_FIll_STATE_BUFFFER_BRESPONSE (LIN_SID_FIll_STATE_BUFFFER | LIN_SID_RESPONSE)
 
 bool LinBusProtocol::answer_lin_order_(const u_int8_t pid) {
   // Send requested answer
@@ -77,9 +73,7 @@ void LinBusProtocol::lin_message_recieved_(const u_int8_t pid, const u_int8_t *m
       this->lin_msg_diag_first_(message, length);
     } else if ((protocol_control_information & 0xF0) == 0x20) {
       // Consecutive Frames
-      this->lin_msg_diag_consecutive_(message, length);
-      // Check if this was the last consecutive message.
-      if (this->multi_pdu_message_len_ == this->multi_pdu_message_expected_size_) {
+      if (this->lin_msg_diag_consecutive_(message, length)) {
         this->lin_msg_diag_multi_();
       }
     }
@@ -144,10 +138,12 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
     response[2] = LIN_SID_HEARTBEAT_RESPONSE;
     response[3] = 0x00;
     this->prepare_update_msg_(response);
+
+    this->lin_heartbeat();
     //}
   } else if (broadcast_address && service_identifier == LIN_SID_ASSIGN_NAD && message_length == 6) {
     if (this->is_matching_identifier_(&message[3])) {
-      ESP_LOGI(TAG, "Assigned new SID %02x and reset device", message[7]);
+      ESP_LOGI(TAG, "Assigned new SID %02X and reset device", message[7]);
 
       // send response with old node address.
       std::array<u_int8_t, 8> response = this->lin_empty_response_;
@@ -162,9 +158,9 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
     }
   } else {
     if (my_node_address) {
-      ESP_LOGD(TAG, "SID %02x  MY  - %s - Unhandled", service_identifier, format_hex_pretty(message, length).c_str());
+      ESP_LOGD(TAG, "SID %02X  MY  - %s - Unhandled", service_identifier, format_hex_pretty(message, length).c_str());
     } else if (broadcast_address) {
-      ESP_LOGD(TAG, "SID %02x  BC  - %s - Unhandled", service_identifier, format_hex_pretty(message, length).c_str());
+      ESP_LOGD(TAG, "SID %02X  BC  - %s - Unhandled", service_identifier, format_hex_pretty(message, length).c_str());
     }
   }
 }
@@ -192,16 +188,16 @@ void LinBusProtocol::lin_msg_diag_first_(const u_int8_t *message, u_int8_t lengt
   }
 }
 
-void LinBusProtocol::lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t length) {
+bool LinBusProtocol::lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t length) {
   if (this->multi_pdu_message_len_ >= this->multi_pdu_message_expected_size_) {
     // ignore, because i don't await a consecutive frame
-    return;
+    return false;
   }
   u_int8_t protocol_control_information = message[1];
   u_int8_t frame_counter = protocol_control_information & 0x0F;
   if (frame_counter != this->multi_pdu_message_frame_counter_) {
     // ignore, because i don't await this consecutive frame
-    return;
+    return false;
   }
   this->multi_pdu_message_frame_counter_++;
   if (this->multi_pdu_message_frame_counter_ > 0x0F) {
@@ -215,6 +211,9 @@ void LinBusProtocol::lin_msg_diag_consecutive_(const u_int8_t *message, u_int8_t
       this->multi_pdu_message_[this->multi_pdu_message_len_++] = message[i];
     }
   }
+
+  // Check if this was the last consecutive message.
+  return this->multi_pdu_message_len_ == this->multi_pdu_message_expected_size_;
 }
 
 void LinBusProtocol::lin_msg_diag_multi_() {
