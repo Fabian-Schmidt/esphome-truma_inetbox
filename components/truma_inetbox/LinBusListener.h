@@ -36,9 +36,9 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
 #endif  // USE_RP2040
 
  protected:
-  LIN_CHECKSUM lin_checksum_;
-  GPIOPin *cs_pin_;
-  GPIOPin *fault_pin_;
+  LIN_CHECKSUM lin_checksum_ = LIN_CHECKSUM::LIN_CHECKSUM_VERSION_2;
+  GPIOPin *cs_pin_ = nullptr;
+  GPIOPin *fault_pin_ = nullptr;
   bool observer_mode_ = false;
 
   void write_lin_answer_(const u_int8_t *data, size_t len);
