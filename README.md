@@ -2,7 +2,7 @@
 
 ESPHome component to remote control Truma CP Plus Heater by simulating a Truma iNet box.
 
-See [1](https://github.com/danielfett/inetbox.py) and [2](https://github.com/mc0110/inetbox2mqtt) for great documentation about how to connect an CP Plus to an ESP32.
+See [1](https://github.com/danielfett/inetbox.py) and [2](https://github.com/mc0110/inetbox2mqtt) for great documentation about how to connect an CP Plus to an ESP32 or RP2040.
 
 ## Acknowledgements
 
@@ -172,6 +172,5 @@ The following [ESP Home actions](https://esphome.io/guides/automations.html#acti
 ## TODO
 
 - [ ] This file
-- [ ] RP2040 support
 - [ ] Testing of Combi 4E / Combi 6E and Alde devices (I only have access to an Combi 4)
 - [ ] More Testing
