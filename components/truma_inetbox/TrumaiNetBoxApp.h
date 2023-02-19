@@ -25,27 +25,38 @@ namespace truma_inetbox {
 #define STATUS_FRAME_RESPONSE_INIT_REQUEST 0x0A
 #define STATUS_FRAME_DEVICES 0x0B
 #define STATUS_FRAME_RESPONSE_ACK 0x0D
-#define STATUS_FRAME_CLOCK 0x15
 #define STATUS_FRAME_CLOCK_RESPONSE (STATUS_FRAME_CLOCK - 1)
-#define STAUTS_FRAME_CONFIG 0x17
+#define STATUS_FRAME_CLOCK 0x15
+// TODO: Documentation and testing of config response.
 #define STAUTS_FRAME_CONFIG_RESPONSE (STAUTS_FRAME_CONFIG - 1)
-// Why can I send 0x33 as response?
-#define STATUS_FRAME_HEATER 0x33
+#define STAUTS_FRAME_CONFIG 0x17
 #define STATUS_FRAME_HEATER_RESPONSE (STATUS_FRAME_HEATER - 1)
-// Error response
+#define STATUS_FRAME_HEATER 0x33
+// Error response - unkown function
 #define STATUS_FRAME_UNKOWN_34 0x34
-// Error response
+// Error response - unkown function
 #define STATUS_FRAME_UNKOWN_36 0x36
-#define STATUS_FRAME_TIMER 0x3D
 #define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
-// Error response
+#define STATUS_FRAME_TIMER 0x3D
+// Error response - unkown function
 #define STATUS_FRAME_UNKOWN_3E 0x3E
+// Error response - unkown function
+#define STATUS_FRAME_UNKOWN_40 0x40
 
-enum class HeatingMode : u_int8_t {
+enum class HeatingMode : u_int16_t {
   HEATING_MODE_OFF = 0x0,
   HEATING_MODE_ECO = 0x1,
   HEATING_MODE_HIGH = 0xA,
   HEATING_MODE_BOOST = 0xB,
+
+  // Feedback Invalid message only with following `heating_mode`. Others are ignored no feedback.
+  // 00FF
+  // 01FE
+  // 02FD
+  // ....
+  // FD02
+  // FE01
+  // FF00
 };
 
 enum class ElectricPowerLevel : u_int16_t {
@@ -182,7 +193,6 @@ struct StatusFrameHeater {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_room;
   // Room
   HeatingMode heating_mode;
-  u_int8_t heater_unkown_1;
   ElectricPowerLevel el_power_level_a;
   TargetTemp target_temp_water;
   ElectricPowerLevel el_power_level_b;
@@ -201,7 +211,6 @@ struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_room;
   // Room
   HeatingMode heating_mode;
-  u_int8_t recv_status_u3;
   ElectricPowerLevel el_power_level_a;
   TargetTemp target_temp_water;
   ElectricPowerLevel el_power_level_b;
@@ -214,7 +223,6 @@ struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
 struct StatusFrameTimer {  // NOLINT(altera-struct-pack-align)
   TargetTemp timer_target_temp_room;
   HeatingMode timer_heating_mode;
-  u_int8_t timer_unkown_1;
   ElectricPowerLevel timer_el_power_level_a;
   TargetTemp timer_target_temp_water;
   ElectricPowerLevel timer_el_power_level_b;
@@ -235,7 +243,6 @@ struct StatusFrameTimer {  // NOLINT(altera-struct-pack-align)
 struct StatusFrameTimerResponse {  // NOLINT(altera-struct-pack-align)
   TargetTemp timer_target_temp_room;
   HeatingMode timer_heating_mode;
-  u_int8_t timer_unkown_1;
   ElectricPowerLevel timer_el_power_level_a;
   TargetTemp timer_target_temp_water;
   ElectricPowerLevel timer_el_power_level_b;
@@ -376,7 +383,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
 #ifdef USE_TIME
   bool truma_clock_can_update() { return this->status_clock_valid_; }
   void update_clock_submit() { this->update_status_clock_unsubmitted_ = true; }
-#endif // USE_TIME
+#endif  // USE_TIME
 
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
 

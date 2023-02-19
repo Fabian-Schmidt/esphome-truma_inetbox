@@ -355,7 +355,7 @@ async def truma_inetbox_heater_set_target_room_temperature_to_code(config, actio
     template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
     cg.add(var.set_temperature(template_))
 
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint8)
+    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
     cg.add(var.set_heating_mode(template_))
 
     return var
@@ -498,7 +498,7 @@ async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, 
     template_ = await cg.templatable(config[CONF_ROOM_TEMPERATURE], args, cg.uint8)
     cg.add(var.set_room_temperature(template_))
 
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint8)
+    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
     cg.add(var.set_heating_mode(template_))
 
     template_ = await cg.templatable(config[CONF_WATER_TEMPERATURE], args, cg.uint8)
