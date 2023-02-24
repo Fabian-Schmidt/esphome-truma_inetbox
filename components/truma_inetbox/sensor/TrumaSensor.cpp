@@ -40,7 +40,7 @@ void TrumaSensor::setup() {
 
 void TrumaSensor::dump_config() {
   LOG_SENSOR("", "Truma Sensor", this);
-  ESP_LOGCONFIG(TAG, "Type %u", this->type_);
+  ESP_LOGCONFIG(TAG, "Type %u", (size_t) this->type_);
 }
 }  // namespace truma_inetbox
 }  // namespace esphome

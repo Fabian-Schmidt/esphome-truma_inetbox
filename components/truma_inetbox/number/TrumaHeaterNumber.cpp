@@ -39,7 +39,7 @@ void TrumaHeaterNumber::control(float value) {
 
 void TrumaHeaterNumber::dump_config() {
   ESP_LOGCONFIG("", "Truma Heater Number");
-  ESP_LOGCONFIG(TAG, "Type %u", this->type_);
+  ESP_LOGCONFIG(TAG, "Type %u", (size_t) this->type_);
 }
 }  // namespace truma_inetbox
 }  // namespace esphome

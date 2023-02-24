@@ -47,7 +47,7 @@ TrumaINetBoxApp = truma_inetbox_ns.class_(
 )
 TrumaiNetBoxAppHeaterMessageTrigger = truma_inetbox_ns.class_(
     "TrumaiNetBoxAppHeaterMessageTrigger",
-    automation.Trigger.template(cg.int_, cg.const_char_ptr, cg.const_char_ptr),
+    automation.Trigger.template(StatusFrameHeaterConstPtr),
 )
 
 # `LIN_CHECKSUM` is a enum class and not a namespace but it works.
@@ -231,6 +231,12 @@ FINAL_VALIDATE_SCHEMA = cv.All(
 )
 
 async def to_code(config):
+    if CORE.using_esp_idf:
+        # Run interrupt on core 0. ESP Home runs on core 1.
+        cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE=0")
+        # Default Stack Size is 2048. Not enough for my operation.
+        cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096")
+
     var = cg.new_Pvariable(config[CONF_ID], config[CONF_NUMBER_OF_CHILDREN])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
@@ -481,11 +487,6 @@ async def truma_inetbox_timer_disable_to_code(config, action_id, template_arg, a
     ),
 )
 async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, args):
-    # Run interrupt on core 0. ESP Home runs on core 1.
-    cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE=0")
-    # Default Stack Size is 2048. Not enough for my operation.
-    cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096")
-
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
 
