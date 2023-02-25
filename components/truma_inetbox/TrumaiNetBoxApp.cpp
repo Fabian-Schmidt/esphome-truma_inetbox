@@ -400,14 +400,15 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
              device.device_count, device.software_revision[0], device.software_revision[1], device.software_revision[2],
              device.hardware_revision_major, device.hardware_revision_minor, device.unkown_2, device.unkown_3);
 
+    auto truma_device = static_cast<const TRUMA_DEVICE>(device.software_revision[0]);
     {
       bool found_unkown_value = false;
       if (device.unkown_0 != 0x01 || device.unkown_1 != 0x00)
         found_unkown_value = true;
-      if (device.software_revision[0] != TRUMA_DEVICE::HEATER_COMBI &&
-          device.software_revision[0] != TRUMA_DEVICE::HEATER_VARIO &&
-          device.software_revision[0] != TRUMA_DEVICE::CPPLUS_COMBI &&
-          device.software_revision[0] != TRUMA_DEVICE::CPPLUS_VARIO)
+      if (truma_device != TRUMA_DEVICE::HEATER_COMBI &&
+          truma_device != TRUMA_DEVICE::HEATER_VARIO &&
+          truma_device != TRUMA_DEVICE::CPPLUS_COMBI &&
+          truma_device != TRUMA_DEVICE::CPPLUS_VARIO)
         found_unkown_value = true;
       if (device.unkown_2 != 0xAD && device.unkown_2 != 0x66 && device.unkown_2 != 0x00)
         found_unkown_value = true;
@@ -420,9 +421,9 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     // Assumption device id one is always the heater.
     if (device.device_id == 1) {
-      if (device.software_revision[0] == TRUMA_DEVICE::HEATER_COMBI) {
+      if (truma_device == TRUMA_DEVICE::HEATER_COMBI) {
         this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI;
-      } else if (device.software_revision[0] == TRUMA_DEVICE::HEATER_VARIO) {
+      } else if (truma_device == TRUMA_DEVICE::HEATER_VARIO) {
         this->heater_device_ = TRUMA_DEVICE::HEATER_VARIO;
       }
     }
