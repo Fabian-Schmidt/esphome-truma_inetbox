@@ -195,11 +195,11 @@ bool TrumaiNetBoxApp::lin_read_field_by_identifier_(u_int8_t identifier, std::ar
     (*response)[1] = lin_identifier[1];
     (*response)[2] = lin_identifier[2];
     (*response)[3] = lin_identifier[3];
-    (*response)[4] = 0x01;  // Hardware revision
+    (*response)[4] = 0x01;  // Variant
     return true;
   } else if (identifier == 0x20 /* Product details to display in CP plus */) {
     auto lin_identifier = this->lin_identifier();
-    // Only the first three parts are used.
+    // Only the first three parts are displayed.
     (*response)[0] = lin_identifier[0];
     (*response)[1] = lin_identifier[1];
     (*response)[2] = lin_identifier[2];
@@ -322,7 +322,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     this->update_status_timer_stale_ = false;
 
-    ESP_LOGV(TAG, "StatusFrameTimer target_temp_room: %f target_temp_water: %f %u:%u -> %u:%u %s",
+    ESP_LOGD(TAG, "StatusFrameTimer target_temp_room: %f target_temp_water: %f %u:%u -> %u:%u %s",
              temp_code_to_decimal(this->status_timer_.timer_target_temp_room),
              temp_code_to_decimal(this->status_timer_.timer_target_temp_water), this->status_timer_.timer_start_hours,
              this->status_timer_.timer_start_minutes, this->status_timer_.timer_stop_hours,
@@ -341,7 +341,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     } else {
       ESP_LOGI(TAG, "StatusFrameResponseAck");
     }
-    ESP_LOGV(TAG, "StatusFrameResponseAck %02X %s %02X", statusFrame->inner.genericHeader.command_counter,
+    ESP_LOGD(TAG, "StatusFrameResponseAck %02X %s %02X", statusFrame->inner.genericHeader.command_counter,
              data.error_code == ResponseAckResult::RESPONSE_ACK_RESULT_OKAY ? " OKAY " : " FAILED ",
              (u_int8_t) data.error_code);
 
@@ -362,7 +362,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     this->status_clock_valid_ = true;
     this->status_clock_updated_ = true;
 
-    ESP_LOGV(TAG, "StatusFrameClock %02d:%02d:%02d", this->status_clock_.clock_hour, this->status_clock_.clock_minute,
+    ESP_LOGD(TAG, "StatusFrameClock %02d:%02d:%02d", this->status_clock_.clock_hour, this->status_clock_.clock_minute,
              this->status_clock_.clock_second);
 
     return response;
@@ -377,7 +377,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     this->status_config_valid_ = true;
     this->status_config_updated_ = true;
 
-    ESP_LOGV(TAG, "StatusFrameConfig Offset: %d", offset_code_to_decimal(this->status_config_.temp_offset));
+    ESP_LOGD(TAG, "StatusFrameConfig Offset: %d", offset_code_to_decimal(this->status_config_.temp_offset));
 
     return response;
   } else if (header->message_type == STATUS_FRAME_DEVICES && header->message_length == sizeof(StatusFrameDevice)) {
@@ -385,15 +385,47 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // This message is special. I recieve one response per registered (at CP plus) device.
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // Combi4
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.79.02.00.01.00.50.00.00.04.03.02.AD.10 - C4.03.02 0050.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.27.02.01.01.00.40.03.22.02.00.01.00.00 - H2.00.01 0340.22
+    // VarioHeat Comfort w/o E-Kit
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.C2.02.00.01.00.51.00.00.05.01.00.66.10 - P5.01.00 0051.00
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.64.02.01.01.00.20.06.02.03.00.00.00.00 - H3.00.00 0620.02
+
     auto device = statusFrame->inner.device;
 
     this->init_recieved_ = micros();
 
-    ESP_LOGV(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X", device.device_id + 1, device.device_count,
-             device.software_revision[0], device.software_revision[1], device.software_revision[2],
-             device.hardware_revision_major, device.hardware_revision_minor);
+    ESP_LOGD(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X (%02X %02X)", device.device_id + 1,
+             device.device_count, device.software_revision[0], device.software_revision[1], device.software_revision[2],
+             device.hardware_revision_major, device.hardware_revision_minor, device.unkown_2, device.unkown_3);
+
+    {
+      bool found_unkown_value = false;
+      if (device.unkown_0 != 0x01 || device.unkown_1 != 0x00)
+        found_unkown_value = true;
+      if (device.software_revision[0] != TRUMA_DEVICE::HEATER_COMBI &&
+          device.software_revision[0] != TRUMA_DEVICE::HEATER_VARIO &&
+          device.software_revision[0] != TRUMA_DEVICE::CPPLUS_COMBI &&
+          device.software_revision[0] != TRUMA_DEVICE::CPPLUS_VARIO)
+        found_unkown_value = true;
+      if (device.unkown_2 != 0xAD && device.unkown_2 != 0x66 && device.unkown_2 != 0x00)
+        found_unkown_value = true;
+      if (device.unkown_3 != 0x10 && device.unkown_3 != 0x00)
+        found_unkown_value = true;
+
+      if (found_unkown_value)
+        ESP_LOGW(TAG, "Unkown information in StatusFrameDevice found. Please report.");
+    }
+
+    // Assumption device id one is always the heater.
+    if (device.device_id == 1) {
+      if (device.software_revision[0] == TRUMA_DEVICE::HEATER_COMBI) {
+        this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI;
+      } else if (device.software_revision[0] == TRUMA_DEVICE::HEATER_VARIO) {
+        this->heater_device_ = TRUMA_DEVICE::HEATER_VARIO;
+      }
+    }
 
     return response;
   } else {

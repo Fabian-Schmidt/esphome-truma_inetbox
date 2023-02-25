@@ -327,6 +327,8 @@ HeatingMode_dummy_ns = truma_inetbox_ns.namespace("HeatingMode")
 CONF_SUPPORTED_HEATING_MODE = {
     "OFF": HeatingMode_dummy_ns.HEATING_MODE_OFF,
     "ECO": HeatingMode_dummy_ns.HEATING_MODE_ECO,
+    "NIGHT": HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_NIGHT,
+    "AUTO": HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_AUTO,
     "HIGH": HeatingMode_dummy_ns.HEATING_MODE_HIGH,
     "BOOST": HeatingMode_dummy_ns.HEATING_MODE_BOOST,
 }

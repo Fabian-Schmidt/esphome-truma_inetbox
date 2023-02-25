@@ -45,8 +45,15 @@ namespace truma_inetbox {
 
 enum class HeatingMode : u_int16_t {
   HEATING_MODE_OFF = 0x0,
+  // COMBI
   HEATING_MODE_ECO = 0x1,
+  // Vario Heat
+  HEATING_MODE_VARIO_HEAT_NIGHT = 0x2,
+  // Vario Heat
+  HEATING_MODE_VARIO_HEAT_AUTO = 0x3,
+  // COMBI
   HEATING_MODE_HIGH = 0xA,
+  // COMBI, Vario Heat
   HEATING_MODE_BOOST = 0xB,
 
   // Feedback Invalid message only with following `heating_mode`. Others are ignored no feedback.
@@ -297,6 +304,14 @@ struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
   u_int8_t unkown_8;
 } __attribute__((packed));
 
+enum class TRUMA_DEVICE : u_int8_t {
+  UNKOWN = 0x00,
+  HEATER_COMBI = 0x02,
+  HEATER_VARIO = 0x03,
+  CPPLUS_COMBI = 0x04,
+  CPPLUS_VARIO = 0x05,
+};
+
 // Length 12 (0x0C)
 struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t device_count;
@@ -308,12 +323,13 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int16_t hardware_revision_major;
   u_int8_t hardware_revision_minor;
   // `software_revision[0].software_revision[1].software_revision[2]`
+  // software_revision[0] -> TRUMA_DEVICE
   u_int8_t software_revision[3];
-  // 0xAD on CPplus
-  // 0x00 on Combi4
+  // 0xAD on CPplus with Combi4 or 0x66 on CPplus with Vario Heat Comfort ohne E
+  // 0x00 on Combi4, Vario Heat
   u_int8_t unkown_2;
   // 0x10 on CPplus
-  // 0x00 on Combi4
+  // 0x00 on Combi4, Vario Heat
   u_int8_t unkown_3;
 
 } __attribute__((packed));
@@ -416,6 +432,9 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   uint32_t init_requested_ = 0;
   uint32_t init_recieved_ = 0;
   u_int8_t message_counter = 1;
+
+  // Truma heater conected to CP Plus.
+  TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI;
 
   std::vector<StatusFrameListener> listeners_heater_;
   CallbackManager<void(const StatusFrameHeater *)> state_heater_callback_{};

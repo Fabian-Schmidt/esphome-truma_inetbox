@@ -22,12 +22,23 @@ bool TrumaiNetBoxApp::action_heater_room(u_int8_t temperature, HeatingMode mode)
   if (heater->target_temp_room == TargetTemp::TARGET_TEMP_OFF) {
     heater->heating_mode = HeatingMode::HEATING_MODE_OFF;
   } else {
-    // If parameter `mode` contains a valid Heating mode use it or else use `ECO`.
-    if (mode == HeatingMode::HEATING_MODE_ECO || mode == HeatingMode::HEATING_MODE_HIGH ||
-        mode == HeatingMode::HEATING_MODE_BOOST) {
-      heater->heating_mode = mode;
-    } else if (heater->heating_mode == HeatingMode::HEATING_MODE_OFF) {
-      heater->heating_mode = HeatingMode::HEATING_MODE_ECO;
+    if (this->heater_device_ == TRUMA_DEVICE::HEATER_VARIO) {
+      // If parameter `mode` contains a valid Heating mode use it or else use `AUTO`.
+      if (mode == HeatingMode::HEATING_MODE_VARIO_HEAT_NIGHT || mode == HeatingMode::HEATING_MODE_VARIO_HEAT_AUTO ||
+          mode == HeatingMode::HEATING_MODE_BOOST) {
+        heater->heating_mode = mode;
+      } else if (heater->heating_mode == HeatingMode::HEATING_MODE_OFF) {
+        heater->heating_mode = HeatingMode::HEATING_MODE_VARIO_HEAT_AUTO;
+      }
+    } else {
+      // HEATER_COMBI
+      // If parameter `mode` contains a valid Heating mode use it or else use `ECO`.
+      if (mode == HeatingMode::HEATING_MODE_ECO || mode == HeatingMode::HEATING_MODE_HIGH ||
+          mode == HeatingMode::HEATING_MODE_BOOST) {
+        heater->heating_mode = mode;
+      } else if (heater->heating_mode == HeatingMode::HEATING_MODE_OFF) {
+        heater->heating_mode = HeatingMode::HEATING_MODE_ECO;
+      }
     }
   }
   if (heater->energy_mix_a == EnergyMix::ENERGY_MIX_NONE) {
@@ -178,12 +189,23 @@ bool TrumaiNetBoxApp::action_timer_activate(u_int16_t start, u_int16_t stop, u_i
   if (timer->timer_target_temp_room == TargetTemp::TARGET_TEMP_OFF) {
     timer->timer_heating_mode = HeatingMode::HEATING_MODE_OFF;
   } else {
-    // If parameter `mode` contains a valid Heating mode use it or else use `ECO`.
-    if (mode == HeatingMode::HEATING_MODE_ECO || mode == HeatingMode::HEATING_MODE_HIGH ||
-        mode == HeatingMode::HEATING_MODE_BOOST) {
-      timer->timer_heating_mode = mode;
-    } else if (timer->timer_heating_mode == HeatingMode::HEATING_MODE_OFF) {
-      timer->timer_heating_mode = HeatingMode::HEATING_MODE_ECO;
+    if (this->heater_device_ == TRUMA_DEVICE::HEATER_VARIO) {
+      // If parameter `mode` contains a valid Heating mode use it or else use `AUTO`.
+      if (mode == HeatingMode::HEATING_MODE_VARIO_HEAT_NIGHT || mode == HeatingMode::HEATING_MODE_VARIO_HEAT_AUTO ||
+          mode == HeatingMode::HEATING_MODE_BOOST) {
+        timer->timer_heating_mode = mode;
+      } else if (timer->timer_heating_mode == HeatingMode::HEATING_MODE_OFF) {
+        timer->timer_heating_mode = HeatingMode::HEATING_MODE_VARIO_HEAT_AUTO;
+      }
+    } else {
+      // HEATER_COMBI
+      // If parameter `mode` contains a valid Heating mode use it or else use `ECO`.
+      if (mode == HeatingMode::HEATING_MODE_ECO || mode == HeatingMode::HEATING_MODE_HIGH ||
+          mode == HeatingMode::HEATING_MODE_BOOST) {
+        timer->timer_heating_mode = mode;
+      } else if (timer->timer_heating_mode == HeatingMode::HEATING_MODE_OFF) {
+        timer->timer_heating_mode = HeatingMode::HEATING_MODE_ECO;
+      }
     }
   }
 
@@ -242,7 +264,7 @@ bool TrumaiNetBoxApp::action_write_time() {
   this->update_clock_submit();
   return true;
 }
-#endif // USE_TIME
+#endif  // USE_TIME
 
 }  // namespace truma_inetbox
 }  // namespace esphome
