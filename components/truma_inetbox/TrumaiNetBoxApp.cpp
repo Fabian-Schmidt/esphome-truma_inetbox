@@ -408,10 +408,6 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       if (truma_device != TRUMA_DEVICE::HEATER_COMBI && truma_device != TRUMA_DEVICE::HEATER_VARIO &&
           truma_device != TRUMA_DEVICE::CPPLUS_COMBI && truma_device != TRUMA_DEVICE::CPPLUS_VARIO)
         found_unkown_value = true;
-      if (device.unkown_2 != 0xAD && device.unkown_2 != 0x66 && device.unkown_2 != 0x00)
-        found_unkown_value = true;
-      if (device.unkown_3 != 0x10 && device.unkown_3 != 0x00)
-        found_unkown_value = true;
 
       if (found_unkown_value)
         ESP_LOGW(TAG, "Unkown information in StatusFrameDevice found. Please report.");
