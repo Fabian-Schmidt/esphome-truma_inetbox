@@ -377,7 +377,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     this->status_config_valid_ = true;
     this->status_config_updated_ = true;
 
-    ESP_LOGD(TAG, "StatusFrameConfig Offset: %d", offset_code_to_decimal(this->status_config_.temp_offset));
+    ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", offset_code_to_decimal(this->status_config_.temp_offset));
 
     return response;
   } else if (header->message_type == STATUS_FRAME_DEVICES && header->message_length == sizeof(StatusFrameDevice)) {
@@ -400,15 +400,13 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
              device.device_count, device.software_revision[0], device.software_revision[1], device.software_revision[2],
              device.hardware_revision_major, device.hardware_revision_minor, device.unkown_2, device.unkown_3);
 
-    auto truma_device = static_cast<const TRUMA_DEVICE>(device.software_revision[0]);
+    const auto truma_device = static_cast<TRUMA_DEVICE>(device.software_revision[0]);
     {
       bool found_unkown_value = false;
       if (device.unkown_0 != 0x01 || device.unkown_1 != 0x00)
         found_unkown_value = true;
-      if (truma_device != TRUMA_DEVICE::HEATER_COMBI &&
-          truma_device != TRUMA_DEVICE::HEATER_VARIO &&
-          truma_device != TRUMA_DEVICE::CPPLUS_COMBI &&
-          truma_device != TRUMA_DEVICE::CPPLUS_VARIO)
+      if (truma_device != TRUMA_DEVICE::HEATER_COMBI && truma_device != TRUMA_DEVICE::HEATER_VARIO &&
+          truma_device != TRUMA_DEVICE::CPPLUS_COMBI && truma_device != TRUMA_DEVICE::CPPLUS_VARIO)
         found_unkown_value = true;
       if (device.unkown_2 != 0xAD && device.unkown_2 != 0x66 && device.unkown_2 != 0x00)
         found_unkown_value = true;
