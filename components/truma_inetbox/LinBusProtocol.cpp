@@ -109,7 +109,7 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
       // - 0x00 - response lin_identifier[0:4] + 0x00 /* Hardware revision*/
       // my_node_address:
       // - 0x20 - displayed version
-      // - 0x22 - unkown
+      // - 0x22 - unknown
       auto identifier = message[3];
       std::array<u_int8_t, 8> response = this->lin_empty_response_;
       response[0] = this->lin_node_address_;

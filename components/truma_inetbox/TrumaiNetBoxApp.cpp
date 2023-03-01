@@ -49,9 +49,9 @@ void TrumaiNetBoxApp::update() {
 
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
   // Supplier Id: 0x4617 - Truma (Phone: +49 (0)89 4617-0)
-  // Unkown:
-  // 17.46.01.03 - Unkown more comms required for init.
-  // 17.46.10.03 - Unkown more comms required for init.
+  // Unknown:
+  // 17.46.01.03 - Unknown more comms required for init.
+  // 17.46.10.03 - Unknown more comms required for init.
   // Heater:
   // 17.46.40.03 - H2.00.01 - 0340.xx Combi 4/6
   // Aircon:
@@ -203,10 +203,10 @@ bool TrumaiNetBoxApp::lin_read_field_by_identifier_(u_int8_t identifier, std::ar
     (*response)[0] = lin_identifier[0];
     (*response)[1] = lin_identifier[1];
     (*response)[2] = lin_identifier[2];
-    // (*response)[3] = // unkown
-    // (*response)[4] = // unkown
+    // (*response)[3] = // unknown
+    // (*response)[4] = // unknown
     return true;
-  } else if (identifier == 0x22 /* unkown usage */) {
+  } else if (identifier == 0x22 /* unknown usage */) {
     // Init is failing if missing
     // Data can be anything?
     return true;
@@ -310,6 +310,17 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     this->update_status_heater_stale_ = false;
     return response;
+  } else if (header->message_type == STATUS_FRAME_AIRCON && header->message_length == sizeof(StatusFrameAircon)) {
+    ESP_LOGI(TAG, "StatusFrameAircon");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.AA.00.00.71.01.00.00.00.00.86.0B.00.00.00.00.00.00.AA.0A
+    this->status_aircon_ = statusFrame->inner.heater;
+    this->status_aircon_valid_ = true;
+    this->status_aircon_updated_ = true;
+
+    this->update_status_aircon_stale_ = false;
+    return response;
   } else if (header->message_type == STATUS_FRAME_TIMER && header->message_length == sizeof(StatusFrameTimer)) {
     ESP_LOGI(TAG, "StatusFrameTimer");
     // EXAMPLE:
@@ -398,20 +409,20 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     ESP_LOGD(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X (%02X %02X)", device.device_id + 1,
              device.device_count, device.software_revision[0], device.software_revision[1], device.software_revision[2],
-             device.hardware_revision_major, device.hardware_revision_minor, device.unkown_2, device.unkown_3);
+             device.hardware_revision_major, device.hardware_revision_minor, device.unknown_2, device.unknown_3);
 
     const auto truma_device = static_cast<TRUMA_DEVICE>(device.software_revision[0]);
     {
-      bool found_unkown_value = false;
-      if (device.unkown_0 != 0x01 || device.unkown_1 != 0x00)
-        found_unkown_value = true;
+      bool found_unknown_value = false;
+      if (device.unknown_0 != 0x01 || device.unknown_1 != 0x00)
+        found_unknown_value = true;
       if (truma_device != TRUMA_DEVICE::AIRCON_DEVICE && truma_device != TRUMA_DEVICE::HEATER_COMBI4 &&
           truma_device != TRUMA_DEVICE::HEATER_VARIO && truma_device != TRUMA_DEVICE::CPPLUS_COMBI &&
           truma_device != TRUMA_DEVICE::CPPLUS_VARIO && truma_device != TRUMA_DEVICE::HEATER_COMBI6D)
-        found_unkown_value = true;
+        found_unknown_value = true;
 
-      if (found_unkown_value)
-        ESP_LOGW(TAG, "Unkown information in StatusFrameDevice found. Please report.");
+      if (found_unknown_value)
+        ESP_LOGW(TAG, "Unknown information in StatusFrameDevice found. Please report.");
     }
 
     if (truma_device == TRUMA_DEVICE::HEATER_COMBI4) {
@@ -428,7 +439,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     return response;
   } else {
-    ESP_LOGW(TAG, "Unkown message type %02X", header->message_type);
+    ESP_LOGW(TAG, "Unknown message type %02X", header->message_type);
   }
   (*return_len) = 0;
   return nullptr;

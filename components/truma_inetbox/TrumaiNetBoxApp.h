@@ -32,16 +32,16 @@ namespace truma_inetbox {
 #define STAUTS_FRAME_CONFIG 0x17
 #define STATUS_FRAME_HEATER_RESPONSE (STATUS_FRAME_HEATER - 1)
 #define STATUS_FRAME_HEATER 0x33
-// Error response - unkown function
-#define STATUS_FRAME_UNKOWN_34 0x34
-// Error response - unkown function
-#define STATUS_FRAME_UNKOWN_36 0x36
+#define STATUS_FRAME_AIRCON_RESPONSE 0x34(STATUS_FRAME_AIRCON - 1)
+#define STATUS_FRAME_AIRCON 0x35
+// Error response - unknown function
+#define STATUS_FRAME_UNKNOWN_36 0x36
 #define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
 #define STATUS_FRAME_TIMER 0x3D
-// Error response - unkown function
-#define STATUS_FRAME_UNKOWN_3E 0x3E
-// Error response - unkown function
-#define STATUS_FRAME_UNKOWN_40 0x40
+// Error response - unknown function
+#define STATUS_FRAME_UNKNOWN_3E 0x3E
+// Error response - unknown function
+#define STATUS_FRAME_UNKNOWN_40 0x40
 
 enum class HeatingMode : u_int16_t {
   HEATING_MODE_OFF = 0x0,
@@ -147,7 +147,7 @@ enum class Language : u_int8_t {
 enum class ResponseAckResult : u_int8_t {
   RESPONSE_ACK_RESULT_OKAY = 0x0,
   RESPONSE_ACK_RESULT_ERROR_INVALID_MSG = 0x2,
-  // The response status frame `message_type` is unkown.
+  // The response status frame `message_type` is unknown.
   RESPONSE_ACK_RESULT_ERROR_INVALID_ID = 0x3,
 };
 
@@ -210,7 +210,7 @@ struct StatusFrameHeater {  // NOLINT(altera-struct-pack-align)
   u_int16_t current_temp_room;
   OperatingStatus operating_status;
   u_int16_t error_code;
-  u_int8_t heater_unkown_2;
+  u_int8_t heater_unknown_2;
 } __attribute__((packed));
 
 // Length 12 (0x0C)
@@ -224,6 +224,33 @@ struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
   EnergyMix energy_mix_a;
   // Ignored?
   EnergyMix energy_mix_b;
+} __attribute__((packed));
+
+// Length 18 (0x12)
+// TODO
+struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)               
+  u_int8_t unknown_01;
+  u_int8_t unknown_02;
+  u_int8_t unknown_03;
+  u_int8_t unknown_04;
+  u_int8_t unknown_05;
+  u_int8_t unknown_06;
+  u_int8_t unknown_07;
+  u_int8_t unknown_08;
+  u_int8_t unknown_09;
+  u_int8_t unknown_10;
+  u_int8_t unknown_11;
+  u_int8_t unknown_12;
+  u_int8_t unknown_13;
+  u_int8_t unknown_14;
+  u_int8_t unknown_15;
+  u_int8_t unknown_16;
+  u_int8_t unknown_17;
+  u_int8_t unknown_18;
+} __attribute__((packed));
+
+struct StatusFrameAirconResponse {  // NOLINT(altera-struct-pack-align)
+  // TODO
 } __attribute__((packed));
 
 // Length 24 (0x18)
@@ -270,7 +297,7 @@ struct StatusFrameTimerResponse {  // NOLINT(altera-struct-pack-align)
 // Length 2 (0x02)
 struct StatusFrameResponseAck {  // NOLINT(altera-struct-pack-align)
   ResponseAckResult error_code;
-  u_int8_t unkown;
+  u_int8_t unknown;
 } __attribute__((packed));
 
 // Length 10 (0x0A)
@@ -294,18 +321,18 @@ struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
   // 0x01 .. 0x0A
   u_int8_t display_brightness;
   Language language;
-  u_int8_t unkown_2;  // 0xB4
-  u_int8_t unkown_3;  // 0x0A
+  u_int8_t unknown_2;  // 0xB4
+  u_int8_t unknown_3;  // 0x0A
   TempOffset temp_offset;
-  u_int8_t unkown_5;  // 0x0A
+  u_int8_t unknown_5;  // 0x0A
   OperatingUnits temp_units;
-  u_int8_t unkown_6;
-  u_int8_t unkown_7;
-  u_int8_t unkown_8;
+  u_int8_t unknown_6;
+  u_int8_t unknown_7;
+  u_int8_t unknown_8;
 } __attribute__((packed));
 
 enum class TRUMA_DEVICE : u_int8_t {
-  UNKOWN = 0x00,
+  UNKNOWN = 0x00,
   // Saphir Compact AC
   AIRCON_DEVICE = 0x01,
   // Combi 4
@@ -325,9 +352,9 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t device_count;
   u_int8_t device_id;
   // 0x01 - Maybe active or found
-  u_int8_t unkown_0;
+  u_int8_t unknown_0;
   // 0x00
-  u_int8_t unkown_1;
+  u_int8_t unknown_1;
   u_int16_t hardware_revision_major;
   u_int8_t hardware_revision_minor;
   // `software_revision[0].software_revision[1].software_revision[2]`
@@ -335,10 +362,10 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t software_revision[3];
   // 0xAD, 0x0B on CPplus with Combi4 or 0x66 on CPplus with Vario Heat Comfort ohne E
   // 0x00 on Combi4, Vario Heat
-  u_int8_t unkown_2;
+  u_int8_t unknown_2;
   // 0x10, 0x12 on CPplus
   // 0x00 on Combi4, Vario Heat
-  u_int8_t unkown_3;
+  u_int8_t unknown_3;
 
 } __attribute__((packed));
 
@@ -443,7 +470,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
 
   // Truma heater conected to CP Plus.
   TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
-  TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKOWN;
+  TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKNOWN;
 
   std::vector<StatusFrameListener> listeners_heater_;
   CallbackManager<void(const StatusFrameHeater *)> state_heater_callback_{};
@@ -452,6 +479,11 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   // Value has changed notify listeners.
   bool status_heater_updated_ = false;
   StatusFrameHeater status_heater_;
+
+  bool status_aircon_valid_ = false;
+  // Value has changed notify listeners.
+  bool status_aircon_updated_ = false;
+  StatusFrameAircon status_aircon_;
 
   bool status_timer_valid_ = false;
   // Value has changed notify listeners.
@@ -478,6 +510,9 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   // plus.
   bool update_status_heater_stale_ = false;
   StatusFrameHeaterResponse update_status_heater_;
+
+
+  bool update_status_aircon_stale_ = false;
 
   // Prepared means `update_status_timer_` was copied from `status_timer_`.
   bool update_status_timer_prepared_ = false;
