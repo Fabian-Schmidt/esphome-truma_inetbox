@@ -375,6 +375,7 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
     StatusFrameHeader genericHeader;
     union {  // NOLINT(altera-struct-pack-align)
       StatusFrameHeater heater;
+      StatusFrameAircon aircon;
       StatusFrameHeaterResponse heaterResponse;
       StatusFrameTimer timer;
       StatusFrameTimerResponse timerResponse;

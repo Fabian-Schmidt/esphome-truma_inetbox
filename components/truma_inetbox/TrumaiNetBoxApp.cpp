@@ -315,7 +315,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.AA.00.00.71.01.00.00.00.00.86.0B.00.00.00.00.00.00.AA.0A
-    this->status_aircon_ = statusFrame->inner.heater;
+    this->status_aircon_ = statusFrame->inner.aircon;
     this->status_aircon_valid_ = true;
     this->status_aircon_updated_ = true;
 
