@@ -25,7 +25,7 @@ bool LinBusProtocol::answer_lin_order_(const u_int8_t pid) {
     if (!this->updates_to_send_.empty()) {
       auto update_to_send_ = this->updates_to_send_.front();
       this->updates_to_send_.pop();
-      this->write_lin_answer_(update_to_send_.data(), update_to_send_.size());
+      this->write_lin_answer_(update_to_send_.data(), (u_int8_t) update_to_send_.size());
       return true;
     }
   }

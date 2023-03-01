@@ -98,6 +98,14 @@ extern void loop1() {
     if (LIN_BUS_LISTENER_INSTANCE_2 != nullptr) {
       sleep2 = LIN_BUS_LISTENER_INSTANCE_2->onSerialEvent();
     }
+    // TODO: Reconsider processing lin messages here.
+    // They contain blocking log messages.
+    if (LIN_BUS_LISTENER_INSTANCE_1 != nullptr) {
+      LIN_BUS_LISTENER_INSTANCE_1->process_lin_msg_queue_((portTickType) 0 /* No blocking*/);
+    }
+    if (LIN_BUS_LISTENER_INSTANCE_2 != nullptr) {
+      LIN_BUS_LISTENER_INSTANCE_2->process_lin_msg_queue_((portTickType) 0 /* No blocking*/);
+    }
     delay(sleep1 > sleep2 ? sleep2 : sleep1);
   }
 }

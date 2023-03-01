@@ -47,6 +47,27 @@ void LinBusListener::setup_framework() {
       return;
     }
   });
+
+  // Creating LIN msg event Task
+  xTaskCreatePinnedToCore(LinBusListener::eventTask_,
+                          "lin_event_task",         // name
+                          4096,                     // stack size (in words)
+                          this,                     // input params
+                          2,                        // priority
+                          &this->eventTaskHandle_,  // handle
+                          0                         // core
+  );
+
+  if (this->eventTaskHandle_ == NULL) {
+    ESP_LOGE(TAG, " -- LIN message Task not created!");
+  }
+}
+
+void LinBusListener::eventTask_(void *args) {
+  LinBusListener *instance = (LinBusListener *) args;
+  for (;;) {
+    instance->process_lin_msg_queue_((portTickType) portMAX_DELAY);
+  }
 }
 
 }  // namespace truma_inetbox

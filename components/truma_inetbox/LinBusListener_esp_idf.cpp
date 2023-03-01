@@ -29,20 +29,34 @@ void LinBusListener::setup_framework() {
   uart_intr_config(uart_num, &uart_intr);
 
   // Creating UART event Task
-  xTaskCreatePinnedToCore(LinBusListener::_uartEventTask,
+  xTaskCreatePinnedToCore(LinBusListener::uartEventTask_,
                           "uart_event_task",                      // name
                           ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE,   // stack size (in words)
                           this,                                   // input params
                           24,                                     // priority
-                          &_eventTask,                            // handle
+                          &this->uartEventTaskHandle_,            // handle
                           ARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE  // core
   );
-  if (_eventTask == NULL) {
-    ESP_LOGE(TAG, " -- UART%d Event Task not Created!", uart_num);
+  if (this->uartEventTaskHandle_ == NULL) {
+    ESP_LOGE(TAG, " -- UART%d Event Task not created!", uart_num);
+  }
+
+  // Creating LIN msg event Task
+  xTaskCreatePinnedToCore(LinBusListener::eventTask_,
+                          "lin_event_task",                       // name
+                          ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE,   // stack size (in words)
+                          this,                                   // input params
+                          2,                                      // priority
+                          &this->eventTaskHandle_,                // handle
+                          ARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE  // core
+  );
+
+  if (this->eventTaskHandle_ == NULL) {
+    ESP_LOGE(TAG, " -- LIN message Task not created!");
   }
 }
 
-void LinBusListener::_uartEventTask(void *args) {
+void LinBusListener::uartEventTask_(void *args) {
   LinBusListener *instance = (LinBusListener *) args;
   auto uartComp = static_cast<uart::truma_IDFUARTComponent *>(instance->parent_);
   auto uart_num = uartComp->get_hw_serial_number();
@@ -63,6 +77,13 @@ void LinBusListener::_uartEventTask(void *args) {
     }
   }
   vTaskDelete(NULL);
+}
+
+void LinBusListener::eventTask_(void *args) {
+  LinBusListener *instance = (LinBusListener *) args;
+  for (;;) {
+    instance->process_lin_msg_queue_((portTickType) portMAX_DELAY);
+  }
 }
 
 }  // namespace truma_inetbox
