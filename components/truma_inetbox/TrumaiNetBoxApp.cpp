@@ -426,7 +426,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   } else {
     ESP_LOGW(TAG, "Unkown message type %02X", header->message_type);
   }
-  (*return_len) = 1;
+  (*return_len) = 0;
   return nullptr;
 }
 
