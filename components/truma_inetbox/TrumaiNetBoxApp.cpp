@@ -384,7 +384,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     ESP_LOGI(TAG, "StatusFrameDevice");
     // This message is special. I recieve one response per registered (at CP plus) device.
     // Example:
-    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|count|??|??|Hardware|Software|??|??
     // Combi4
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.79.02.00.01.00.50.00.00.04.03.02.AD.10 - C4.03.02 0050.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.27.02.01.01.00.40.03.22.02.00.01.00.00 - H2.00.01 0340.22
@@ -405,21 +405,25 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       bool found_unkown_value = false;
       if (device.unkown_0 != 0x01 || device.unkown_1 != 0x00)
         found_unkown_value = true;
-      if (truma_device != TRUMA_DEVICE::HEATER_COMBI && truma_device != TRUMA_DEVICE::HEATER_VARIO &&
-          truma_device != TRUMA_DEVICE::CPPLUS_COMBI && truma_device != TRUMA_DEVICE::CPPLUS_VARIO)
+      if (truma_device != TRUMA_DEVICE::AIRCON_DEVICE && truma_device != TRUMA_DEVICE::HEATER_COMBI4 &&
+          truma_device != TRUMA_DEVICE::HEATER_VARIO && truma_device != TRUMA_DEVICE::CPPLUS_COMBI &&
+          truma_device != TRUMA_DEVICE::CPPLUS_VARIO && truma_device != TRUMA_DEVICE::HEATER_COMBI6D)
         found_unkown_value = true;
 
       if (found_unkown_value)
         ESP_LOGW(TAG, "Unkown information in StatusFrameDevice found. Please report.");
     }
 
-    // Assumption device id one is always the heater.
-    if (device.device_id == 1) {
-      if (truma_device == TRUMA_DEVICE::HEATER_COMBI) {
-        this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI;
-      } else if (truma_device == TRUMA_DEVICE::HEATER_VARIO) {
-        this->heater_device_ = TRUMA_DEVICE::HEATER_VARIO;
-      }
+    if (truma_device == TRUMA_DEVICE::HEATER_COMBI4) {
+      this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
+    } else if (truma_device == TRUMA_DEVICE::HEATER_COMBI6D) {
+      this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI6D;
+    } else if (truma_device == TRUMA_DEVICE::HEATER_VARIO) {
+      this->heater_device_ = TRUMA_DEVICE::HEATER_VARIO;
+    }
+
+    if (truma_device == TRUMA_DEVICE::AIRCON_DEVICE) {
+      this->aircon_device_ = TRUMA_DEVICE::AIRCON_DEVICE;
     }
 
     return response;

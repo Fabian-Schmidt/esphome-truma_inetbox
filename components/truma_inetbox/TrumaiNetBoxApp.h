@@ -306,10 +306,18 @@ struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
 
 enum class TRUMA_DEVICE : u_int8_t {
   UNKOWN = 0x00,
-  HEATER_COMBI = 0x02,
+  // Saphir Compact AC
+  AIRCON_DEVICE = 0x01,
+  // Combi 4
+  HEATER_COMBI4 = 0x02,
+  // Vario Heat Comfort (non E)
   HEATER_VARIO = 0x03,
+  // CP Plus for Combi
   CPPLUS_COMBI = 0x04,
+  // CP Plus for Vario Heat
   CPPLUS_VARIO = 0x05,
+  // Combi 6 D
+  HEATER_COMBI6D = 0x06,
 };
 
 // Length 12 (0x0C)
@@ -434,7 +442,8 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   u_int8_t message_counter = 1;
 
   // Truma heater conected to CP Plus.
-  TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI;
+  TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
+  TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKOWN;
 
   std::vector<StatusFrameListener> listeners_heater_;
   CallbackManager<void(const StatusFrameHeater *)> state_heater_callback_{};
