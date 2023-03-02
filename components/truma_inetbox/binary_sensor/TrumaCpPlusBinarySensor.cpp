@@ -12,7 +12,7 @@ void TrumaCpPlusBinarySensor::update() {
     this->publish_state(false);
     return;
   }
-  auto timeout = this->parent_->get_last_cp_plus_request() + 30 * 1000 * 1000 /* 30 seconds*/;
+  const auto timeout = this->parent_->get_last_cp_plus_request() + 90 * 1000 * 1000 /* 90 seconds*/;
   this->publish_state(micros() < timeout);
 }
 
