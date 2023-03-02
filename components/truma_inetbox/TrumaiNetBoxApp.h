@@ -38,8 +38,8 @@ namespace truma_inetbox {
 #define STATUS_FRAME_UNKNOWN_36 0x36
 #define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
 #define STATUS_FRAME_TIMER 0x3D
-// Error response - unknown function
-#define STATUS_FRAME_UNKNOWN_3E 0x3E
+#define STATUS_FRAME_AIRCON_INIT_RESPONSE (STATUS_FRAME_AIRCON_INIT - 1)
+#define STATUS_FRAME_AIRCON_INIT 0x3F
 // Error response - unknown function
 #define STATUS_FRAME_UNKNOWN_40 0x40
 
@@ -228,27 +228,38 @@ struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
 
 // Length 18 (0x12)
 // TODO
-struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)               
+struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
+  // Mode? 00 - OFF, 04 - AC Ventilation, 05 - AC Cooling
   u_int8_t unknown_01;
+  // 0x00
   u_int8_t unknown_02;
+  // 0x71
   u_int8_t unknown_03;
+  // 0x01
   u_int8_t unknown_04;
-  u_int8_t unknown_05;
-  u_int8_t unknown_06;
+  u_int16_t target_temp_room;
+  // 0x00
   u_int8_t unknown_07;
+  // 0x00
   u_int8_t unknown_08;
-  u_int8_t unknown_09;
-  u_int8_t unknown_10;
+  // No idea why two current_temp
+  u_int16_t current_temp_aircon;
+  // 0x00
   u_int8_t unknown_11;
+  // 0x00
   u_int8_t unknown_12;
+  // 0x00
   u_int8_t unknown_13;
+  // 0x00
   u_int8_t unknown_14;
+  // 0x00
   u_int8_t unknown_15;
+  // 0x00
   u_int8_t unknown_16;
-  u_int8_t unknown_17;
-  u_int8_t unknown_18;
+  u_int16_t current_temp_room;
 } __attribute__((packed));
 
+// TODO
 struct StatusFrameAirconResponse {  // NOLINT(altera-struct-pack-align)
   // TODO
 } __attribute__((packed));
@@ -366,7 +377,35 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   // 0x10, 0x12 on CPplus
   // 0x00 on Combi4, Vario Heat
   u_int8_t unknown_3;
+} __attribute__((packed));
 
+// Length 22 (0x16)
+// TODO
+struct StatusFrameAirconInit {  // NOLINT(altera-struct-pack-align)
+  u_int8_t unknown_01;          // 0x00
+  u_int8_t unknown_02;          // 0x00
+  // 0x71
+  u_int8_t unknown_03;
+  // 0x01
+  u_int8_t unknown_04;
+  u_int8_t unknown_05;  // 0x00
+  u_int8_t unknown_06;  // 0x00
+  u_int8_t unknown_07;  // 0x00
+  u_int8_t unknown_08;  // 0x00
+  u_int8_t unknown_09;  // 0x00
+  u_int8_t unknown_10;  // 0x00
+  u_int8_t unknown_11;  // 0x00
+  u_int8_t unknown_12;  // 0x00
+  u_int8_t unknown_13;  // 0x00
+  u_int8_t unknown_14;  // 0x00
+  u_int8_t unknown_15;  // 0x00
+  u_int8_t unknown_16;  // 0x00
+  u_int8_t unknown_17;  // 0x00
+  u_int8_t unknown_18;  // 0x00
+  u_int8_t unknown_19;  // 0x00
+  u_int8_t unknown_20;  // 0x00
+  u_int8_t unknown_21;  // 0x00
+  u_int8_t unknown_22;  // 0x00
 } __attribute__((packed));
 
 union StatusFrame {  // NOLINT(altera-struct-pack-align)
@@ -383,6 +422,7 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameClock clock;
       StatusFrameConfig config;
       StatusFrameDevice device;
+      StatusFrameAirconInit airconInit;
     } __attribute__((packed));
   } inner;
 } __attribute__((packed));
@@ -511,7 +551,6 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   // plus.
   bool update_status_heater_stale_ = false;
   StatusFrameHeaterResponse update_status_heater_;
-
 
   bool update_status_aircon_stale_ = false;
 
