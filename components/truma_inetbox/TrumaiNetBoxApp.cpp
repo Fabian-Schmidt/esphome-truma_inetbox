@@ -82,6 +82,7 @@ const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
 void TrumaiNetBoxApp::lin_heartbeat() { this->device_registered_ = micros(); }
 
 void TrumaiNetBoxApp::lin_reset_device() {
+  LinBusProtocol::lin_reset_device();
   this->device_registered_ = micros();
   this->init_recieved_ = 0;
 

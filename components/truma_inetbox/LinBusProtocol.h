@@ -9,7 +9,7 @@ class LinBusProtocol : public LinBusListener {
  public:
   virtual const std::array<u_int8_t, 4> lin_identifier() = 0;
   virtual void lin_heartbeat() = 0;
-  virtual void lin_reset_device() = 0;
+  virtual void lin_reset_device();
 
  protected:
   const std::array<u_int8_t, 8> lin_empty_response_ = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};

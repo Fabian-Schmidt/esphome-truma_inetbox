@@ -19,6 +19,13 @@ static const char *const TAG = "truma_inetbox.LinBusProtocol";
 #define LIN_SID_HEARTBEAT 0xB9
 #define LIN_SID_HEARTBEAT_RESPONSE (LIN_SID_HEARTBEAT | LIN_SID_RESPONSE)
 
+void LinBusProtocol::lin_reset_device(){
+    // clear any messages in send queue of LinBus Protocol handler.
+  while (!this->updates_to_send_.empty()) {
+    this->updates_to_send_.pop();
+  }
+}
+
 bool LinBusProtocol::answer_lin_order_(const u_int8_t pid) {
   // Send requested answer
   if (pid == DIAGNOSTIC_FRAME_SLAVE) {
@@ -150,11 +157,12 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
       response[0] = this->lin_node_address_;
       response[1] = 1; /* bytes length*/
       response[2] = LIN_SID_ASSIGN_NAD_RESPONSE;
-      this->prepare_update_msg_(response);
-      this->lin_node_address_ = message[7];
 
       // assumption an assign new SID occurs as part of init process.
       this->lin_reset_device();
+
+      this->prepare_update_msg_(response);
+      this->lin_node_address_ = message[7];
     }
   } else {
     if (my_node_address) {
