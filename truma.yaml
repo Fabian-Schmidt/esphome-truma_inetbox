@@ -5,10 +5,6 @@ esphome:
     then:
       # read time from external source (connected via I2C)
       - ds1307.read_time
-      # wait 90 seconds for Truma CP Plus connection to init
-      - delay: 90 seconds
-      # update CP Plus clock
-      - truma_inetbox.clock.set
 
 external_components:
   - source: github://Fabian-Schmidt/esphome-truma_inetbox
@@ -27,12 +23,7 @@ i2c:
 time:
   - platform: ds1307
     update_interval: never
-  - platform: sntp
-    on_time_sync:
-      - ds1307.write_time
-      # wait 90 seconds for Truma CP Plus connection to init
-      - delay: 90 seconds
-      - truma_inetbox.clock.set
+    id: esptime
 
 uart:
   - id: lin_uart_bus
@@ -45,6 +36,7 @@ uart:
 
 truma_inetbox:
   uart_id: lin_uart_bus
+  time_id: esptime
   cs_pin: 5
   fault_pin: 18
   # Advanced users can use `on_heater_message` action. The heater data is in the `message` variable.

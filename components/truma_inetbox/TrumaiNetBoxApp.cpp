@@ -45,6 +45,19 @@ void TrumaiNetBoxApp::update() {
     this->status_config_updated_ = false;
   }
   LinBusProtocol::update();
+
+#ifdef USE_TIME
+  // Update time of CP Plus automatically when
+  // - Time component configured
+  // - Update was not done
+  // - 30 seconds after init data recieved
+  if (this->time_ != nullptr && !this->update_status_clock_done && this->init_recieved_ > 0) {
+    if (micros() > ((30 * 1000 * 1000) + this->init_recieved_ /* 30 seconds after init recieved */)) {
+      this->update_status_clock_done = true;
+      this->action_write_time();
+    }
+  }
+#endif  // USE_TIME
 }
 
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {

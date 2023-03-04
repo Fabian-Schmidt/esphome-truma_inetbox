@@ -444,10 +444,6 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   void lin_heartbeat() override;
   void lin_reset_device() override;
 
-#ifdef USE_TIME
-  void set_time(time::RealTimeClock *time) { time_ = time; }
-#endif  // USE_TIME
-
   bool get_status_heater_valid() { return this->status_heater_valid_; }
   const StatusFrameHeater *get_status_heater() { return &this->status_heater_; }
   void register_listener(const std::function<void(const StatusFrameHeater *)> &func);
@@ -472,11 +468,6 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   StatusFrameTimerResponse *update_timer_prepare();
   void update_timer_submit() { this->update_status_timer_unsubmitted_ = true; }
 
-#ifdef USE_TIME
-  bool truma_clock_can_update() { return this->status_clock_valid_; }
-  void update_clock_submit() { this->update_status_clock_unsubmitted_ = true; }
-#endif  // USE_TIME
-
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
 
   // Automation
@@ -494,15 +485,15 @@ class TrumaiNetBoxApp : public LinBusProtocol {
                              HeatingMode mode = HeatingMode::HEATING_MODE_OFF, u_int8_t water_temperature = 0,
                              EnergyMix energy_mix = EnergyMix::ENERGY_MIX_NONE,
                              ElectricPowerLevel el_power_level = ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0);
+
 #ifdef USE_TIME
+  void set_time(time::RealTimeClock *time) { time_ = time; }
+  bool truma_clock_can_update() { return this->status_clock_valid_; }
+  void update_clock_submit() { this->update_status_clock_unsubmitted_ = true; }
   bool action_write_time();
 #endif  // USE_TIME
 
  protected:
-#ifdef USE_TIME
-  time::RealTimeClock *time_ = nullptr;
-#endif  // USE_TIME
-
   // Truma CP Plus needs init (reset). This device is not registered.
   uint32_t device_registered_ = 0;
   uint32_t init_requested_ = 0;
@@ -563,10 +554,19 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   bool update_status_timer_stale_ = false;
   StatusFrameTimerResponse update_status_timer_;
 
+#ifdef USE_TIME
+  time::RealTimeClock *time_ = nullptr;
+
   // The behaviour of `update_status_clock_unsubmitted_` is special.
   // Just an update is marked. The actual package is prepared when CP Plus asks for the data in the
   // `lin_multiframe_recieved` method.
   bool update_status_clock_unsubmitted_ = false;
+
+  // Mark if the initial clock sync was done.
+  bool update_status_clock_done = false;
+#else
+  const bool update_status_clock_unsubmitted_ = false;
+#endif  // USE_TIME
 
   bool answer_lin_order_(const u_int8_t pid) override;
 
