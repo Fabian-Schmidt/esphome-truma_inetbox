@@ -370,7 +370,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     this->update_status_timer_stale_ = false;
 
-    ESP_LOGD(TAG, "StatusFrameTimer target_temp_room: %f target_temp_water: %f %u:%u -> %u:%u %s",
+    ESP_LOGD(TAG, "StatusFrameTimer target_temp_room: %f target_temp_water: %f %02u:%02u -> %02u:%02u %s",
              temp_code_to_decimal(this->status_timer_.timer_target_temp_room),
              temp_code_to_decimal(this->status_timer_.timer_target_temp_water), this->status_timer_.timer_start_hours,
              this->status_timer_.timer_start_minutes, this->status_timer_.timer_stop_hours,
