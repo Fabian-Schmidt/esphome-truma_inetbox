@@ -16,6 +16,38 @@ enum class TRUMA_SENSOR_TYPE {
   OPERATING_STATUS,
 };
 
+static const char *enum_to_c_str(const TRUMA_SENSOR_TYPE val) {
+  switch (val) {
+    case TRUMA_SENSOR_TYPE::CURRENT_ROOM_TEMPERATURE:
+      return "CURRENT_ROOM_TEMPERATURE";
+      break;
+    case TRUMA_SENSOR_TYPE::CURRENT_WATER_TEMPERATURE:
+      return "CURRENT_WATER_TEMPERATURE";
+      break;
+    case TRUMA_SENSOR_TYPE::TARGET_ROOM_TEMPERATURE:
+      return "TARGET_ROOM_TEMPERATURE";
+      break;
+    case TRUMA_SENSOR_TYPE::TARGET_WATER_TEMPERATURE:
+      return "TARGET_WATER_TEMPERATURE";
+      break;
+    case TRUMA_SENSOR_TYPE::HEATING_MODE:
+      return "HEATING_MODE";
+      break;
+    case TRUMA_SENSOR_TYPE::ELECTRIC_POWER_LEVEL:
+      return "ELECTRIC_POWER_LEVEL";
+      break;
+    case TRUMA_SENSOR_TYPE::ENERGY_MIX:
+      return "ENERGY_MIX";
+      break;
+    case TRUMA_SENSOR_TYPE::OPERATING_STATUS:
+      return "OPERATING_STATUS";
+      break;
+    default:
+      return "";
+      break;
+  }
+}
+
 class TrumaSensor : public Component, public sensor::Sensor, public Parented<TrumaiNetBoxApp> {
  public:
   void setup() override;

@@ -27,7 +27,7 @@ void TrumaTimerBinarySensor::setup() {
 
 void TrumaTimerBinarySensor::dump_config() {
   ESP_LOGCONFIG("", "Truma Timer Binary Sensor");
-  ESP_LOGCONFIG(TAG, "Type %u", (size_t) this->type_);
+  ESP_LOGCONFIG(TAG, "  Type %s", enum_to_c_str(this->type_));
 }
 }  // namespace truma_inetbox
 }  // namespace esphome
