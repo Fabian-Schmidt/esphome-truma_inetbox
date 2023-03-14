@@ -34,8 +34,8 @@ namespace truma_inetbox {
 #define STATUS_FRAME_HEATER 0x33
 #define STATUS_FRAME_AIRCON_RESPONSE (STATUS_FRAME_AIRCON - 1)
 #define STATUS_FRAME_AIRCON 0x35
-// Error response - unknown function
-#define STATUS_FRAME_UNKNOWN_36 0x36
+#define STATUS_FRAME_AIRCON2_RESPONSE (STATUS_FRAME_AIRCON2 - 1)
+#define STATUS_FRAME_AIRCON2 0x37
 #define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
 #define STATUS_FRAME_TIMER 0x3D
 #define STATUS_FRAME_AIRCON_INIT_RESPONSE (STATUS_FRAME_AIRCON_INIT - 1)
@@ -408,6 +408,26 @@ struct StatusFrameAirconInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_22;  // 0x00
 } __attribute__((packed));
 
+// Length 18 (0x12)
+struct StatusFrameAircon2 {  // NOLINT(altera-struct-pack-align)
+  u_int8_t unknown_01;       // 0x01
+  u_int8_t unknown_02;       // 0x00
+  u_int8_t unknown_03;       // 0x01
+  u_int8_t unknown_04;       // 0x00
+  u_int8_t unknown_05;       // 0x00
+  u_int8_t unknown_06;       // 0x00
+  u_int8_t unknown_07;       // 0x00
+  u_int8_t unknown_08;       // 0x00
+  u_int8_t unknown_09;       // 0x00
+  u_int8_t unknown_10;       // 0x00
+  u_int8_t unknown_11;       // 0x00
+  u_int8_t unknown_12;       // 0x00
+  u_int8_t unknown_13;       // 0x00
+  u_int8_t unknown_14;       // 0x00
+  u_int16_t current_temp;
+  u_int16_t target_temp;
+} __attribute__((packed));
+
 union StatusFrame {  // NOLINT(altera-struct-pack-align)
   u_int8_t raw[41];
   struct inner {  // NOLINT(altera-struct-pack-align)
@@ -423,6 +443,7 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameConfig config;
       StatusFrameDevice device;
       StatusFrameAirconInit airconInit;
+      StatusFrameAircon2 aircon2;
     } __attribute__((packed));
   } inner;
 } __attribute__((packed));
