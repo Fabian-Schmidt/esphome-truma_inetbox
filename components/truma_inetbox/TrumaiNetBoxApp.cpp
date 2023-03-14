@@ -403,13 +403,20 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     ESP_LOGI(TAG, "StatusFrameAirconInit");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.16.3F.00.E2.00.00.71.01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.16.3F.00.E2.00.00.71.01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON2 && header->message_length == sizeof(StatusFrameAircon2)) {
+  } else if (header->message_type == STATUS_FRAME_AIRCON_2 && header->message_length == sizeof(StatusFrameAircon2)) {
     ESP_LOGI(TAG, "StatusFrameAircon2");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.37.00.BF.01.00.01.00.00.00.00.00.00.00.00.00.00.00.49.0B.40.0B
+    return response;
+  } else if (header->message_type == STATUS_FRAME_AIRCON_INIT_2 &&
+             header->message_length == sizeof(StatusFrameAirconInit2)) {
+    ESP_LOGI(TAG, "StatusFrameAirconInit2");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.14.41.00.53.01.00.01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
     return response;
   } else if (header->message_type == STATUS_FRAME_TIMER && header->message_length == sizeof(StatusFrameTimer)) {
     ESP_LOGI(TAG, "StatusFrameTimer");
