@@ -237,13 +237,13 @@ struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_03;
   // 0x01
   u_int8_t unknown_04;
-  u_int16_t target_temp_room;
+  TargetTemp target_temp_room;
   // 0x00
   u_int8_t unknown_07;
   // 0x00
   u_int8_t unknown_08;
   // No idea why two current_temp
-  u_int16_t current_temp_aircon;
+  TargetTemp current_temp_aircon;
   // 0x00
   u_int8_t unknown_11;
   // 0x00
@@ -256,12 +256,39 @@ struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_15;
   // 0x00
   u_int8_t unknown_16;
-  u_int16_t current_temp_room;
+  TargetTemp current_temp_room;
 } __attribute__((packed));
 
 // TODO
 struct StatusFrameAirconResponse {  // NOLINT(altera-struct-pack-align)
-  // TODO
+  // Mode? 00 - OFF, 04 - AC Ventilation, 05 - AC Cooling
+  u_int8_t unknown_01;
+  // 0x00
+  u_int8_t unknown_02;
+  // 0x71
+  u_int8_t unknown_03;
+  // 0x01
+  u_int8_t unknown_04;
+  TargetTemp target_temp_room;
+  // 0x00
+  u_int8_t unknown_07;
+  // 0x00
+  u_int8_t unknown_08;
+  // No idea why two current_temp
+  TargetTemp current_temp_aircon;
+  // 0x00
+  u_int8_t unknown_11;
+  // 0x00
+  u_int8_t unknown_12;
+  // 0x00
+  u_int8_t unknown_13;
+  // 0x00
+  u_int8_t unknown_14;
+  // 0x00
+  u_int8_t unknown_15;
+  // 0x00
+  u_int8_t unknown_16;
+  TargetTemp current_temp_room;
 } __attribute__((packed));
 
 // Length 24 (0x18)
@@ -424,8 +451,8 @@ struct StatusFrameAircon2 {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_12;       // 0x00
   u_int8_t unknown_13;       // 0x00
   u_int8_t unknown_14;       // 0x00
-  u_int16_t current_temp;
-  u_int16_t target_temp;
+  TargetTemp current_temp;
+  TargetTemp target_temp;
 } __attribute__((packed));
 
 union StatusFrame {  // NOLINT(altera-struct-pack-align)
@@ -434,7 +461,6 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
     StatusFrameHeader genericHeader;
     union {  // NOLINT(altera-struct-pack-align)
       StatusFrameHeater heater;
-      StatusFrameAircon aircon;
       StatusFrameHeaterResponse heaterResponse;
       StatusFrameTimer timer;
       StatusFrameTimerResponse timerResponse;
@@ -442,6 +468,8 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameClock clock;
       StatusFrameConfig config;
       StatusFrameDevice device;
+      StatusFrameAircon aircon;
+      StatusFrameAirconResponse airconResponse;
       StatusFrameAirconInit airconInit;
       StatusFrameAircon2 aircon2;
     } __attribute__((packed));
@@ -484,6 +512,10 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   bool truma_heater_can_update() { return this->status_heater_valid_; }
   StatusFrameHeaterResponse *update_heater_prepare();
   void update_heater_submit() { this->update_status_heater_unsubmitted_ = true; }
+
+  bool truma_aircon_can_update() { return this->status_aircon_valid_; }
+  StatusFrameAirconResponse *update_aircon_prepare();
+  void update_aircon_submit() { this->update_status_aircon_unsubmitted_ = true; }
 
   bool truma_timer_can_update() { return this->status_timer_valid_; }
   StatusFrameTimerResponse *update_timer_prepare();
@@ -564,7 +596,10 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   bool update_status_heater_stale_ = false;
   StatusFrameHeaterResponse update_status_heater_;
 
+  bool update_status_aircon_prepared_ = false;
+  bool update_status_aircon_unsubmitted_ = false;
   bool update_status_aircon_stale_ = false;
+  StatusFrameAirconResponse update_status_aircon_;
 
   // Prepared means `update_status_timer_` was copied from `status_timer_`.
   bool update_status_timer_prepared_ = false;
