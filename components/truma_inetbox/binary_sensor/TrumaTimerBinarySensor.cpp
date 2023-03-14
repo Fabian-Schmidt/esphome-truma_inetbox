@@ -5,7 +5,7 @@
 namespace esphome {
 namespace truma_inetbox {
 
-static const char *const TAG = "truma_inetbox.binary_sensor";
+static const char *const TAG = "truma_inetbox.timer_binary_sensor";
 
 void TrumaTimerBinarySensor::setup() {
   this->parent_->register_listener([this](const StatusFrameTimer *status_timer) {
@@ -26,7 +26,7 @@ void TrumaTimerBinarySensor::setup() {
 }
 
 void TrumaTimerBinarySensor::dump_config() {
-  ESP_LOGCONFIG("", "Truma Timer Binary Sensor");
+  LOG_BINARY_SENSOR("", "Truma Timer Binary Sensor", this);
   ESP_LOGCONFIG(TAG, "  Type %s", enum_to_c_str(this->type_));
 }
 }  // namespace truma_inetbox

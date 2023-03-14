@@ -4,7 +4,7 @@
 namespace esphome {
 namespace truma_inetbox {
 
-static const char *const TAG = "truma_inetbox.truma_room_climate";
+static const char *const TAG = "truma_inetbox.room_climate";
 void TrumaRoomClimate::setup() {
   this->parent_->register_listener([this](const StatusFrameHeater *status_heater) {
     // Publish updated state
@@ -32,7 +32,7 @@ void TrumaRoomClimate::setup() {
   });
 }
 
-void TrumaRoomClimate::dump_config() { ESP_LOGCONFIG(TAG, "Truma Room Climate"); }
+void TrumaRoomClimate::dump_config() { LOG_CLIMATE(TAG, "Truma Room Climate", this); }
 
 void TrumaRoomClimate::control(const climate::ClimateCall &call) {
   if (call.get_target_temperature().has_value()) {

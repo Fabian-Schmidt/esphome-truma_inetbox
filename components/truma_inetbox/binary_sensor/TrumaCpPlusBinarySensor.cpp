@@ -5,7 +5,7 @@
 namespace esphome {
 namespace truma_inetbox {
 
-static const char *const TAG = "truma_inetbox.binary_sensor";
+static const char *const TAG = "truma_inetbox.cpplus_binary_sensor";
 
 void TrumaCpPlusBinarySensor::update() {
   if (this->parent_->get_lin_bus_fault() || (this->parent_->get_last_cp_plus_request() == 0)) {
@@ -16,6 +16,6 @@ void TrumaCpPlusBinarySensor::update() {
   this->publish_state(micros() < timeout);
 }
 
-void TrumaCpPlusBinarySensor::dump_config() { ESP_LOGCONFIG("", "Truma CP Plus Binary Sensor"); }
+void TrumaCpPlusBinarySensor::dump_config() { LOG_BINARY_SENSOR("", "Truma CP Plus Binary Sensor", this); }
 }  // namespace truma_inetbox
 }  // namespace esphome

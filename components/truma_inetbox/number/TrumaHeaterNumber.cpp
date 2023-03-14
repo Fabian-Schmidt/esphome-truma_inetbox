@@ -5,7 +5,7 @@
 namespace esphome {
 namespace truma_inetbox {
 
-static const char *const TAG = "truma_inetbox.sensor";
+static const char *const TAG = "truma_inetbox.heater_number";
 
 void TrumaHeaterNumber::setup() {
   this->parent_->register_listener([this](const StatusFrameHeater *status_heater) {
@@ -38,7 +38,7 @@ void TrumaHeaterNumber::control(float value) {
 }
 
 void TrumaHeaterNumber::dump_config() {
-  ESP_LOGCONFIG("", "Truma Heater Number");
+  LOG_NUMBER("", "Truma Heater Number", this);
   ESP_LOGCONFIG(TAG, "  Type '%s'", enum_to_c_str(this->type_));
 }
 }  // namespace truma_inetbox
