@@ -203,7 +203,8 @@ struct StatusFrameHeater {  // NOLINT(altera-struct-pack-align)
   u_int16_t current_temp_water;
   u_int16_t current_temp_room;
   OperatingStatus operating_status;
-  u_int16_t error_code;
+  u_int8_t error_code_low;
+  u_int8_t error_code_high;
   u_int8_t heater_unknown_2;
 } __attribute__((packed));
 

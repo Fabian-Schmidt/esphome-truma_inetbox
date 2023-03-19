@@ -30,6 +30,9 @@ void TrumaHeaterBinarySensor::setup() {
       case TRUMA_BINARY_SENSOR_TYPE::HEATER_ELECTRICITY:
         this->publish_state(status_heater->energy_mix_a == EnergyMix::ENERGY_MIX_ELECTRICITY);
         break;
+      case TRUMA_BINARY_SENSOR_TYPE::HEATER_HAS_ERROR:
+        this->publish_state(status_heater->error_code_high != 0x00);
+        break;
       default:
         break;
     }

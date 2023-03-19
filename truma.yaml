@@ -8,6 +8,10 @@ esphome:
 
 external_components:
   - source: github://Fabian-Schmidt/esphome-truma_inetbox
+  #- source:
+  #    type: local
+  #    path: ./components
+  #  components: ["truma_inetbox", "uart"]
 
 esp32:
   board: mhetesp32devkit
@@ -74,6 +78,9 @@ binary_sensor:
   - platform: truma_inetbox
     name: "Heater mode Elec"
     type: HEATER_ELECTRICITY
+  - platform: truma_inetbox
+    name: "Heater has error"
+    type: HEATER_HAS_ERROR
 
   - platform: truma_inetbox
     name: "Timer active"
@@ -130,6 +137,9 @@ sensor:
   - platform: truma_inetbox
     name: "Operating status"
     type: OPERATING_STATUS
+  - platform: truma_inetbox
+    name: "Heater error code"
+    type: HEATER_ERROR_CODE
 
 switch:
   - platform: template

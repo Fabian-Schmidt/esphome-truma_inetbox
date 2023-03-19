@@ -14,6 +14,7 @@ enum class TRUMA_SENSOR_TYPE {
   ELECTRIC_POWER_LEVEL,
   ENERGY_MIX,
   OPERATING_STATUS,
+  HEATER_ERROR_CODE,
 };
 
 static const char *enum_to_c_str(const TRUMA_SENSOR_TYPE val) {
@@ -41,6 +42,9 @@ static const char *enum_to_c_str(const TRUMA_SENSOR_TYPE val) {
       break;
     case TRUMA_SENSOR_TYPE::OPERATING_STATUS:
       return "OPERATING_STATUS";
+      break;
+    case TRUMA_SENSOR_TYPE::HEATER_ERROR_CODE:
+      return "HEATER_ERROR_CODE";
       break;
     default:
       return "";
