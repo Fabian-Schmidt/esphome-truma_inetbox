@@ -200,6 +200,10 @@ StatusFrameAirconResponse *TrumaiNetBoxApp::update_aircon_prepare() {
 
   // prepare status response
   this->update_status_aircon_ = {};
+  this->update_status_aircon_.mode = this->status_aircon_.mode;
+  this->update_status_aircon_.operation = this->status_aircon_.operation;
+  this->update_status_aircon_.energy_mix = this->status_aircon_.energy_mix;
+  this->update_status_aircon_.target_temp_aircon = this->status_aircon_.target_temp_aircon;
 
   this->update_status_aircon_prepared_ = true;
   return &this->update_status_aircon_;
@@ -301,21 +305,11 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       status_frame_create_empty(response_frame, STATUS_FRAME_AIRCON_RESPONSE, sizeof(StatusFrameAirconResponse),
                                 this->message_counter++);
 
-      response_frame->inner.airconResponse.unknown_01 = this->update_status_aircon_.unknown_01;
+      response_frame->inner.airconResponse.mode = this->update_status_aircon_.mode;
       response_frame->inner.airconResponse.unknown_02 = this->update_status_aircon_.unknown_02;
-      response_frame->inner.airconResponse.unknown_03 = this->update_status_aircon_.unknown_03;
-      response_frame->inner.airconResponse.unknown_04 = this->update_status_aircon_.unknown_04;
-      response_frame->inner.airconResponse.target_temp_room = this->update_status_aircon_.target_temp_room;
-      response_frame->inner.airconResponse.unknown_07 = this->update_status_aircon_.unknown_07;
-      response_frame->inner.airconResponse.unknown_08 = this->update_status_aircon_.unknown_08;
-      response_frame->inner.airconResponse.current_temp_aircon = this->update_status_aircon_.current_temp_aircon;
-      response_frame->inner.airconResponse.unknown_11 = this->update_status_aircon_.unknown_11;
-      response_frame->inner.airconResponse.unknown_12 = this->update_status_aircon_.unknown_12;
-      response_frame->inner.airconResponse.unknown_13 = this->update_status_aircon_.unknown_13;
-      response_frame->inner.airconResponse.unknown_14 = this->update_status_aircon_.unknown_14;
-      response_frame->inner.airconResponse.unknown_15 = this->update_status_aircon_.unknown_15;
-      response_frame->inner.airconResponse.unknown_16 = this->update_status_aircon_.unknown_16;
-      response_frame->inner.airconResponse.current_temp_room = this->update_status_aircon_.current_temp_room;
+      response_frame->inner.airconResponse.operation = this->update_status_aircon_.operation;
+      response_frame->inner.airconResponse.energy_mix = this->update_status_aircon_.energy_mix;
+      response_frame->inner.airconResponse.target_temp_aircon = this->update_status_aircon_.target_temp_aircon;
 
       status_frame_calculate_checksum(response_frame);
       (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAirconResponse);
@@ -485,7 +479,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     this->status_config_valid_ = true;
     this->status_config_updated_ = true;
 
-    ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", offset_code_to_decimal(this->status_config_.temp_offset));
+    ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", temp_code_to_decimal(this->status_config_.temp_offset));
 
     return response;
   } else if (header->message_type == STATUS_FRAME_DEVICES && header->message_length == sizeof(StatusFrameDevice)) {

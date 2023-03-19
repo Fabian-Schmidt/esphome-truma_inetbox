@@ -56,7 +56,7 @@ bool TrumaiNetBoxApp::action_heater_water(u_int8_t temperature) {
   }
   auto heater = this->update_heater_prepare();
 
-  heater->target_temp_water = deciaml_to_water_temp(temperature);
+  heater->target_temp_water = decimal_to_water_temp(temperature);
 
   // Ensure `energy_mix_a` is set.
   if (heater->target_temp_water != TargetTemp::TARGET_TEMP_OFF && heater->energy_mix_a == EnergyMix::ENERGY_MIX_NONE) {
@@ -209,7 +209,7 @@ bool TrumaiNetBoxApp::action_timer_activate(u_int16_t start, u_int16_t stop, u_i
     }
   }
 
-  timer->timer_target_temp_water = deciaml_to_water_temp(water_temperature);
+  timer->timer_target_temp_water = decimal_to_water_temp(water_temperature);
 
   // If parameter `el_power_level` contains a valid mode use it.
   if (el_power_level == ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0 ||

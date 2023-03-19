@@ -150,16 +150,13 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
     //}
   } else if (broadcast_address && service_identifier == LIN_SID_ASSIGN_NAD && message_length == 6) {
     if (this->is_matching_identifier_(&message[3])) {
-      ESP_LOGI(TAG, "Assigned new SID %02X and reset device", message[7]);
+      ESP_LOGI(TAG, "Assigned new SID %02X", message[7]);
 
       // send response with old node address.
       std::array<u_int8_t, 8> response = this->lin_empty_response_;
       response[0] = this->lin_node_address_;
       response[1] = 1; /* bytes length*/
       response[2] = LIN_SID_ASSIGN_NAD_RESPONSE;
-
-      // assumption an assign new SID occurs as part of init process.
-      this->lin_reset_device();
 
       this->prepare_update_msg_(response);
       this->lin_node_address_ = message[7];

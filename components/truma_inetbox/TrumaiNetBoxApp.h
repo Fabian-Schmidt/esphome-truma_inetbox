@@ -82,34 +82,42 @@ enum class TargetTemp : u_int16_t {
   // 200C
   TARGET_TEMP_WATER_BOOST = (200 + 273) * 10,
 
+  TARGET_TEMP_05C = (5 + 273) * 10,
+  TARGET_TEMP_06C = (6 + 273) * 10,
+  TARGET_TEMP_07C = (7 + 273) * 10,
+  TARGET_TEMP_08C = (8 + 273) * 10,
+  TARGET_TEMP_09C = (9 + 273) * 10,
+  TARGET_TEMP_10C = (10 + 273) * 10,
+  TARGET_TEMP_11C = (11 + 273) * 10,
+  TARGET_TEMP_12C = (12 + 273) * 10,
+  TARGET_TEMP_13C = (13 + 273) * 10,
+  TARGET_TEMP_14C = (14 + 273) * 10,
+  TARGET_TEMP_15C = (15 + 273) * 10,
+  TARGET_TEMP_16C = (16 + 273) * 10,
+  TARGET_TEMP_17C = (17 + 273) * 10,
+  TARGET_TEMP_18C = (18 + 273) * 10,
+  TARGET_TEMP_19C = (19 + 273) * 10,
+  TARGET_TEMP_20C = (20 + 273) * 10,
+  TARGET_TEMP_21C = (21 + 273) * 10,
+  TARGET_TEMP_22C = (22 + 273) * 10,
+  TARGET_TEMP_23C = (23 + 273) * 10,
+  TARGET_TEMP_24C = (24 + 273) * 10,
+  TARGET_TEMP_25C = (25 + 273) * 10,
+  TARGET_TEMP_26C = (26 + 273) * 10,
+  TARGET_TEMP_27C = (27 + 273) * 10,
+  TARGET_TEMP_28C = (28 + 273) * 10,
+  TARGET_TEMP_29C = (29 + 273) * 10,
+  TARGET_TEMP_30C = (30 + 273) * 10,
+  TARGET_TEMP_31C = (31 + 273) * 10,
+
   TARGET_TEMP_ROOM_MIN = (5 + 273) * 10,
-  TARGET_TEMP_ROOM_05C = (5 + 273) * 10,
-  TARGET_TEMP_ROOM_06C = (6 + 273) * 10,
-  TARGET_TEMP_ROOM_07C = (7 + 273) * 10,
-  TARGET_TEMP_ROOM_08C = (8 + 273) * 10,
-  TARGET_TEMP_ROOM_09C = (9 + 273) * 10,
-  TARGET_TEMP_ROOM_10C = (10 + 273) * 10,
-  TARGET_TEMP_ROOM_11C = (11 + 273) * 10,
-  TARGET_TEMP_ROOM_12C = (12 + 273) * 10,
-  TARGET_TEMP_ROOM_13C = (13 + 273) * 10,
-  TARGET_TEMP_ROOM_14C = (14 + 273) * 10,
-  TARGET_TEMP_ROOM_15C = (15 + 273) * 10,
-  TARGET_TEMP_ROOM_16C = (16 + 273) * 10,
-  TARGET_TEMP_ROOM_17C = (17 + 273) * 10,
-  TARGET_TEMP_ROOM_18C = (18 + 273) * 10,
-  TARGET_TEMP_ROOM_19C = (19 + 273) * 10,
-  TARGET_TEMP_ROOM_20C = (20 + 273) * 10,
-  TARGET_TEMP_ROOM_21C = (21 + 273) * 10,
-  TARGET_TEMP_ROOM_22C = (22 + 273) * 10,
-  TARGET_TEMP_ROOM_23C = (23 + 273) * 10,
-  TARGET_TEMP_ROOM_24C = (24 + 273) * 10,
-  TARGET_TEMP_ROOM_25C = (25 + 273) * 10,
-  TARGET_TEMP_ROOM_26C = (26 + 273) * 10,
-  TARGET_TEMP_ROOM_27C = (27 + 273) * 10,
-  TARGET_TEMP_ROOM_28C = (28 + 273) * 10,
-  TARGET_TEMP_ROOM_29C = (29 + 273) * 10,
-  TARGET_TEMP_ROOM_30C = (30 + 273) * 10,
   TARGET_TEMP_ROOM_MAX = (30 + 273) * 10,
+
+  TARGET_TEMP_AIRCON_MIN = (16 + 273) * 10,
+  TARGET_TEMP_AIRCON_MAX = (31 + 273) * 10,
+
+  TARGET_TEMP_AIRCON_AUTO_MIN = (18 + 273) * 10,
+  TARGET_TEMP_AIRCON_AUTO_MAX = (25 + 273) * 10,
 };
 
 enum class EnergyMix : u_int8_t {
@@ -149,20 +157,6 @@ enum class ResponseAckResult : u_int8_t {
   RESPONSE_ACK_RESULT_ERROR_INVALID_MSG = 0x2,
   // The response status frame `message_type` is unknown.
   RESPONSE_ACK_RESULT_ERROR_INVALID_ID = 0x3,
-};
-
-enum class TempOffset : u_int8_t {
-  TEMP_OFFSET_0_0C = (u_int8_t) ((-0.0f + 17) * 10),
-  TEMP_OFFSET_0_5C = (u_int8_t) ((-0.5f + 17) * 10),
-  TEMP_OFFSET_1_0C = (u_int8_t) ((-1.0f + 17) * 10),
-  TEMP_OFFSET_1_5C = (u_int8_t) ((-1.5f + 17) * 10),
-  TEMP_OFFSET_2_0C = (u_int8_t) ((-2.0f + 17) * 10),
-  TEMP_OFFSET_2_5C = (u_int8_t) ((-2.5f + 17) * 10),
-  TEMP_OFFSET_3_0C = (u_int8_t) ((-3.0f + 17) * 10),
-  TEMP_OFFSET_3_5C = (u_int8_t) ((-3.5f + 17) * 10),
-  TEMP_OFFSET_4_0C = (u_int8_t) ((-4.0f + 17) * 10),
-  TEMP_OFFSET_4_5C = (u_int8_t) ((-4.5f + 17) * 10),
-  TEMP_OFFSET_5_0C = (u_int8_t) ((-5.0f + 17) * 10),
 };
 
 enum class ClockMode : u_int8_t {
@@ -294,10 +288,10 @@ struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
   // 0x01 .. 0x0A
   u_int8_t display_brightness;
   Language language;
-  u_int8_t unknown_2;  // 0xB4
-  u_int8_t unknown_3;  // 0x0A
-  TempOffset temp_offset;
-  u_int8_t unknown_5;  // 0x0A
+  // Mit „AC SET“ wird ein Offset zwischen Kühlen und Heizen eingestellt.
+  // Die Einstellung ist in Schritten von 0,5 °C im Bereich von 0 °C bis +5 °C möglich.
+  TargetTemp ac_offset;
+  TargetTemp temp_offset;
   OperatingUnits temp_units;
   u_int8_t unknown_6;
   u_int8_t unknown_7;
@@ -341,18 +335,28 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_3;
 } __attribute__((packed));
 
+enum class AirconMode : u_int8_t {
+  // Auto - 18 to 25
+  OFF = 0x00,
+  AC_VENTILATION = 0x04,
+  AC_COOLING = 0x05,
+};
+
+enum class AirconOperation : u_int8_t {
+  AC_ONLY = 0x71,
+  // Heater and Aircon
+  AUTO = 0x72,
+};
+
 // Length 18 (0x12)
 // TODO
 struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
-  // Mode? 00 - OFF, 04 - AC Ventilation, 05 - AC Cooling
-  u_int8_t unknown_01;
+  AirconMode mode;
   // 0x00
   u_int8_t unknown_02;
-  // 0x71
-  u_int8_t unknown_03;
-  // 0x01
-  u_int8_t unknown_04;
-  TargetTemp target_temp_room;
+  AirconOperation operation;
+  EnergyMix energy_mix;
+  TargetTemp target_temp_aircon;
   // 0x00
   u_int8_t unknown_07;
   // 0x00
@@ -363,10 +367,7 @@ struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_11;
   // 0x00
   u_int8_t unknown_12;
-  // 0x00
-  u_int8_t unknown_13;
-  // 0x00
-  u_int8_t unknown_14;
+  ElectricPowerLevel el_power_level;
   // 0x00
   u_int8_t unknown_15;
   // 0x00
@@ -374,55 +375,29 @@ struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
   TargetTemp current_temp_room;
 } __attribute__((packed));
 
-// TODO
 struct StatusFrameAirconResponse {  // NOLINT(altera-struct-pack-align)
-  // Mode? 00 - OFF, 04 - AC Ventilation, 05 - AC Cooling
-  u_int8_t unknown_01;
+  AirconMode mode;
   // 0x00
   u_int8_t unknown_02;
-  // 0x71
-  u_int8_t unknown_03;
-  // 0x01
-  u_int8_t unknown_04;
-  TargetTemp target_temp_room;
-  // 0x00
-  u_int8_t unknown_07;
-  // 0x00
-  u_int8_t unknown_08;
-  // No idea why two current_temp
-  TargetTemp current_temp_aircon;
-  // 0x00
-  u_int8_t unknown_11;
-  // 0x00
-  u_int8_t unknown_12;
-  // 0x00
-  u_int8_t unknown_13;
-  // 0x00
-  u_int8_t unknown_14;
-  // 0x00
-  u_int8_t unknown_15;
-  // 0x00
-  u_int8_t unknown_16;
-  TargetTemp current_temp_room;
+  AirconOperation operation;
+  EnergyMix energy_mix;
+  TargetTemp target_temp_aircon;
 } __attribute__((packed));
 
 // Length 18 (0x12)
 // TODO
 struct StatusFrameAircon2 {  // NOLINT(altera-struct-pack-align)
-  u_int8_t unknown_01;       // 0x01
-  u_int8_t unknown_02;       // 0x00
-  u_int8_t unknown_03;       // 0x01
-  u_int8_t unknown_04;       // 0x00
-  u_int8_t unknown_05;       // 0x00
-  u_int8_t unknown_06;       // 0x00
-  u_int8_t unknown_07;       // 0x00
-  u_int8_t unknown_08;       // 0x00
-  u_int8_t unknown_09;       // 0x00
-  u_int8_t unknown_10;       // 0x00
-  u_int8_t unknown_11;       // 0x00
-  u_int8_t unknown_12;       // 0x00
-  u_int8_t unknown_13;       // 0x00
-  u_int8_t unknown_14;       // 0x00
+  EnergyMix energy_mix_a;
+  u_int8_t unknown_02;  // 0x00
+  EnergyMix energy_mix_b;
+  u_int8_t unknown_04;  // 0x00
+  u_int8_t unknown_05;  // 0x00
+  u_int8_t unknown_06;  // 0x00
+  TargetTemp target_temp_aircon_auto;
+  ElectricPowerLevel el_power_level_a;
+  u_int8_t unknown_11;  // 0x00
+  u_int8_t unknown_12;  // 0x00
+  ElectricPowerLevel el_power_level_b;
   TargetTemp current_temp;
   TargetTemp target_temp;
 } __attribute__((packed));
@@ -432,51 +407,51 @@ struct StatusFrameAircon2 {  // NOLINT(altera-struct-pack-align)
 struct StatusFrameAirconInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_01;          // 0x00
   u_int8_t unknown_02;          // 0x00
-  u_int8_t unknown_03;          // 0x71
-  u_int8_t unknown_04;          // 0x01
-  u_int8_t unknown_05;          // 0x00
-  u_int8_t unknown_06;          // 0x00
-  u_int8_t unknown_07;          // 0x00
-  u_int8_t unknown_08;          // 0x00
-  u_int8_t unknown_09;          // 0x00
-  u_int8_t unknown_10;          // 0x00
-  u_int8_t unknown_11;          // 0x00
-  u_int8_t unknown_12;          // 0x00
-  u_int8_t unknown_13;          // 0x00
-  u_int8_t unknown_14;          // 0x00
-  u_int8_t unknown_15;          // 0x00
-  u_int8_t unknown_16;          // 0x00
-  u_int8_t unknown_17;          // 0x00
-  u_int8_t unknown_18;          // 0x00
-  u_int8_t unknown_19;          // 0x00
-  u_int8_t unknown_20;          // 0x00
-  u_int8_t unknown_21;          // 0x00
-  u_int8_t unknown_22;          // 0x00
+  AirconOperation operation;
+  EnergyMix energy_mix;
+  u_int8_t unknown_05;  // 0x00
+  u_int8_t unknown_06;  // 0x00
+  u_int8_t unknown_07;  // 0x00
+  u_int8_t unknown_08;  // 0x00
+  u_int8_t unknown_09;  // 0x00
+  u_int8_t unknown_10;  // 0x00
+  u_int8_t unknown_11;  // 0x00
+  u_int8_t unknown_12;  // 0x00
+  u_int8_t unknown_13;  // 0x00
+  u_int8_t unknown_14;  // 0x00
+  u_int8_t unknown_15;  // 0x00
+  u_int8_t unknown_16;  // 0x00
+  u_int8_t unknown_17;  // 0x00
+  u_int8_t unknown_18;  // 0x00
+  u_int8_t unknown_19;  // 0x00
+  u_int8_t unknown_20;  // 0x00
+  u_int8_t unknown_21;  // 0x00
+  u_int8_t unknown_22;  // 0x00
 } __attribute__((packed));
 
 // Length 20 (0x14)
 // TODO
 struct StatusFrameAirconInit2 {  // NOLINT(altera-struct-pack-align)
-  u_int8_t unknown_01;           // 0x01
-  u_int8_t unknown_02;           // 0x00
-  u_int8_t unknown_03;           // 0x01
-  u_int8_t unknown_04;           // 0x00
-  u_int8_t unknown_05;           // 0x00
-  u_int8_t unknown_06;           // 0x00
-  u_int8_t unknown_07;           // 0x00
-  u_int8_t unknown_08;           // 0x00
-  u_int8_t unknown_09;           // 0x00
-  u_int8_t unknown_10;           // 0x00
-  u_int8_t unknown_11;           // 0x00
-  u_int8_t unknown_12;           // 0x00
-  u_int8_t unknown_13;           // 0x00
-  u_int8_t unknown_14;           // 0x00
-  u_int8_t unknown_15;           // 0x00
-  u_int8_t unknown_16;           // 0x00
-  u_int8_t unknown_17;           // 0x00
-  u_int8_t unknown_18;           // 0x00
-  u_int8_t unknown_19;           // 0x00
-  u_int8_t unknown_20;           // 0x00
+  EnergyMix energy_mix_a;
+  u_int8_t unknown_02;  // 0x00
+  EnergyMix energy_mix_b;
+  u_int8_t unknown_04;  // 0x00
+  u_int8_t unknown_05;  // 0x00
+  u_int8_t unknown_06;  // 0x00
+  u_int8_t unknown_07;  // 0x00
+  u_int8_t unknown_08;  // 0x00
+  u_int8_t unknown_09;  // 0x00
+  u_int8_t unknown_10;  // 0x00
+  u_int8_t unknown_11;  // 0x00
+  u_int8_t unknown_12;  // 0x00
+  u_int8_t unknown_13;  // 0x00
+  u_int8_t unknown_14;  // 0x00
+  u_int8_t unknown_15;  // 0x00
+  u_int8_t unknown_16;  // 0x00
+  u_int8_t unknown_17;  // 0x00
+  u_int8_t unknown_18;  // 0x00
+  u_int8_t unknown_19;  // 0x00
+  u_int8_t unknown_20;  // 0x00
 } __attribute__((packed));
 
 union StatusFrame {  // NOLINT(altera-struct-pack-align)

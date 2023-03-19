@@ -31,6 +31,10 @@ float temp_code_to_decimal(u_int16_t val, float zero) {
 
 float temp_code_to_decimal(TargetTemp val, float zero) { return temp_code_to_decimal((u_int16_t) val, zero); }
 
+TargetTemp decimal_to_temp(u_int8_t val) { return (TargetTemp) ((((u_int16_t) val) + 273) * 10); }
+
+TargetTemp decimal_to_temp(float val) { return (TargetTemp) ((val + 273) * 10); }
+
 TargetTemp decimal_to_room_temp(u_int8_t val) {
   if (val == 0) {
     return TargetTemp::TARGET_TEMP_OFF;
@@ -41,7 +45,7 @@ TargetTemp decimal_to_room_temp(u_int8_t val) {
   if (val >= 30) {
     return TargetTemp::TARGET_TEMP_ROOM_MAX;
   }
-  return (TargetTemp) ((((u_int16_t) val) + 273) * 10);
+  return decimal_to_temp(val);
 }
 
 TargetTemp decimal_to_room_temp(float val) {
@@ -54,10 +58,36 @@ TargetTemp decimal_to_room_temp(float val) {
   if (val >= 30) {
     return TargetTemp::TARGET_TEMP_ROOM_MAX;
   }
-  return (TargetTemp) ((val + 273) * 10);
+  return decimal_to_temp(val);
 }
 
-TargetTemp deciaml_to_water_temp(u_int8_t val) {
+TargetTemp decimal_to_aircon_temp(u_int8_t val) {
+  if (val == 0) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  }
+  if (val <= 16) {
+    return TargetTemp::TARGET_TEMP_AIRCON_MIN;
+  }
+  if (val >= 31) {
+    return TargetTemp::TARGET_TEMP_AIRCON_MAX;
+  }
+  return decimal_to_temp(val);
+}
+
+TargetTemp decimal_to_aircon_temp(float val) {
+  if (val == NAN) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  }
+  if (val <= 16) {
+    return TargetTemp::TARGET_TEMP_AIRCON_MIN;
+  }
+  if (val >= 31) {
+    return TargetTemp::TARGET_TEMP_AIRCON_MAX;
+  }
+  return decimal_to_temp(val);
+}
+
+TargetTemp decimal_to_water_temp(u_int8_t val) {
   if (val < 40) {
     return TargetTemp::TARGET_TEMP_OFF;
   } else if (val >= 40 && val < 60) {
@@ -68,8 +98,6 @@ TargetTemp deciaml_to_water_temp(u_int8_t val) {
     return TargetTemp::TARGET_TEMP_WATER_BOOST;
   }
 }
-
-float offset_code_to_decimal(TempOffset val) { return ((float) val) / 10.0f - 17.0f; }
 
 const std::string operating_status_to_str(OperatingStatus val) {
   if (val == OperatingStatus::OPERATING_STATUS_OFF) {

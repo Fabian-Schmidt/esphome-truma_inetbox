@@ -12,10 +12,13 @@ u_int8_t addr_parity(const u_int8_t pid);
 u_int8_t data_checksum(const u_int8_t *message, u_int8_t length, uint16_t sum);
 float temp_code_to_decimal(u_int16_t val, float zero = NAN);
 float temp_code_to_decimal(TargetTemp val, float zero = NAN);
+TargetTemp decimal_to_temp(u_int8_t val);
+TargetTemp decimal_to_temp(float val);
 TargetTemp decimal_to_room_temp(u_int8_t val);
 TargetTemp decimal_to_room_temp(float val);
-TargetTemp deciaml_to_water_temp(u_int8_t val);
-float offset_code_to_decimal(TempOffset val);
+TargetTemp decimal_to_aircon_temp(u_int8_t val);
+TargetTemp decimal_to_aircon_temp(float val);
+TargetTemp decimal_to_water_temp(u_int8_t val);
 const std::string operating_status_to_str(OperatingStatus val);
 ElectricPowerLevel decimal_to_el_power_level(u_int16_t val);
 
