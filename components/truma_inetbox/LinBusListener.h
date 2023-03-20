@@ -3,9 +3,10 @@
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 
+#ifdef USE_ESP32
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
-
+#endif  // USE_ESP32
 #ifdef USE_ESP32_FRAMEWORK_ESP_IDF
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
