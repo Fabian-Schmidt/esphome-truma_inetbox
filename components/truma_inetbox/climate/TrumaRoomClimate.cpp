@@ -6,7 +6,7 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.room_climate";
 void TrumaRoomClimate::setup() {
-  this->parent_->register_listener([this](const StatusFrameHeater *status_heater) {
+  this->parent_->add_on_heater_message_callback([this](const StatusFrameHeater *status_heater) {
     // Publish updated state
     this->target_temperature = temp_code_to_decimal(status_heater->target_temp_room);
     this->current_temperature = temp_code_to_decimal(status_heater->current_temp_room);

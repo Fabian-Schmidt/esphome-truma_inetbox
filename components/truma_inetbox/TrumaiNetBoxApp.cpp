@@ -9,41 +9,16 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.TrumaiNetBoxApp";
 
-TrumaiNetBoxApp::TrumaiNetBoxApp(u_int8_t expected_listener_count) {
-  this->listeners_heater_.reserve(expected_listener_count);
-}
-
 void TrumaiNetBoxApp::update() {
   // Call listeners in after method 'lin_multiframe_recieved' call.
   // Because 'lin_multiframe_recieved' is time critical an all these sensors can take some time.
-  if (this->status_heater_updated_ || this->status_timer_updated_ || this->status_clock_updated_ ||
-      this->status_config_updated_) {
-    // Run through listeners
-    for (auto &listener : this->listeners_heater_) {
-      if (this->status_heater_updated_ && listener.on_heater_change != nullptr) {
-        listener.on_heater_change(&this->status_heater_);
-      }
-      if (this->status_timer_updated_ && listener.on_timer_change != nullptr) {
-        listener.on_timer_change(&this->status_timer_);
-      }
-      if (this->status_clock_updated_ && listener.on_clock_change != nullptr) {
-        listener.on_clock_change(&this->status_clock_);
-      }
-      if (this->status_config_updated_ && listener.on_config_change != nullptr) {
-        listener.on_config_change(&this->status_config_);
-      }
-    }
 
-    // Run through callbacks
-    if (this->status_heater_updated_) {
-      this->state_heater_callback_.call(&this->status_heater_);
-    }
-    // update is handeld
-    this->status_heater_updated_ = false;
-    this->status_timer_updated_ = false;
-    this->status_clock_updated_ = false;
-    this->status_config_updated_ = false;
-  }
+  // Run through callbacks
+  heater_.update();
+  timer_.update();
+  clock_.update();
+  config_.update();
+
   LinBusProtocol::update();
 
 #ifdef USE_TIME
@@ -58,6 +33,13 @@ void TrumaiNetBoxApp::update() {
     }
   }
 #endif  // USE_TIME
+}
+
+template<typename T> void TrumaStausFrameStorage<T>::update() {
+  if (this->data_updated_) {
+    this->state_callback_.call(&this->data_);
+  }
+  this->data_updated_ = false;
 }
 
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
@@ -86,110 +68,73 @@ void TrumaiNetBoxApp::lin_reset_device() {
   this->device_registered_ = micros();
   this->init_recieved_ = 0;
 
-  this->status_heater_valid_ = false;
-  this->status_heater_updated_ = false;
-  this->status_timer_valid_ = false;
-  this->status_timer_updated_ = false;
-  this->status_clock_valid_ = false;
-  this->status_clock_updated_ = false;
-  this->status_config_valid_ = false;
-  this->status_config_updated_ = false;
+  this->heater_.reset();
+  this->timer_.reset();
+  this->clock_.reset();
+  this->config_.reset();
 
   this->update_time_ = 0;
-
-  this->update_status_heater_prepared_ = false;
-  this->update_status_heater_unsubmitted_ = false;
-  this->update_status_heater_stale_ = false;
 
   this->update_status_aircon_prepared_ = false;
   this->update_status_aircon_unsubmitted_ = false;
   this->update_status_aircon_stale_ = false;
-
-  this->update_status_timer_prepared_ = false;
-  this->update_status_timer_unsubmitted_ = false;
-  this->update_status_timer_stale_ = false;
 }
 
-void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameHeater *)> &func) {
-  StatusFrameListener listener = {};
-  listener.on_heater_change = func;
-  this->listeners_heater_.push_back(std::move(listener));
-
-  if (this->status_heater_valid_) {
-    func(&this->status_heater_);
-  }
+template<typename T> void TrumaStausFrameStorage<T>::reset() {
+  this->data_valid_ = false;
+  this->data_updated_ = false;
 }
-void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameTimer *)> &func) {
-  StatusFrameListener listener = {};
-  listener.on_timer_change = func;
-  this->listeners_heater_.push_back(std::move(listener));
 
-  if (this->status_timer_valid_) {
-    func(&this->status_timer_);
-  }
-}
-void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameClock *)> &func) {
-  StatusFrameListener listener = {};
-  listener.on_clock_change = func;
-  this->listeners_heater_.push_back(std::move(listener));
-
-  if (this->status_clock_valid_) {
-    func(&this->status_clock_);
-  }
-}
-void TrumaiNetBoxApp::register_listener(const std::function<void(const StatusFrameConfig *)> &func) {
-  StatusFrameListener listener = {};
-  listener.on_config_change = func;
-  this->listeners_heater_.push_back(std::move(listener));
-
-  if (this->status_config_valid_) {
-    func(&this->status_config_);
-  }
+template<typename T, typename TResponse> void TrumaStausFrameResponseStorage<T, TResponse>::reset() {
+  TrumaStausFrameStorage<T>::reset();
+  this->update_status_prepared_ = false;
+  this->update_status_unsubmitted_ = false;
+  this->update_status_stale_ = false;
 }
 
 StatusFrameHeaterResponse *TrumaiNetBoxApp::update_heater_prepare() {
   // An update is currently going on.
-  if (this->update_status_heater_prepared_ || this->update_status_heater_stale_) {
-    return &this->update_status_heater_;
+  if (this->heater_.update_status_prepared_ || this->heater_.update_status_stale_) {
+    return &this->heater_.update_status_;
   }
 
   // prepare status heater response
-  this->update_status_heater_ = {};
-  this->update_status_heater_.target_temp_room = this->status_heater_.target_temp_room;
-  this->update_status_heater_.heating_mode = this->status_heater_.heating_mode;
-  this->update_status_heater_.el_power_level_a = this->status_heater_.el_power_level_a;
-  this->update_status_heater_.target_temp_water = this->status_heater_.target_temp_water;
-  this->update_status_heater_.el_power_level_b = this->status_heater_.el_power_level_b;
-  this->update_status_heater_.energy_mix_a = this->status_heater_.energy_mix_a;
-  this->update_status_heater_.energy_mix_b = this->status_heater_.energy_mix_b;
+  this->heater_.update_status_ = {};
+  this->heater_.update_status_.target_temp_room = this->heater_.data_.target_temp_room;
+  this->heater_.update_status_.heating_mode = this->heater_.data_.heating_mode;
+  this->heater_.update_status_.el_power_level_a = this->heater_.data_.el_power_level_a;
+  this->heater_.update_status_.target_temp_water = this->heater_.data_.target_temp_water;
+  this->heater_.update_status_.el_power_level_b = this->heater_.data_.el_power_level_b;
+  this->heater_.update_status_.energy_mix_a = this->heater_.data_.energy_mix_a;
+  this->heater_.update_status_.energy_mix_b = this->heater_.data_.energy_mix_b;
 
-  this->update_status_heater_prepared_ = true;
-  return &this->update_status_heater_;
+  this->heater_.update_status_prepared_ = true;
+  return &this->heater_.update_status_;
 }
 
 StatusFrameTimerResponse *TrumaiNetBoxApp::update_timer_prepare() {
   // An update is currently going on.
-  if (this->update_status_timer_prepared_ || this->update_status_timer_stale_) {
-    return &this->update_status_timer_;
+  if (this->timer_.update_status_prepared_ || this->timer_.update_status_stale_) {
+    return &this->timer_.update_status_;
   }
 
   // prepare status heater response
-  this->update_status_timer_ = {};
-  this->update_status_timer_.timer_target_temp_room = this->status_timer_.timer_target_temp_room;
-  this->update_status_timer_.timer_heating_mode = this->status_timer_.timer_heating_mode;
-  this->update_status_timer_.timer_el_power_level_a = this->status_timer_.timer_el_power_level_a;
-  this->update_status_timer_.timer_target_temp_water = this->status_timer_.timer_target_temp_water;
-  this->update_status_timer_.timer_el_power_level_b = this->status_timer_.timer_el_power_level_b;
-  this->update_status_timer_.timer_energy_mix_a = this->status_timer_.timer_energy_mix_a;
-  this->update_status_timer_.timer_energy_mix_b = this->status_timer_.timer_energy_mix_b;
-  this->update_status_timer_.timer_resp_active = this->status_timer_.timer_active;
-  this->update_status_timer_.timer_resp_start_minutes = this->status_timer_.timer_start_minutes;
-  this->update_status_timer_.timer_resp_start_hours = this->status_timer_.timer_start_hours;
-  this->update_status_timer_.timer_resp_stop_minutes = this->status_timer_.timer_stop_minutes;
-  this->update_status_timer_.timer_resp_stop_hours = this->status_timer_.timer_stop_hours;
+  this->timer_.update_status_ = {};
+  this->timer_.update_status_.timer_target_temp_room = this->timer_.data_.timer_target_temp_room;
+  this->timer_.update_status_.timer_heating_mode = this->timer_.data_.timer_heating_mode;
+  this->timer_.update_status_.timer_el_power_level_a = this->timer_.data_.timer_el_power_level_a;
+  this->timer_.update_status_.timer_target_temp_water = this->timer_.data_.timer_target_temp_water;
+  this->timer_.update_status_.timer_el_power_level_b = this->timer_.data_.timer_el_power_level_b;
+  this->timer_.update_status_.timer_energy_mix_a = this->timer_.data_.timer_energy_mix_a;
+  this->timer_.update_status_.timer_energy_mix_b = this->timer_.data_.timer_energy_mix_b;
+  this->timer_.update_status_.timer_resp_active = this->timer_.data_.timer_active;
+  this->timer_.update_status_.timer_resp_start_minutes = this->timer_.data_.timer_start_minutes;
+  this->timer_.update_status_.timer_resp_start_hours = this->timer_.data_.timer_start_hours;
+  this->timer_.update_status_.timer_resp_stop_minutes = this->timer_.data_.timer_stop_minutes;
+  this->timer_.update_status_.timer_resp_stop_hours = this->timer_.data_.timer_stop_hours;
 
-  this->update_status_timer_prepared_ = true;
-  return &this->update_status_timer_;
+  this->timer_.update_status_prepared_ = true;
+  return &this->timer_.update_status_;
 }
 
 StatusFrameAirconResponse *TrumaiNetBoxApp::update_aircon_prepare() {
@@ -272,32 +217,32 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       ESP_LOGD(TAG, "Requested read: Sending init");
       status_frame_create_init(response_frame, return_len, this->message_counter++);
       return response;
-    } else if (this->update_status_heater_unsubmitted_) {
+    } else if (this->heater_.update_status_unsubmitted_) {
       ESP_LOGD(TAG, "Requested read: Sending heater update");
       status_frame_create_update_heater(
-          response_frame, return_len, this->message_counter++, this->update_status_heater_.target_temp_room,
-          this->update_status_heater_.target_temp_water, this->update_status_heater_.heating_mode,
-          this->update_status_heater_.energy_mix_a, this->update_status_heater_.el_power_level_a);
+          response_frame, return_len, this->message_counter++, this->heater_.update_status_.target_temp_room,
+          this->heater_.update_status_.target_temp_water, this->heater_.update_status_.heating_mode,
+          this->heater_.update_status_.energy_mix_a, this->heater_.update_status_.el_power_level_a);
 
       this->update_time_ = 0;
-      this->update_status_heater_prepared_ = false;
-      this->update_status_heater_unsubmitted_ = false;
-      this->update_status_heater_stale_ = true;
+      this->heater_.update_status_prepared_ = false;
+      this->heater_.update_status_unsubmitted_ = false;
+      this->heater_.update_status_stale_ = true;
       return response;
-    } else if (this->update_status_timer_unsubmitted_) {
+    } else if (this->timer_.update_status_unsubmitted_) {
       ESP_LOGD(TAG, "Requested read: Sending timer update");
       status_frame_create_update_timer(
-          response_frame, return_len, this->message_counter++, this->update_status_timer_.timer_resp_active,
-          this->update_status_timer_.timer_resp_start_hours, this->update_status_timer_.timer_resp_start_minutes,
-          this->update_status_timer_.timer_resp_stop_hours, this->update_status_timer_.timer_resp_stop_minutes,
-          this->update_status_timer_.timer_target_temp_room, this->update_status_timer_.timer_target_temp_water,
-          this->update_status_timer_.timer_heating_mode, this->update_status_timer_.timer_energy_mix_a,
-          this->update_status_timer_.timer_el_power_level_a);
+          response_frame, return_len, this->message_counter++, this->timer_.update_status_.timer_resp_active,
+          this->timer_.update_status_.timer_resp_start_hours, this->timer_.update_status_.timer_resp_start_minutes,
+          this->timer_.update_status_.timer_resp_stop_hours, this->timer_.update_status_.timer_resp_stop_minutes,
+          this->timer_.update_status_.timer_target_temp_room, this->timer_.update_status_.timer_target_temp_water,
+          this->timer_.update_status_.timer_heating_mode, this->timer_.update_status_.timer_energy_mix_a,
+          this->timer_.update_status_.timer_el_power_level_a);
 
       this->update_time_ = 0;
-      this->update_status_timer_prepared_ = false;
-      this->update_status_timer_unsubmitted_ = false;
-      this->update_status_timer_stale_ = true;
+      this->timer_.update_status_prepared_ = false;
+      this->timer_.update_status_unsubmitted_ = false;
+      this->timer_.update_status_stale_ = true;
       return response;
     } else if (this->update_status_aircon_unsubmitted_) {
       ESP_LOGD(TAG, "Requested read: Sending aircon update");
@@ -327,7 +272,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
         auto now = this->time_->now();
 
         status_frame_create_update_clock(response_frame, return_len, this->message_counter++, now.hour, now.minute,
-                                         now.second, this->status_clock_.clock_mode);
+                                         now.second, this->clock_.data_.clock_mode);
       }
       this->update_status_clock_unsubmitted_ = false;
       return response;
@@ -359,11 +304,11 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|cWate|cRoom|st|err  |  |
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.14.33.00.12.00.00.00.00.00.00.00.00.00.00.01.01.CC.0B.6C.0B.00.00.00.00
-    this->status_heater_ = statusFrame->inner.heater;
-    this->status_heater_valid_ = true;
-    this->status_heater_updated_ = true;
+    this->heater_.data_ = statusFrame->inner.heater;
+    this->heater_.data_valid_ = true;
+    this->heater_.data_updated_ = true;
 
-    this->update_status_heater_stale_ = false;
+    this->heater_.update_status_stale_ = false;
     return response;
   } else if (header->message_type == STATUS_FRAME_AIRCON && header->message_length == sizeof(StatusFrameAircon)) {
     ESP_LOGI(TAG, "StatusFrameAircon");
@@ -418,17 +363,17 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|??|elecA|tWate|elecB|mi|mi|<--response-->|??|??|on|start|stop-|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.1D.18.0B.01.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.13.18.0B.0B.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
-    this->status_timer_ = statusFrame->inner.timer;
-    this->status_timer_valid_ = true;
-    this->status_timer_updated_ = true;
+    this->timer_.data_ = statusFrame->inner.timer;
+    this->timer_.data_valid_ = true;
+    this->timer_.data_updated_ = true;
 
-    this->update_status_timer_stale_ = false;
+    this->timer_.update_status_stale_ = false;
 
     ESP_LOGD(TAG, "StatusFrameTimer target_temp_room: %f target_temp_water: %f %02u:%02u -> %02u:%02u %s",
-             temp_code_to_decimal(this->status_timer_.timer_target_temp_room),
-             temp_code_to_decimal(this->status_timer_.timer_target_temp_water), this->status_timer_.timer_start_hours,
-             this->status_timer_.timer_start_minutes, this->status_timer_.timer_stop_hours,
-             this->status_timer_.timer_stop_minutes, ((u_int8_t) this->status_timer_.timer_active ? " ON" : " OFF"));
+             temp_code_to_decimal(this->timer_.data_.timer_target_temp_room),
+             temp_code_to_decimal(this->timer_.data_.timer_target_temp_water), this->timer_.data_.timer_start_hours,
+             this->timer_.data_.timer_start_minutes, this->timer_.data_.timer_stop_hours,
+             this->timer_.data_.timer_stop_minutes, ((u_int8_t) this->timer_.data_.timer_active ? " ON" : " OFF"));
 
     return response;
   } else if (header->message_type == STATUS_FRAME_RESPONSE_ACK &&
@@ -460,12 +405,12 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.5B.0D.20.00.01.01.00.00.01.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.71.16.00.00.01.01.00.00.02.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.2B.16.1F.28.01.01.00.00.01.00.00
-    this->status_clock_ = statusFrame->inner.clock;
-    this->status_clock_valid_ = true;
-    this->status_clock_updated_ = true;
+    this->clock_.data_ = statusFrame->inner.clock;
+    this->clock_.data_valid_ = true;
+    this->clock_.data_updated_ = true;
 
-    ESP_LOGD(TAG, "StatusFrameClock %02d:%02d:%02d", this->status_clock_.clock_hour, this->status_clock_.clock_minute,
-             this->status_clock_.clock_second);
+    ESP_LOGD(TAG, "StatusFrameClock %02d:%02d:%02d", this->clock_.data_.clock_hour, this->clock_.data_.clock_minute,
+             this->clock_.data_.clock_second);
 
     return response;
   } else if (header->message_type == STAUTS_FRAME_CONFIG && header->message_length == sizeof(StatusFrameConfig)) {
@@ -475,11 +420,11 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.41.06.01.B4.0A.78.0A.00.00.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
-    this->status_config_ = statusFrame->inner.config;
-    this->status_config_valid_ = true;
-    this->status_config_updated_ = true;
+    this->config_.data_ = statusFrame->inner.config;
+    this->config_.data_valid_ = true;
+    this->config_.data_updated_ = true;
 
-    ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", temp_code_to_decimal(this->status_config_.temp_offset));
+    ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", temp_code_to_decimal(this->config_.data_.temp_offset));
 
     return response;
   } else if (header->message_type == STATUS_FRAME_DEVICES && header->message_length == sizeof(StatusFrameDevice)) {
@@ -556,7 +501,7 @@ bool TrumaiNetBoxApp::has_update_to_submit_() {
       this->init_requested_ = micros();
       return true;
     }
-  } else if (this->update_status_heater_unsubmitted_ || this->update_status_timer_unsubmitted_ ||
+  } else if (this->heater_.update_status_unsubmitted_ || this->timer_.update_status_unsubmitted_ ||
              this->update_status_clock_unsubmitted_ || this->update_status_aircon_unsubmitted_) {
     if (this->update_time_ == 0) {
       // ESP_LOGD(TAG, "Notify CP Plus I got updates.");

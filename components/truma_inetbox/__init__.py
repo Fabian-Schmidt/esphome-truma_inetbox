@@ -226,8 +226,6 @@ CONFIG_SCHEMA = cv.All(
 FINAL_VALIDATE_SCHEMA = cv.All(
     final_validate_device_schema(
         "truma_inetbox", baud_rate=9600, require_tx=True, require_rx=True, stop_bits=2, data_bits=8, parity="NONE", require_hardware_uart=True),
-    count_id_usage(CONF_NUMBER_OF_CHILDREN, [
-                   CONF_TRUMA_INETBOX_ID, CONF_ID], TrumaINetBoxApp),
 )
 
 async def to_code(config):
@@ -237,7 +235,7 @@ async def to_code(config):
         # Default Stack Size is 2048. Not enough for my operation.
         cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096")
 
-    var = cg.new_Pvariable(config[CONF_ID], config[CONF_NUMBER_OF_CHILDREN])
+    var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
     if (CONF_TIME_ID in config):

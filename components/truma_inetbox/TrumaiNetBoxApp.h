@@ -477,56 +477,80 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
   } inner;
 } __attribute__((packed));
 
-struct StatusFrameListener {
-  std::function<void(const StatusFrameHeater *)> on_heater_change = nullptr;
-  std::function<void(const StatusFrameTimer *)> on_timer_change = nullptr;
-  std::function<void(const StatusFrameClock *)> on_clock_change = nullptr;
-  std::function<void(const StatusFrameConfig *)> on_config_change = nullptr;
+template<typename T> class TrumaStausFrameStorage {
+ public:
+  CallbackManager<void(const T *)> state_callback_{};
+  T data_;
+  bool data_valid_ = false;
+  // Value has changed notify listeners.
+  bool data_updated_ = false;
+
+  // bool get_status_valid() { return this->data_valid_; }
+  // const T *get_status() { return &this->data_; }
+  void update();
+  void reset();
+};
+
+template<typename T, typename TResponse> class TrumaStausFrameResponseStorage : public TrumaStausFrameStorage<T> {
+ public:
+  void reset();
+
+  // Prepared means `update_status_` was copied from `data_`.
+  bool update_status_prepared_ = false;
+  // Prepared means an update is already awating fetch from CP plus.
+  bool update_status_unsubmitted_ = false;
+  // I have submitted my update request to CP plus, but I have not recieved an update with new heater values from CP
+  // plus.
+  bool update_status_stale_ = false;
+  TResponse update_status_;
 };
 
 class TrumaiNetBoxApp : public LinBusProtocol {
  public:
-  TrumaiNetBoxApp(u_int8_t expected_listener_count);
-
   void update() override;
 
   const std::array<u_int8_t, 4> lin_identifier() override;
   void lin_heartbeat() override;
   void lin_reset_device() override;
 
-  bool get_status_heater_valid() { return this->status_heater_valid_; }
-  const StatusFrameHeater *get_status_heater() { return &this->status_heater_; }
-  void register_listener(const std::function<void(const StatusFrameHeater *)> &func);
+  bool get_status_heater_valid() { return this->heater_.data_valid_; }
+  const StatusFrameHeater *get_status_heater() { return &this->heater_.data_; }
 
-  bool get_status_timer_valid() { return this->status_timer_valid_; }
-  const StatusFrameTimer *get_status_timer() { return &this->status_timer_; }
-  void register_listener(const std::function<void(const StatusFrameTimer *)> &func);
+  bool get_status_timer_valid() { return this->timer_.data_valid_; }
+  const StatusFrameTimer *get_status_timer() { return &this->timer_.data_; }
 
-  bool get_status_clock_valid() { return this->status_clock_valid_; }
-  const StatusFrameClock *get_status_clock() { return &this->status_clock_; }
-  void register_listener(const std::function<void(const StatusFrameClock *)> &func);
+  bool get_status_clock_valid() { return this->clock_.data_valid_; }
+  const StatusFrameClock *get_status_clock() { return &this->clock_.data_; }
 
-  bool get_status_config_valid() { return this->status_config_valid_; }
-  const StatusFrameConfig *get_status_config() { return &this->status_config_; }
-  void register_listener(const std::function<void(const StatusFrameConfig *)> &func);
+  bool get_status_config_valid() { return this->config_.data_valid_; }
+  const StatusFrameConfig *get_status_config() { return &this->config_.data_; }
 
-  bool truma_heater_can_update() { return this->status_heater_valid_; }
+  bool truma_heater_can_update() { return this->heater_.data_valid_; }
   StatusFrameHeaterResponse *update_heater_prepare();
-  void update_heater_submit() { this->update_status_heater_unsubmitted_ = true; }
+  void update_heater_submit() { this->heater_.update_status_unsubmitted_ = true; }
 
   bool truma_aircon_can_update() { return this->status_aircon_valid_; }
   StatusFrameAirconResponse *update_aircon_prepare();
   void update_aircon_submit() { this->update_status_aircon_unsubmitted_ = true; }
 
-  bool truma_timer_can_update() { return this->status_timer_valid_; }
+  bool truma_timer_can_update() { return this->timer_.data_valid_; }
   StatusFrameTimerResponse *update_timer_prepare();
-  void update_timer_submit() { this->update_status_timer_unsubmitted_ = true; }
+  void update_timer_submit() { this->timer_.update_status_unsubmitted_ = true; }
 
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
 
   // Automation
   void add_on_heater_message_callback(std::function<void(const StatusFrameHeater *)> callback) {
-    this->state_heater_callback_.add(std::move(callback));
+    this->heater_.state_callback_.add(std::move(callback));
+  }
+  void add_on_timer_message_callback(std::function<void(const StatusFrameTimer *)> callback) {
+    this->timer_.state_callback_.add(std::move(callback));
+  }
+  void add_on_clock_message_callback(std::function<void(const StatusFrameClock *)> callback) {
+    this->clock_.state_callback_.add(std::move(callback));
+  }
+  void add_on_config_message_callback(std::function<void(const StatusFrameConfig *)> callback) {
+    this->config_.state_callback_.add(std::move(callback));
   }
   bool action_heater_room(u_int8_t temperature, HeatingMode mode = HeatingMode::HEATING_MODE_OFF);
   bool action_heater_water(u_int8_t temperature);
@@ -542,7 +566,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
 
 #ifdef USE_TIME
   void set_time(time::RealTimeClock *time) { time_ = time; }
-  bool truma_clock_can_update() { return this->status_clock_valid_; }
+  bool truma_clock_can_update() { return this->clock_.data_valid_; }
   void update_clock_submit() { this->update_status_clock_unsubmitted_ = true; }
   bool action_write_time();
 #endif  // USE_TIME
@@ -558,58 +582,23 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
   TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKNOWN;
 
-  std::vector<StatusFrameListener> listeners_heater_;
-  CallbackManager<void(const StatusFrameHeater *)> state_heater_callback_{};
-
-  bool status_heater_valid_ = false;
-  // Value has changed notify listeners.
-  bool status_heater_updated_ = false;
-  StatusFrameHeater status_heater_;
+  TrumaStausFrameResponseStorage<StatusFrameHeater, StatusFrameHeaterResponse> heater_;
+  TrumaStausFrameResponseStorage<StatusFrameTimer, StatusFrameTimerResponse> timer_;
+  TrumaStausFrameStorage<StatusFrameConfig> config_;
+  TrumaStausFrameStorage<StatusFrameClock> clock_;
 
   bool status_aircon_valid_ = false;
   // Value has changed notify listeners.
   bool status_aircon_updated_ = false;
   StatusFrameAircon status_aircon_;
 
-  bool status_timer_valid_ = false;
-  // Value has changed notify listeners.
-  bool status_timer_updated_ = false;
-  StatusFrameTimer status_timer_;
-
-  bool status_clock_valid_ = false;
-  // Value has changed notify listeners.
-  bool status_clock_updated_ = false;
-  StatusFrameClock status_clock_;
-
-  bool status_config_valid_ = false;
-  // Value has changed notify listeners.
-  bool status_config_updated_ = false;
-  StatusFrameConfig status_config_;
-
   // last time CP plus was informed I got an update msg.
   uint32_t update_time_ = 0;
-  // Prepared means `update_status_heater_` was copied from `status_heater_`.
-  bool update_status_heater_prepared_ = false;
-  // Prepared means an update is already awating fetch from CP plus.
-  bool update_status_heater_unsubmitted_ = false;
-  // I have submitted my update request to CP plus, but I have not recieved an update with new heater values from CP
-  // plus.
-  bool update_status_heater_stale_ = false;
-  StatusFrameHeaterResponse update_status_heater_;
 
   bool update_status_aircon_prepared_ = false;
   bool update_status_aircon_unsubmitted_ = false;
   bool update_status_aircon_stale_ = false;
   StatusFrameAirconResponse update_status_aircon_;
-
-  // Prepared means `update_status_timer_` was copied from `status_timer_`.
-  bool update_status_timer_prepared_ = false;
-  // Prepared means an update is already awating fetch from CP plus.
-  bool update_status_timer_unsubmitted_ = false;
-  // I have submitted my update request to CP plus, but I have not recieved an update with new timer values from CP
-  // plus.
-  bool update_status_timer_stale_ = false;
-  StatusFrameTimerResponse update_status_timer_;
 
 #ifdef USE_TIME
   time::RealTimeClock *time_ = nullptr;

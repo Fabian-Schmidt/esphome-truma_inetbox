@@ -8,7 +8,7 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.time";
 
 void TrumaTime::setup() {
-  this->parent_->register_listener([this](const StatusFrameClock *status_clock) {
+  this->parent_->add_on_clock_message_callback([this](const StatusFrameClock *status_clock) {
     if (this->auto_disable_count_ > 0) {
       if (this->read_time() && this->auto_disable_) {
         this->auto_disable_count_--;

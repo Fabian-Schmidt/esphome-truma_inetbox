@@ -8,7 +8,7 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.timer_binary_sensor";
 
 void TrumaTimerBinarySensor::setup() {
-  this->parent_->register_listener([this](const StatusFrameTimer *status_timer) {
+  this->parent_->add_on_timer_message_callback([this](const StatusFrameTimer *status_timer) {
     switch (this->type_) {
       case TRUMA_BINARY_SENSOR_TYPE::TIMER_ACTIVE:
         this->publish_state(status_timer->timer_active == TimerActive::TIMER_ACTIVE_ON);
