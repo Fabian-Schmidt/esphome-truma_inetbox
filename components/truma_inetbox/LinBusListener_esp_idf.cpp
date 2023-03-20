@@ -2,7 +2,12 @@
 #include "LinBusListener.h"
 #include "esphome/core/log.h"
 #include "soc/uart_reg.h"
+#ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_esp_idf.h"
+#define ESPHOME_UART uart::truma_IDFUARTComponent
+#else
+#define ESPHOME_UART uart::IDFUARTComponent
+#endif // CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/uart_component_esp_idf.h"
 
 namespace esphome {
@@ -14,7 +19,7 @@ static const char *const TAG = "truma_inetbox.LinBusListener";
 
 void LinBusListener::setup_framework() {
   // uartSetFastReading
-  auto uartComp = static_cast<uart::truma_IDFUARTComponent *>(this->parent_);
+  auto uartComp = static_cast<ESPHOME_UART *>(this->parent_);
 
   auto uart_num = uartComp->get_hw_serial_number();
 
@@ -60,7 +65,7 @@ void LinBusListener::setup_framework() {
 
 void LinBusListener::uartEventTask_(void *args) {
   LinBusListener *instance = (LinBusListener *) args;
-  auto uartComp = static_cast<uart::truma_IDFUARTComponent *>(instance->parent_);
+  auto uartComp = static_cast<ESPHOME_UART *>(instance->parent_);
   auto uart_num = uartComp->get_hw_serial_number();
   auto uartEventQueue = uartComp->get_uart_event_queue();
   uart_event_t event;
@@ -92,5 +97,6 @@ void LinBusListener::eventTask_(void *args) {
 }  // namespace esphome
 
 #undef QUEUE_WAIT_BLOCKING
+#undef ESPHOME_UART
 
 #endif  // USE_ESP32_FRAMEWORK_ESP_IDF

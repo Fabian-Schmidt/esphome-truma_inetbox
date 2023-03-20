@@ -1,7 +1,12 @@
 #ifdef USE_RP2040
 #include "LinBusListener.h"
 #include "esphome/core/log.h"
+#ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_rp2040.h"
+#define ESPHOME_UART uart::truma_RP2040UartComponent
+#else
+#define ESPHOME_UART uart::RP2040UartComponent
+#endif // CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/uart_component_rp2040.h"
 #include <SerialUART.h>
 
@@ -18,7 +23,7 @@ static const char *const TAG = "truma_inetbox.LinBusListener";
 #define QUEUE_WAIT_DONT_BLOCK (TickType_t) 0
 
 void LinBusListener::setup_framework() {
-  auto uartComp = static_cast<esphome::uart::truma_RP2040UartComponent *>(this->parent_);
+  auto uartComp = static_cast<ESPHOME_UART *>(this->parent_);
   auto is_hw_serial = uartComp->is_hw_serial();
   if (!is_hw_serial) {
     ESP_LOGW(TAG, "Must use hardware serial SerialPIO is not supported.");
@@ -113,5 +118,6 @@ extern void loop1() {
 }
 
 #undef QUEUE_WAIT_DONT_BLOCK
+#undef ESPHOME_UART
 
 #endif  // USE_RP2040

@@ -216,6 +216,7 @@ async def to_code(config):
     cg.add_global(uart_ns.using)
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
+    cg.add_build_flag("-DCUSTOM_ESPHOME_UART");
 
     cg.add(var.set_baud_rate(config[CONF_BAUD_RATE]))
 
