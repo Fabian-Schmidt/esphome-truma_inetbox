@@ -1,5 +1,5 @@
 esphome:
-  name: "esp32_ard"
+  name: "esp32-ard"
 
   on_boot:
     then:

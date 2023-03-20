@@ -1,5 +1,5 @@
 esphome:
-  name: "esp32_idf"
+  name: "rp2040"
 
   on_boot:
     then:

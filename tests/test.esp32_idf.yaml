@@ -1,5 +1,5 @@
 esphome:
-  name: "esp32_idf"
+  name: "esp32-idf"
 
   on_boot:
     then:
