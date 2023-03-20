@@ -27,17 +27,17 @@ jobs:
       matrix:
         include:
           - id: test
-            file: tests/test1.yaml
-            name: Test tests/test1.yaml
-            pio_cache_key: test1
-          #- id: test
-          #  file: tests/test2.yaml
-          #  name: Test tests/test2.yaml
-          #  pio_cache_key: test2
-          #- id: test
-          #  file: tests/test3.yaml
-          #  name: Test tests/test3.yaml
-          #  pio_cache_key: test3
+            file: tests/test.esp32_ard.yaml
+            name: Test tests/test.esp32_ard.yaml
+            pio_cache_key: test.esp32_ard
+          - id: test
+           file: tests/test.esp32_idf.yaml
+           name: Test tests/test.esp32_idf.yaml
+           pio_cache_key: test.esp32_idf
+          - id: test
+           file: tests/test.rp2040.yaml
+           name: Test tests/test.rp2040.yaml
+           pio_cache_key: test.rp2040
 
     steps:
       - uses: actions/checkout@v3

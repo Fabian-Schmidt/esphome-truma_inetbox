@@ -1,0 +1,60 @@
+  - platform: template
+    name: "Activate Room Heater"
+    lambda: |-
+      return id(HEATER_ROOM).state;
+    turn_on_action:
+      - truma_inetbox.heater.set_target_room_temperature:
+          # You can use lambda functions
+          temperature: !lambda |-
+            return 16;
+          # Optional set heating mode: `"OFF"`, `ECO`, `HIGH`, `BOOST`
+          heating_mode: ECO
+    turn_off_action:
+      - truma_inetbox.heater.set_target_room_temperature:
+          # Disable heater by setting temperature to `0`.
+          temperature: 0
+  - platform: template
+    name: "Activate Water Heater"
+    lambda: |-
+      return id(HEATER_WATER).state;
+    turn_on_action:
+      - truma_inetbox.heater.set_target_water_temperature:
+          # Set water temp as number: `0`, `40`, `60`, `80`
+          temperature: 40
+    turn_off_action:
+      - truma_inetbox.heater.set_target_water_temperature:
+          # Disable heater by setting temperature to `0`.
+          temperature: 0
+  - platform: template
+    name: "Activate Water Heater (enum)"
+    lambda: |-
+      return id(HEATER_WATER).state;
+    turn_on_action:
+      - truma_inetbox.heater.set_target_water_temperature_enum:
+          # Set water temp as text: `"OFF"`, `ECO`, `HIGH`, `BOOST`
+          temperature: ECO
+    turn_off_action:
+      # You can also use the simplified syntax.
+      - truma_inetbox.heater.set_target_water_temperature_enum: "OFF"
+  - platform: template
+    name: "Active Timer"
+    lambda: |-
+      return id(TIMER_ACTIVE).state;
+    turn_on_action:
+      - truma_inetbox.timer.activate:
+          start: 7:00
+          stop: 9:30
+          # Required: Set room temp to a number between 5 and 30
+          room_temperature: 13
+          # Optional: Set heating mode: `"OFF"`, `ECO`, `HIGH`, `BOOST`
+          heating_mode: ECO
+          # Optional: Set water temp as number: `0`, `40`, `60`, `80`
+          water_temperature: 0
+          # Optional: Set energy mix to: `GAS`, `MIX`, `ELECTRICITY`
+          energy_mix: GAS
+          # Optional: Set electricity level to `0`, `900`, `1800`
+          watt: 0
+
+    turn_off_action:
+      # You can also use the simplified syntax.
+      - truma_inetbox.timer.disable

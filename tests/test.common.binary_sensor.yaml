@@ -1,0 +1,38 @@
+  - platform: truma_inetbox
+    name: "CP Plus alive"
+    type: CP_PLUS_CONNECTED
+
+  - platform: truma_inetbox
+    name: "Room Heater active"
+    type: HEATER_ROOM
+    id: HEATER_ROOM
+  - platform: truma_inetbox
+    name: "Water Heater active"
+    type: HEATER_WATER
+    id: HEATER_WATER
+  - platform: truma_inetbox
+    name: "Heater mode Gas"
+    type: HEATER_GAS
+  - platform: truma_inetbox
+    name: "Heater mode Mix 1"
+    type: HEATER_MIX_1
+  - platform: truma_inetbox
+    name: "Heater mode Mix 2"
+    type: HEATER_MIX_2
+  - platform: truma_inetbox
+    name: "Heater mode Elec"
+    type: HEATER_ELECTRICITY
+  - platform: truma_inetbox
+    name: "Heater has error"
+    type: HEATER_HAS_ERROR
+
+  - platform: truma_inetbox
+    name: "Timer active"
+    type: TIMER_ACTIVE
+    id: TIMER_ACTIVE
+  - platform: truma_inetbox
+    name: "Timer Room Heater active"
+    type: TIMER_ROOM
+  - platform: truma_inetbox
+    name: "Timer Water Heater active"
+    type: TIMER_WATER

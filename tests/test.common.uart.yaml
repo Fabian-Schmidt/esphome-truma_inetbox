@@ -1,0 +1,7 @@
+  - id: lin_uart_bus
+    tx_pin: 12
+    rx_pin: 13
+    baud_rate: 9600
+    data_bits: 8
+    parity: NONE
+    stop_bits: 2

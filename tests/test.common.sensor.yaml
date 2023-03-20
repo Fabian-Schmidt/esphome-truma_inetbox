@@ -1,0 +1,27 @@
+  - platform: truma_inetbox
+    name: "Current Room Temperature"
+    type: CURRENT_ROOM_TEMPERATURE
+  - platform: truma_inetbox
+    name: "Current Water Temperature"
+    type: CURRENT_WATER_TEMPERATURE
+  - platform: truma_inetbox
+    name: "Target Room Temperature"
+    type: TARGET_ROOM_TEMPERATURE
+  - platform: truma_inetbox
+    name: "Target Water Temperature"
+    type: TARGET_WATER_TEMPERATURE
+  - platform: truma_inetbox
+    name: "Heating mode"
+    type: HEATING_MODE
+  - platform: truma_inetbox
+    name: "electric power level"
+    type: ELECTRIC_POWER_LEVEL
+  - platform: truma_inetbox
+    name: "Energy mix"
+    type: ENERGY_MIX
+  - platform: truma_inetbox
+    name: "Operating status"
+    type: OPERATING_STATUS
+  - platform: truma_inetbox
+    name: "Heater error code"
+    type: HEATER_ERROR_CODE

@@ -1,0 +1,9 @@
+  - platform: truma_inetbox
+    name: "Target Room Temperature"
+    type: TARGET_ROOM_TEMPERATURE
+  - platform: truma_inetbox
+    name: "Target Water Temperature"
+    type: TARGET_WATER_TEMPERATURE
+  - platform: truma_inetbox
+    name: "electric power level"
+    type: ELECTRIC_POWER_LEVEL

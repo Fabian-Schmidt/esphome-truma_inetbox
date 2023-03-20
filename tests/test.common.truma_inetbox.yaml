@@ -1,0 +1,13 @@
+  uart_id: lin_uart_bus
+  time_id: esptime
+  cs_pin: 5
+  fault_pin: 18
+  # Advanced users can use `on_heater_message` action. The heater data is in the `message` variable.
+  on_heater_message:
+    then:
+    - logger.log: "Message from CP Plus."
+    - if:
+        condition:
+          lambda: return message->operating_status == truma_inetbox::OperatingStatus::OPERATING_STATUS_OFF;
+        then:
+          - logger.log: "Heater is off."

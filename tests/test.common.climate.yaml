@@ -1,0 +1,6 @@
+  - platform: truma_inetbox
+    name: "Truma Room"
+    type: ROOM
+  - platform: truma_inetbox
+    name: "Truma Water"
+    type: WATER

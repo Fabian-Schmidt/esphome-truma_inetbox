@@ -1,0 +1,38 @@
+esphome:
+  name: "esp32_idf"
+
+  on_boot:
+    then:
+      # read time from external source (connected via I2C)
+      - ds1307.read_time
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: ["truma_inetbox", "uart"]
+
+rp2040:
+  board: rpipicow
+  framework:
+    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
+
+i2c:
+  sda: 14
+  scl: 27
+  scan: false
+  id: i2c_bus_a
+
+time:
+  - platform: ds1307
+    update_interval: never
+    id: esptime
+
+uart: !include test.common.uart.yaml
+truma_inetbox: !include test.common.truma_inetbox.yaml
+binary_sensor: !include test.common.binary_sensor.yaml
+button: !include test.common.button.yaml
+climate: !include test.common.climate.yaml
+number: !include test.common.number.yaml
+sensor: !include test.common.sensor.yaml
+switch: !include test.common.switch.yaml

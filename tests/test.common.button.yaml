@@ -1,0 +1,37 @@
+  - platform: template
+    name: "Energy mix GAS only"
+    on_press:
+      - truma_inetbox.heater.set_energy_mix:
+          # Set energy mix to: `GAS`, `MIX`, `ELECTRICITY`
+          energy_mix: GAS
+  - platform: template
+    name: "Energy mix MIX 1"
+    on_press:
+      - truma_inetbox.heater.set_energy_mix:
+          energy_mix: MIX
+          # Set electricity level to `0`, `900`, `1800`
+          watt: 900W
+  - platform: template
+    name: "Energy mix MIX 2"
+    on_press:
+      - truma_inetbox.heater.set_energy_mix:
+          energy_mix: MIX
+          watt: 1800
+  - platform: template
+    name: "Energy mix ELECTRICITY only"
+    on_press:
+      - truma_inetbox.heater.set_energy_mix:
+          energy_mix: ELECTRICITY
+          watt: 1800W
+  - platform: template
+    name: "Set electric power level to 0 Watt"
+    on_press:
+      - truma_inetbox.heater.set_electric_power_level: 0
+  - platform: template
+    name: "Set electric power level to 900 Watt"
+    on_press:
+      - truma_inetbox.heater.set_electric_power_level: 900
+  - platform: template
+    name: "Set electric power level to 1800 Watt"
+    on_press:
+      - truma_inetbox.heater.set_electric_power_level: 1800
