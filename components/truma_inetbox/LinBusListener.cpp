@@ -65,7 +65,7 @@ void LinBusListener::setup() {
   }
 
   // Register interval to submit log messages
-  this->set_interval("logmsg", 50, [this]() { this->process_log_queue_(QUEUE_WAIT_DONT_BLOCK); });
+  this->set_interval("logmsg", 50, [this]() { this->process_log_queue(QUEUE_WAIT_DONT_BLOCK); });
 }
 
 void LinBusListener::update() { this->check_for_lin_fault_(); }
@@ -323,14 +323,14 @@ void LinBusListener::clear_uart_buffer_() {
   }
 }
 
-void LinBusListener::process_lin_msg_queue_(TickType_t xTicksToWait) {
+void LinBusListener::process_lin_msg_queue(TickType_t xTicksToWait) {
   QUEUE_LIN_MSG lin_msg;
   while (xQueueReceive(this->lin_msg_queue_, &lin_msg, xTicksToWait) == pdPASS) {
     this->lin_message_recieved_(lin_msg.current_PID, lin_msg.data, lin_msg.len);
   }
 }
 
-void LinBusListener::process_log_queue_(TickType_t xTicksToWait) {
+void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
   QUEUE_LOG_MSG log_msg;
   while (xQueueReceive(this->log_queue_, &log_msg, xTicksToWait) == pdPASS) {
     auto current_PID = log_msg.current_PID;

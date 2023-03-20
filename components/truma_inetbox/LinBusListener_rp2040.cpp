@@ -15,6 +15,8 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.LinBusListener";
 
+#define QUEUE_WAIT_DONT_BLOCK (TickType_t) 0
+
 void LinBusListener::setup_framework() {
   auto uartComp = static_cast<esphome::uart::truma_RP2040UartComponent *>(this->parent_);
   auto is_hw_serial = uartComp->is_hw_serial();
@@ -101,13 +103,15 @@ extern void loop1() {
     // TODO: Reconsider processing lin messages here.
     // They contain blocking log messages.
     if (LIN_BUS_LISTENER_INSTANCE_1 != nullptr) {
-      LIN_BUS_LISTENER_INSTANCE_1->process_lin_msg_queue_((portTickType) 0 /* No blocking*/);
+      LIN_BUS_LISTENER_INSTANCE_1->process_lin_msg_queue(QUEUE_WAIT_DONT_BLOCK);
     }
     if (LIN_BUS_LISTENER_INSTANCE_2 != nullptr) {
-      LIN_BUS_LISTENER_INSTANCE_2->process_lin_msg_queue_((portTickType) 0 /* No blocking*/);
+      LIN_BUS_LISTENER_INSTANCE_2->process_lin_msg_queue(QUEUE_WAIT_DONT_BLOCK);
     }
     delay(sleep1 > sleep2 ? sleep2 : sleep1);
   }
 }
+
+#undef QUEUE_WAIT_DONT_BLOCK
 
 #endif  // USE_RP2040

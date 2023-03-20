@@ -12,6 +12,8 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.LinBusListener";
 
+#define QUEUE_WAIT_BLOCKING (portTickType) portMAX_DELAY
+
 void LinBusListener::setup_framework() {
   auto uartComp = static_cast<esphome::uart::truma_ESP32ArduinoUARTComponent *>(this->parent_);
 
@@ -66,11 +68,13 @@ void LinBusListener::setup_framework() {
 void LinBusListener::eventTask_(void *args) {
   LinBusListener *instance = (LinBusListener *) args;
   for (;;) {
-    instance->process_lin_msg_queue_((portTickType) portMAX_DELAY);
+    instance->process_lin_msg_queue(QUEUE_WAIT_BLOCKING);
   }
 }
 
 }  // namespace truma_inetbox
 }  // namespace esphome
+
+#undef QUEUE_WAIT_BLOCKING
 
 #endif  // USE_ESP32_FRAMEWORK_ARDUINO

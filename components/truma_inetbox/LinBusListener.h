@@ -7,12 +7,11 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #endif  // USE_ESP32
-#ifdef USE_ESP32_FRAMEWORK_ESP_IDF
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#endif  // USE_ESP32_FRAMEWORK_ESP_IDF
 #ifdef USE_RP2040
 #include <hardware/uart.h>
+#include <FreeRTOS.h>
+#include <semphr.h>
+#include <queue.h>
 #endif  // USE_RP2040
 
 namespace esphome {
@@ -77,6 +76,9 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   void set_fault_pin(GPIOPin *pin) { this->fault_pin_ = pin; }
   void set_observer_mode(bool val) { this->observer_mode_ = val; }
   bool get_lin_bus_fault() { return fault_on_lin_bus_reported_ > 3; }
+
+  void process_lin_msg_queue(TickType_t xTicksToWait);
+  void process_log_queue(TickType_t xTicksToWait);
 
 #ifdef USE_RP2040
   // Return is the expected wait time till next data check is recommended.
@@ -143,8 +145,6 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   void read_lin_frame_();
   void clear_uart_buffer_();
   void setup_framework();
-  void process_lin_msg_queue_(TickType_t xTicksToWait);
-  void process_log_queue_(TickType_t xTicksToWait);
 
   uint8_t lin_msg_static_queue_storage[6 * sizeof(QUEUE_LIN_MSG)];
   StaticQueue_t lin_msg_static_queue_;

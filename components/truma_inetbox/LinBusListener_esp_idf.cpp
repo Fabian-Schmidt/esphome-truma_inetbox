@@ -10,6 +10,8 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.LinBusListener";
 
+#define QUEUE_WAIT_BLOCKING (portTickType) portMAX_DELAY
+
 void LinBusListener::setup_framework() {
   // uartSetFastReading
   auto uartComp = static_cast<uart::truma_IDFUARTComponent *>(this->parent_);
@@ -64,7 +66,7 @@ void LinBusListener::uartEventTask_(void *args) {
   uart_event_t event;
   for (;;) {
     // Waiting for UART event.
-    if (xQueueReceive(*uartEventQueue, (void *) &event, (portTickType) portMAX_DELAY)) {
+    if (xQueueReceive(*uartEventQueue, (void *) &event, QUEUE_WAIT_BLOCKING)) {
       if (event.type == UART_DATA && instance->available() > 0) {
         instance->onReceive_();
       } else if (event.type == UART_BREAK) {
@@ -82,11 +84,13 @@ void LinBusListener::uartEventTask_(void *args) {
 void LinBusListener::eventTask_(void *args) {
   LinBusListener *instance = (LinBusListener *) args;
   for (;;) {
-    instance->process_lin_msg_queue_((portTickType) portMAX_DELAY);
+    instance->process_lin_msg_queue(QUEUE_WAIT_BLOCKING);
   }
 }
 
 }  // namespace truma_inetbox
 }  // namespace esphome
+
+#undef QUEUE_WAIT_BLOCKING
 
 #endif  // USE_ESP32_FRAMEWORK_ESP_IDF
