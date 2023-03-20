@@ -70,14 +70,11 @@ void TrumaiNetBoxApp::lin_reset_device() {
 
   this->heater_.reset();
   this->timer_.reset();
+  this->airconManual_.reset();
   this->clock_.reset();
   this->config_.reset();
 
   this->update_time_ = 0;
-
-  this->update_status_aircon_prepared_ = false;
-  this->update_status_aircon_unsubmitted_ = false;
-  this->update_status_aircon_stale_ = false;
 }
 
 template<typename T> void TrumaStausFrameStorage<T>::reset() {
@@ -137,21 +134,21 @@ StatusFrameTimerResponse *TrumaiNetBoxApp::update_timer_prepare() {
   return &this->timer_.update_status_;
 }
 
-StatusFrameAirconResponse *TrumaiNetBoxApp::update_aircon_prepare() {
+StatusFrameAirconManualResponse *TrumaiNetBoxApp::update_aircon_prepare() {
   // An update is currently going on.
-  if (this->update_status_aircon_prepared_ || this->update_status_aircon_stale_) {
-    return &this->update_status_aircon_;
+   if (this->airconManual_.update_status_prepared_ || this->airconManual_.update_status_stale_) {
+    return &this->airconManual_.update_status_;
   }
 
   // prepare status response
-  this->update_status_aircon_ = {};
-  this->update_status_aircon_.mode = this->status_aircon_.mode;
-  this->update_status_aircon_.operation = this->status_aircon_.operation;
-  this->update_status_aircon_.energy_mix = this->status_aircon_.energy_mix;
-  this->update_status_aircon_.target_temp_aircon = this->status_aircon_.target_temp_aircon;
+  this->airconManual_.update_status_ = {};
+  this->airconManual_.update_status_.mode = this->airconManual_.data_.mode;
+  this->airconManual_.update_status_.operation = this->airconManual_.data_.operation;
+  this->airconManual_.update_status_.energy_mix = this->airconManual_.data_.energy_mix;
+  this->airconManual_.update_status_.target_temp_aircon = this->airconManual_.data_.target_temp_aircon;
 
-  this->update_status_aircon_prepared_ = true;
-  return &this->update_status_aircon_;
+  this->airconManual_.update_status_prepared_ = true;
+  return &this->airconManual_.update_status_;
 }
 
 bool TrumaiNetBoxApp::answer_lin_order_(const u_int8_t pid) {
@@ -244,25 +241,25 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       this->timer_.update_status_unsubmitted_ = false;
       this->timer_.update_status_stale_ = true;
       return response;
-    } else if (this->update_status_aircon_unsubmitted_) {
+    } else if (this->airconManual_.update_status_unsubmitted_) {
       ESP_LOGD(TAG, "Requested read: Sending aircon update");
 
-      status_frame_create_empty(response_frame, STATUS_FRAME_AIRCON_RESPONSE, sizeof(StatusFrameAirconResponse),
+      status_frame_create_empty(response_frame, STATUS_FRAME_AIRCON_MANUAL_RESPONSE, sizeof(StatusFrameAirconManualResponse),
                                 this->message_counter++);
 
-      response_frame->inner.airconResponse.mode = this->update_status_aircon_.mode;
-      response_frame->inner.airconResponse.unknown_02 = this->update_status_aircon_.unknown_02;
-      response_frame->inner.airconResponse.operation = this->update_status_aircon_.operation;
-      response_frame->inner.airconResponse.energy_mix = this->update_status_aircon_.energy_mix;
-      response_frame->inner.airconResponse.target_temp_aircon = this->update_status_aircon_.target_temp_aircon;
+      response_frame->inner.airconManualResponse.mode = this->airconManual_.update_status_.mode;
+      response_frame->inner.airconManualResponse.unknown_02 = this->airconManual_.update_status_.unknown_02;
+      response_frame->inner.airconManualResponse.operation = this->airconManual_.update_status_.operation;
+      response_frame->inner.airconManualResponse.energy_mix = this->airconManual_.update_status_.energy_mix;
+      response_frame->inner.airconManualResponse.target_temp_aircon = this->airconManual_.update_status_.target_temp_aircon;
 
       status_frame_calculate_checksum(response_frame);
-      (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAirconResponse);
+      (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAirconManualResponse);
 
       this->update_time_ = 0;
-      this->update_status_aircon_prepared_ = false;
-      this->update_status_aircon_unsubmitted_ = false;
-      this->update_status_aircon_stale_ = true;
+      this->airconManual_.update_status_prepared_ = false;
+      this->airconManual_.update_status_unsubmitted_ = false;
+      this->airconManual_.update_status_stale_ = true;
       return response;
 #ifdef USE_TIME
     } else if (this->update_status_clock_unsubmitted_) {
@@ -310,8 +307,8 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     this->heater_.update_status_stale_ = false;
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON && header->message_length == sizeof(StatusFrameAircon)) {
-    ESP_LOGI(TAG, "StatusFrameAircon");
+  } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL && header->message_length == sizeof(StatusFrameAirconManual)) {
+    ESP_LOGI(TAG, "StatusFrameAirconManual");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // - ac temps form 16 - 30 C in +2 steps
@@ -331,28 +328,28 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.C2.04.00.71.01.D6.0B.00.00.88.0B.00.00.00.00.00.00.AA.0A
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.13.04.00.71.01.86.0B.00.00.88.0B.00.00.00.00.00.00.AA.0A
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.A8.00.00.71.01.00.00.00.00.88.0B.00.00.00.00.00.00.AA.0A
-    this->status_aircon_ = statusFrame->inner.aircon;
-    this->status_aircon_valid_ = true;
-    this->status_aircon_updated_ = true;
+    this->airconManual_.data_ = statusFrame->inner.airconManual;
+    this->airconManual_.data_valid_ = true;
+    this->airconManual_.data_updated_ = true;
 
-    this->update_status_aircon_stale_ = false;
+    this->airconManual_.update_status_stale_ = false;
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON_INIT &&
-             header->message_length == sizeof(StatusFrameAirconInit)) {
-    ESP_LOGI(TAG, "StatusFrameAirconInit");
+  } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL_INIT &&
+             header->message_length == sizeof(StatusFrameAirconManualInit)) {
+    ESP_LOGI(TAG, "StatusFrameAirconManualInit");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.16.3F.00.E2.00.00.71.01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON_2 && header->message_length == sizeof(StatusFrameAircon2)) {
-    ESP_LOGI(TAG, "StatusFrameAircon2");
+  } else if (header->message_type == STATUS_FRAME_AIRCON_AUTO && header->message_length == sizeof(StatusFrameAirconAuto)) {
+    ESP_LOGI(TAG, "StatusFrameAirconAuto");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.37.00.BF.01.00.01.00.00.00.00.00.00.00.00.00.00.00.49.0B.40.0B
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON_INIT_2 &&
-             header->message_length == sizeof(StatusFrameAirconInit2)) {
-    ESP_LOGI(TAG, "StatusFrameAirconInit2");
+  } else if (header->message_type == STATUS_FRAME_AIRCON_AUTO_INIT &&
+             header->message_length == sizeof(StatusFrameAirconAutoInit)) {
+    ESP_LOGI(TAG, "StatusFrameAirconAutoInit");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.14.41.00.53.01.00.01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
@@ -431,7 +428,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     ESP_LOGI(TAG, "StatusFrameDevice");
     // This message is special. I recieve one response per registered (at CP plus) device.
     // Example:
-    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|count|??|??|Hardware|Software|??|??
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|count|st|??|Hardware|Software|??|??
     // Combi4
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.79.02.00.01.00.50.00.00.04.03.02.AD.10 - C4.03.02 0050.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.27.02.01.01.00.40.03.22.02.00.01.00.00 - H2.00.01 0340.22
@@ -454,7 +451,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     const auto truma_device = static_cast<TRUMA_DEVICE>(device.software_revision[0]);
     {
       bool found_unknown_value = false;
-      if (device.unknown_0 != 0x01 || device.unknown_1 != 0x00)
+      if (device.unknown_1 != 0x00)
         found_unknown_value = true;
       if (truma_device != TRUMA_DEVICE::AIRCON_DEVICE && truma_device != TRUMA_DEVICE::HEATER_COMBI4 &&
           truma_device != TRUMA_DEVICE::HEATER_VARIO && truma_device != TRUMA_DEVICE::CPPLUS_COMBI &&
@@ -502,7 +499,7 @@ bool TrumaiNetBoxApp::has_update_to_submit_() {
       return true;
     }
   } else if (this->heater_.update_status_unsubmitted_ || this->timer_.update_status_unsubmitted_ ||
-             this->update_status_clock_unsubmitted_ || this->update_status_aircon_unsubmitted_) {
+             this->update_status_clock_unsubmitted_ || this->airconManual_.update_status_unsubmitted_) {
     if (this->update_time_ == 0) {
       // ESP_LOGD(TAG, "Notify CP Plus I got updates.");
       this->update_time_ = micros();

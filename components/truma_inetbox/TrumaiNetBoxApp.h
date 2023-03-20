@@ -32,16 +32,16 @@ namespace truma_inetbox {
 #define STAUTS_FRAME_CONFIG 0x17
 #define STATUS_FRAME_HEATER_RESPONSE (STATUS_FRAME_HEATER - 1)
 #define STATUS_FRAME_HEATER 0x33
-#define STATUS_FRAME_AIRCON_RESPONSE (STATUS_FRAME_AIRCON - 1)
-#define STATUS_FRAME_AIRCON 0x35
-#define STATUS_FRAME_AIRCON_2_RESPONSE (STATUS_FRAME_AIRCON_2 - 1)
-#define STATUS_FRAME_AIRCON_2 0x37
+#define STATUS_FRAME_AIRCON_MANUAL_RESPONSE (STATUS_FRAME_AIRCON_MANUAL - 1)
+#define STATUS_FRAME_AIRCON_MANUAL 0x35
+#define STATUS_FRAME_AIRCON_AUTO_RESPONSE (STATUS_FRAME_AIRCON_AUTO - 1)
+#define STATUS_FRAME_AIRCON_AUTO 0x37
 #define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
 #define STATUS_FRAME_TIMER 0x3D
-#define STATUS_FRAME_AIRCON_INIT_RESPONSE (STATUS_FRAME_AIRCON_INIT - 1)
-#define STATUS_FRAME_AIRCON_INIT 0x3F
-#define STATUS_FRAME_AIRCON_INIT_2_RESPONSE (STATUS_FRAME_AIRCON_INIT_2 - 1)
-#define STATUS_FRAME_AIRCON_INIT_2 0x41
+#define STATUS_FRAME_AIRCON_MANUAL_INIT_RESPONSE (STATUS_FRAME_AIRCON_MANUAL_INIT - 1)
+#define STATUS_FRAME_AIRCON_MANUAL_INIT 0x3F
+#define STATUS_FRAME_AIRCON_AUTO_INIT_RESPONSE (STATUS_FRAME_AIRCON_AUTO_INIT - 1)
+#define STATUS_FRAME_AIRCON_AUTO_INIT 0x41
 
 enum class HeatingMode : u_int16_t {
   HEATING_MODE_OFF = 0x0,
@@ -315,12 +315,16 @@ enum class TRUMA_DEVICE : u_int8_t {
   HEATER_COMBI6D = 0x06,
 };
 
+enum class TRUMA_DEVICE_STATE : u_int8_t{
+  OFFLINE = 0x00,
+  ONLINE = 0x01,
+};
+
 // Length 12 (0x0C)
 struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t device_count;
   u_int8_t device_id;
-  // 0x01 - Maybe active or found
-  u_int8_t unknown_0;
+  TRUMA_DEVICE_STATE state;
   // 0x00
   u_int8_t unknown_1;
   u_int16_t hardware_revision_major;
@@ -351,7 +355,7 @@ enum class AirconOperation : u_int8_t {
 
 // Length 18 (0x12)
 // TODO
-struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAirconManual {  // NOLINT(altera-struct-pack-align)
   AirconMode mode;
   // 0x00
   u_int8_t unknown_02;
@@ -376,7 +380,7 @@ struct StatusFrameAircon {  // NOLINT(altera-struct-pack-align)
   TargetTemp current_temp_room;
 } __attribute__((packed));
 
-struct StatusFrameAirconResponse {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAirconManualResponse {  // NOLINT(altera-struct-pack-align)
   AirconMode mode;
   // 0x00
   u_int8_t unknown_02;
@@ -385,29 +389,11 @@ struct StatusFrameAirconResponse {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_aircon;
 } __attribute__((packed));
 
-// Length 18 (0x12)
-// TODO
-struct StatusFrameAircon2 {  // NOLINT(altera-struct-pack-align)
-  EnergyMix energy_mix_a;
-  u_int8_t unknown_02;  // 0x00
-  EnergyMix energy_mix_b;
-  u_int8_t unknown_04;  // 0x00
-  u_int8_t unknown_05;  // 0x00
-  u_int8_t unknown_06;  // 0x00
-  TargetTemp target_temp_aircon_auto;
-  ElectricPowerLevel el_power_level_a;
-  u_int8_t unknown_11;  // 0x00
-  u_int8_t unknown_12;  // 0x00
-  ElectricPowerLevel el_power_level_b;
-  TargetTemp current_temp;
-  TargetTemp target_temp;
-} __attribute__((packed));
-
 // Length 22 (0x16)
 // TODO
-struct StatusFrameAirconInit {  // NOLINT(altera-struct-pack-align)
-  u_int8_t unknown_01;          // 0x00
-  u_int8_t unknown_02;          // 0x00
+struct StatusFrameAirconManualInit {  // NOLINT(altera-struct-pack-align)
+  u_int8_t unknown_01;                // 0x00
+  u_int8_t unknown_02;                // 0x00
   AirconOperation operation;
   EnergyMix energy_mix;
   u_int8_t unknown_05;  // 0x00
@@ -430,9 +416,27 @@ struct StatusFrameAirconInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_22;  // 0x00
 } __attribute__((packed));
 
+// Length 18 (0x12)
+// TODO
+struct StatusFrameAirconAuto {  // NOLINT(altera-struct-pack-align)
+  EnergyMix energy_mix_a;
+  u_int8_t unknown_02;  // 0x00
+  EnergyMix energy_mix_b;
+  u_int8_t unknown_04;  // 0x00
+  u_int8_t unknown_05;  // 0x00
+  u_int8_t unknown_06;  // 0x00
+  TargetTemp target_temp_aircon_auto;
+  ElectricPowerLevel el_power_level_a;
+  u_int8_t unknown_11;  // 0x00
+  u_int8_t unknown_12;  // 0x00
+  ElectricPowerLevel el_power_level_b;
+  TargetTemp current_temp;
+  TargetTemp target_temp;
+} __attribute__((packed));
+
 // Length 20 (0x14)
 // TODO
-struct StatusFrameAirconInit2 {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAirconAutoInit {  // NOLINT(altera-struct-pack-align)
   EnergyMix energy_mix_a;
   u_int8_t unknown_02;  // 0x00
   EnergyMix energy_mix_b;
@@ -468,11 +472,11 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameClock clock;
       StatusFrameConfig config;
       StatusFrameDevice device;
-      StatusFrameAircon aircon;
-      StatusFrameAirconResponse airconResponse;
-      StatusFrameAirconInit airconInit;
-      StatusFrameAircon2 aircon2;
-      StatusFrameAirconInit2 airconInit2;
+      StatusFrameAirconManual airconManual;
+      StatusFrameAirconManualResponse airconManualResponse;
+      StatusFrameAirconManualInit airconManualInit;
+      StatusFrameAirconAuto airconAuto;
+      StatusFrameAirconAutoInit airconAutoInit;
     } __attribute__((packed));
   } inner;
 } __attribute__((packed));
@@ -529,13 +533,13 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   StatusFrameHeaterResponse *update_heater_prepare();
   void update_heater_submit() { this->heater_.update_status_unsubmitted_ = true; }
 
-  bool truma_aircon_can_update() { return this->status_aircon_valid_; }
-  StatusFrameAirconResponse *update_aircon_prepare();
-  void update_aircon_submit() { this->update_status_aircon_unsubmitted_ = true; }
-
   bool truma_timer_can_update() { return this->timer_.data_valid_; }
   StatusFrameTimerResponse *update_timer_prepare();
   void update_timer_submit() { this->timer_.update_status_unsubmitted_ = true; }
+
+  bool truma_aircon_can_update() { return this->airconManual_.data_valid_; }
+  StatusFrameAirconManualResponse *update_aircon_prepare();
+  void update_aircon_submit() { this->airconManual_.update_status_unsubmitted_ = true; }
 
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
 
@@ -551,6 +555,9 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   }
   void add_on_config_message_callback(std::function<void(const StatusFrameConfig *)> callback) {
     this->config_.state_callback_.add(std::move(callback));
+  }
+  void add_on_aircon_manual_message_callback(std::function<void(const StatusFrameAirconManual *)> callback) {
+    this->airconManual_.state_callback_.add(std::move(callback));
   }
   bool action_heater_room(u_int8_t temperature, HeatingMode mode = HeatingMode::HEATING_MODE_OFF);
   bool action_heater_water(u_int8_t temperature);
@@ -584,21 +591,12 @@ class TrumaiNetBoxApp : public LinBusProtocol {
 
   TrumaStausFrameResponseStorage<StatusFrameHeater, StatusFrameHeaterResponse> heater_;
   TrumaStausFrameResponseStorage<StatusFrameTimer, StatusFrameTimerResponse> timer_;
+  TrumaStausFrameResponseStorage<StatusFrameAirconManual, StatusFrameAirconManualResponse> airconManual_;
   TrumaStausFrameStorage<StatusFrameConfig> config_;
   TrumaStausFrameStorage<StatusFrameClock> clock_;
 
-  bool status_aircon_valid_ = false;
-  // Value has changed notify listeners.
-  bool status_aircon_updated_ = false;
-  StatusFrameAircon status_aircon_;
-
   // last time CP plus was informed I got an update msg.
   uint32_t update_time_ = 0;
-
-  bool update_status_aircon_prepared_ = false;
-  bool update_status_aircon_unsubmitted_ = false;
-  bool update_status_aircon_stale_ = false;
-  StatusFrameAirconResponse update_status_aircon_;
 
 #ifdef USE_TIME
   time::RealTimeClock *time_ = nullptr;
