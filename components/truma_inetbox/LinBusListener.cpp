@@ -54,18 +54,20 @@ void LinBusListener::setup() {
     this->fault_pin_->setup();
   }
 
-  assert(this->log_queue_ != 0);
-
   // call device specific function
   this->setup_framework();
+
+#if ESPHOME_LOG_LEVEL > ESPHOME_LOG_LEVEL_NONE
+  assert(this->log_queue_ != 0);
+
+  // Register interval to submit log messages
+  this->set_interval("logmsg", 50, [this]() { this->process_log_queue(QUEUE_WAIT_DONT_BLOCK); });
+#endif  // ESPHOME_LOG_LEVEL > ESPHOME_LOG_LEVEL_NONE
 
   if (this->cs_pin_ != nullptr) {
     // Enable LIN driver if not in oberserver mode.
     this->cs_pin_->digital_write(!this->observer_mode_);
   }
-
-  // Register interval to submit log messages
-  this->set_interval("logmsg", 50, [this]() { this->process_log_queue(QUEUE_WAIT_DONT_BLOCK); });
 }
 
 void LinBusListener::update() { this->check_for_lin_fault_(); }
@@ -74,13 +76,13 @@ void LinBusListener::write_lin_answer_(const u_int8_t *data, u_int8_t len) {
   QUEUE_LOG_MSG log_msg = QUEUE_LOG_MSG();
   if (!this->can_write_lin_answer_) {
     log_msg.type = QUEUE_LOG_MSG_TYPE::ERROR_LIN_ANSWER_CAN_WRITE_LIN_ANSWER;
-    xQueueSend(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+    TRUMA_LOGE(log_msg);
     return;
   }
   this->can_write_lin_answer_ = false;
   if (len > 8) {
     log_msg.type = QUEUE_LOG_MSG_TYPE::ERROR_LIN_ANSWER_TOO_LONG;
-    xQueueSend(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+    TRUMA_LOGE(log_msg);
     return;
   }
 
@@ -105,7 +107,6 @@ void LinBusListener::write_lin_answer_(const u_int8_t *data, u_int8_t len) {
     this->write(data_CRC);
   }
 
-#ifdef ESPHOME_LOG_HAS_VERBOSE
   log_msg.type = QUEUE_LOG_MSG_TYPE::VERBOSE_LIN_ANSWER_RESPONSE;
   log_msg.current_PID = this->current_PID_;
   for (u_int8_t i = 0; i < len; i++) {
@@ -113,8 +114,7 @@ void LinBusListener::write_lin_answer_(const u_int8_t *data, u_int8_t len) {
   }
   log_msg.data[len] = data_CRC;
   log_msg.len = len++;
-  xQueueSend(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
-#endif  // ESPHOME_LOG_HAS_VERBOSE
+  TRUMA_LOGV(log_msg);
 }
 
 bool LinBusListener::check_for_lin_fault_() {
@@ -130,13 +130,13 @@ bool LinBusListener::check_for_lin_fault_() {
       if (this->fault_on_lin_bus_reported_ % 3 == 0) {
         QUEUE_LOG_MSG log_msg = QUEUE_LOG_MSG();
         log_msg.type = QUEUE_LOG_MSG_TYPE::ERROR_CHECK_FOR_LIN_FAULT_DETECTED;
-        xQueueSend(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+        TRUMA_LOGE(log_msg);
       }
     } else if (this->get_lin_bus_fault()) {
       this->fault_on_lin_bus_reported_ = 0;
       QUEUE_LOG_MSG log_msg = QUEUE_LOG_MSG();
       log_msg.type = QUEUE_LOG_MSG_TYPE::INFO_CHECK_FOR_LIN_FAULT_FIXED;
-      xQueueSend(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+      TRUMA_LOGI(log_msg);
     } else {
       this->fault_on_lin_bus_reported_ = 0;
     }
@@ -180,7 +180,7 @@ void LinBusListener::read_lin_frame_() {
             }
             log_msg.len = this->current_data_count_;
           }
-          xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+          TRUMA_LOGE_ISR(log_msg);
         }
       }
 
@@ -189,11 +189,9 @@ void LinBusListener::read_lin_frame_() {
 
       // First is Break expected
       if (!this->read_byte(&buf) || buf != LIN_BREAK) {
-#ifdef ESPHOME_LOG_HAS_VERY_VERBOSE
         log_msg.type = QUEUE_LOG_MSG_TYPE::VV_READ_LIN_FRAME_BREAK_EXPECTED;
         log_msg.current_PID = buf;
-        xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
-#endif  // ESPHOME_LOG_HAS_VERY_VERBOSE
+        TRUMA_LOGVV_ISR(log_msg);
       } else {
         // ESP_LOGVV(TAG, "%02X BREAK received.", buf);
         this->current_state_ = READ_STATE_SYNC;
@@ -202,11 +200,9 @@ void LinBusListener::read_lin_frame_() {
     case READ_STATE_SYNC:
       // Second is Sync expected
       if (!this->read_byte(&buf) || buf != LIN_SYNC) {
-#ifdef ESPHOME_LOG_HAS_VERY_VERBOSE
         log_msg.type = QUEUE_LOG_MSG_TYPE::VV_READ_LIN_FRAME_SYNC_EXPECTED;
         log_msg.current_PID = buf;
-        xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
-#endif  // ESPHOME_LOG_HAS_VERY_VERBOSE
+        TRUMA_LOGVV_ISR(log_msg);
         this->current_state_ = buf == LIN_BREAK ? READ_STATE_SYNC : READ_STATE_BREAK;
       } else {
         // ESP_LOGVV(TAG, "%02X SYNC found.", buf);
@@ -220,7 +216,7 @@ void LinBusListener::read_lin_frame_() {
         if (this->current_PID_with_parity_ != (this->current_PID_ | (addr_parity(this->current_PID_) << 6))) {
           log_msg.type = QUEUE_LOG_MSG_TYPE::WARN_READ_LIN_FRAME_SID_CRC;
           log_msg.current_PID = this->current_PID_with_parity_;
-          xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+          TRUMA_LOGW_ISR(log_msg);
           this->current_data_valid = false;
         }
       }
@@ -267,7 +263,7 @@ void LinBusListener::read_lin_frame_() {
         (this->current_PID_ == DIAGNOSTIC_FRAME_MASTER || this->current_PID_ == DIAGNOSTIC_FRAME_SLAVE)) {
       if (data_CRC != data_checksum(this->current_data_, data_length, 0)) {
         log_msg.type = QUEUE_LOG_MSG_TYPE::WARN_READ_LIN_FRAME_LINv1_CRC;
-        xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+        TRUMA_LOGW_ISR(log_msg);
         this->current_data_valid = false;
       }
       if (this->current_PID_ == DIAGNOSTIC_FRAME_MASTER) {
@@ -282,7 +278,7 @@ void LinBusListener::read_lin_frame_() {
       u_int8_t data_CRC_slave = data_checksum(this->current_data_, data_length, this->current_PID_with_parity_);
       if (data_CRC != data_CRC_master && data_CRC != data_CRC_slave) {
         log_msg.type = QUEUE_LOG_MSG_TYPE::WARN_READ_LIN_FRAME_LINv2_CRC;
-        xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+        TRUMA_LOGW_ISR(log_msg);
         this->current_data_valid = false;
       }
       message_source_know = true;
@@ -301,7 +297,7 @@ void LinBusListener::read_lin_frame_() {
     log_msg.current_data_valid = this->current_data_valid;
     log_msg.message_source_know = message_source_know;
     log_msg.message_from_master = message_from_master;
-    xQueueSendFromISR(this->log_queue_, (void *) &log_msg, QUEUE_WAIT_DONT_BLOCK);
+    TRUMA_LOGV_ISR(log_msg);
 #endif  // ESPHOME_LOG_HAS_VERBOSE
 
     if (this->current_data_valid && message_from_master) {
@@ -331,6 +327,7 @@ void LinBusListener::process_lin_msg_queue(TickType_t xTicksToWait) {
 }
 
 void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
+#if ESPHOME_LOG_LEVEL > ESPHOME_LOG_LEVEL_NONE
   QUEUE_LOG_MSG log_msg;
   while (xQueueReceive(this->log_queue_, &log_msg, xTicksToWait) == pdPASS) {
     auto current_PID = log_msg.current_PID;
@@ -341,7 +338,6 @@ void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
       case QUEUE_LOG_MSG_TYPE::ERROR_LIN_ANSWER_TOO_LONG:
         ESP_LOGE(TAG, "LIN answer cannot be longer than 8 bytes.");
         break;
-#ifdef ESPHOME_LOG_HAS_VERBOSE
       case QUEUE_LOG_MSG_TYPE::VERBOSE_LIN_ANSWER_RESPONSE:
         if (!this->observer_mode_) {
           ESP_LOGV(TAG, "RESPONSE %02X %s", current_PID, format_hex_pretty(log_msg.data, log_msg.len).c_str());
@@ -350,19 +346,15 @@ void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
                    format_hex_pretty(log_msg.data, log_msg.len).c_str());
         }
         break;
-#endif  // ESPHOME_LOG_HAS_VERBOSE
-
       case QUEUE_LOG_MSG_TYPE::ERROR_CHECK_FOR_LIN_FAULT_DETECTED:
         ESP_LOGE(TAG, "Fault on LIN BUS detected.");
         break;
       case QUEUE_LOG_MSG_TYPE::INFO_CHECK_FOR_LIN_FAULT_FIXED:
         ESP_LOGI(TAG, "Fault on LIN BUS fixed.");
         break;
-
       case QUEUE_LOG_MSG_TYPE::ERROR_READ_LIN_FRAME_UNABLE_TO_ANSWER:
         ESP_LOGE(TAG, "PID %02X      order - unable to send response", current_PID);
         break;
-
       case QUEUE_LOG_MSG_TYPE::ERROR_READ_LIN_FRAME_LOST_MSG:
         if (log_msg.len == 0) {
           ESP_LOGV(TAG, "PID %02X      order no answer", current_PID);
@@ -371,14 +363,12 @@ void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
                    format_hex_pretty(log_msg.data, log_msg.len).c_str());
         }
         break;
-#ifdef ESPHOME_LOG_HAS_VERY_VERBOSE
       case QUEUE_LOG_MSG_TYPE::VV_READ_LIN_FRAME_BREAK_EXPECTED:
         ESP_LOGVV(TAG, "0x%02X Expected BREAK not received.", current_PID);
         break;
       case QUEUE_LOG_MSG_TYPE::VV_READ_LIN_FRAME_SYNC_EXPECTED:
         ESP_LOGVV(TAG, "0x%02X Expected SYNC not found.", current_PID);
         break;
-#endif  // ESPHOME_LOG_HAS_VERY_VERBOSE
       case QUEUE_LOG_MSG_TYPE::WARN_READ_LIN_FRAME_SID_CRC:
         ESP_LOGW(TAG, "0x%02X LIN CRC error on SID.", current_PID);
         break;
@@ -388,7 +378,6 @@ void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
       case QUEUE_LOG_MSG_TYPE::WARN_READ_LIN_FRAME_LINv2_CRC:
         ESP_LOGW(TAG, "LIN v2 CRC error");
         break;
-#ifdef ESPHOME_LOG_HAS_VERBOSE
       case QUEUE_LOG_MSG_TYPE::VERBOSE_READ_LIN_FRAME_MSG:
         // Mark the PID of the TRUMA Combi heater as very verbose message.
         if (current_PID == 0x20 || current_PID == 0x21 || current_PID == 0x22 ||
@@ -403,11 +392,11 @@ void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
                    log_msg.current_data_valid ? "" : "INVALID");
         }
         break;
-#endif  // ESPHOME_LOG_HAS_VERBOSE
       default:
         break;
     }
   }
+#endif  // ESPHOME_LOG_LEVEL > ESPHOME_LOG_LEVEL_NONE
 }
 
 #undef LIN_BREAK

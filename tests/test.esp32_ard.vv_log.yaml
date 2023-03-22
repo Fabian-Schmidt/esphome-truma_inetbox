@@ -1,0 +1,28 @@
+esphome:
+  name: "esp32-ard-vv-log"
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: ["truma_inetbox", "uart"]
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+  level: VERY_VERBOSE
+
+uart: !include test.common.uart.yaml
+truma_inetbox:
+  uart_id: lin_uart_bus
+  cs_pin: 5
+  fault_pin: 18
+binary_sensor: !include test.common.binary_sensor.yaml
+button: !include test.common.button.yaml
+climate: !include test.common.climate.yaml
+number: !include test.common.number.yaml
+sensor: !include test.common.sensor.yaml
+switch: !include test.common.switch.yaml

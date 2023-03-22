@@ -1,5 +1,6 @@
 #pragma once
 
+#include "LinBusLog.h"
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 
@@ -23,44 +24,6 @@ struct QUEUE_LIN_MSG {
   u_int8_t current_PID;
   u_int8_t data[8];
   u_int8_t len;
-};
-
-enum class QUEUE_LOG_MSG_TYPE {
-  UNKNOWN,
-  ERROR_LIN_ANSWER_CAN_WRITE_LIN_ANSWER,
-  ERROR_LIN_ANSWER_TOO_LONG,
-#ifdef ESPHOME_LOG_HAS_VERBOSE
-  VERBOSE_LIN_ANSWER_RESPONSE,
-#endif  // ESPHOME_LOG_HAS_VERBOSE
-
-  ERROR_CHECK_FOR_LIN_FAULT_DETECTED,
-  INFO_CHECK_FOR_LIN_FAULT_FIXED,
-
-  ERROR_READ_LIN_FRAME_UNABLE_TO_ANSWER,
-  ERROR_READ_LIN_FRAME_LOST_MSG,
-#ifdef ESPHOME_LOG_HAS_VERY_VERBOSE
-  VV_READ_LIN_FRAME_BREAK_EXPECTED,
-  VV_READ_LIN_FRAME_SYNC_EXPECTED,
-#endif  // ESPHOME_LOG_HAS_VERY_VERBOSE
-  WARN_READ_LIN_FRAME_SID_CRC,
-  WARN_READ_LIN_FRAME_LINv1_CRC,
-  WARN_READ_LIN_FRAME_LINv2_CRC,
-#ifdef ESPHOME_LOG_HAS_VERBOSE
-  VERBOSE_READ_LIN_FRAME_MSG,
-#endif  // ESPHOME_LOG_HAS_VERBOSE
-};
-
-// Log messages generated during interrupt are pushed to log queue.
-struct QUEUE_LOG_MSG {
-  QUEUE_LOG_MSG_TYPE type;
-  u_int8_t current_PID;
-  u_int8_t data[9];
-  u_int8_t len;
-#ifdef ESPHOME_LOG_HAS_VERBOSE
-  bool current_data_valid;
-  bool message_source_know;
-  bool message_from_master;
-#endif  // ESPHOME_LOG_HAS_VERBOSE
 };
 
 class LinBusListener : public PollingComponent, public uart::UARTDevice {
@@ -153,12 +116,14 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
                          /* uxItemSize */ sizeof(QUEUE_LIN_MSG),
                          /* pucQueueStorageBuffer */ lin_msg_static_queue_storage, &lin_msg_static_queue_);
 
+#if ESPHOME_LOG_LEVEL > ESPHOME_LOG_LEVEL_NONE
   uint8_t log_static_queue_storage[6 * sizeof(QUEUE_LOG_MSG)];
   StaticQueue_t log_static_queue_;
   QueueHandle_t log_queue_ =
       xQueueCreateStatic(/* uxQueueLength */ 6,
                          /* uxItemSize */ sizeof(QUEUE_LOG_MSG),
                          /* pucQueueStorageBuffer */ log_static_queue_storage, &log_static_queue_);
+#endif
 
 #ifdef USE_ESP32
   TaskHandle_t eventTaskHandle_;

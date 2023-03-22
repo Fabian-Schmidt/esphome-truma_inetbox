@@ -35,6 +35,10 @@ jobs:
             name: Test tests/test.esp32_ard.uart.yaml
             pio_cache_key: test.esp32_ard.uart
           - id: test
+            file: tests/test.esp32_ard.vv_log.yaml
+            name: Test tests/test.esp32_ard.vv_log.yaml
+            pio_cache_key: test.esp32_ard.vv_log
+          - id: test
             file: tests/test.esp32_ard.yaml
             name: Test tests/test.esp32_ard.yaml
             pio_cache_key: test.esp32_ard
