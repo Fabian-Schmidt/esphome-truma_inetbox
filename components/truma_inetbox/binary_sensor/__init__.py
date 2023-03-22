@@ -27,6 +27,7 @@ CONF_SUPPORTED_TYPE = {
     "HEATER_ROOM": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_ROOM),
     "HEATER_WATER": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_WATER),
     "HEATER_GAS": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_GAS),
+    "HEATER_DIESEL": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_DIESEL),
     "HEATER_MIX_1": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_MIX_1),
     "HEATER_MIX_2": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_MIX_2),
     "HEATER_ELECTRICITY": (truma_inetbox_ns.class_("TrumaHeaterBinarySensor", binary_sensor.BinarySensor, cg.Component), TRUMA_BINARY_SENSOR_TYPE_dummy_ns.HEATER_ELECTRICITY),

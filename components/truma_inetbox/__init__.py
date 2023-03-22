@@ -296,6 +296,7 @@ EnergyMix_dummy_ns = truma_inetbox_ns.namespace("EnergyMix")
 CONF_SUPPORTED_ENERGY_MIX = {
     "NONE": EnergyMix_dummy_ns.ENERGY_MIX_NONE,
     "GAS": EnergyMix_dummy_ns.ENERGY_MIX_GAS,
+    "DIESEL": EnergyMix_dummy_ns.ENERGY_MIX_DIESEL,
     "ELECTRICITY": EnergyMix_dummy_ns.ENERGY_MIX_ELECTRICITY,
     "MIX": EnergyMix_dummy_ns.ENERGY_MIX_MIX,
 }

@@ -85,6 +85,7 @@ enum class TargetTemp : u_int16_t {
 enum class EnergyMix : u_int8_t {
   ENERGY_MIX_NONE = 0b00,
   ENERGY_MIX_GAS = 0b01,
+  ENERGY_MIX_DIESEL = 0b01,
   ENERGY_MIX_ELECTRICITY = 0b10,
   ENERGY_MIX_MIX = 0b11,
 };

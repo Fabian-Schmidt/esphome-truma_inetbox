@@ -77,9 +77,11 @@ The following `type` values are available:
 - `HEATER_ROOM`
 - `HEATER_WATER`
 - `HEATER_GAS`
+- `HEATER_DIESEL`
 - `HEATER_MIX_1`
 - `HEATER_MIX_2`
 - `HEATER_ELECTRICITY`
+- `HEATER_HAS_ERROR`
 - `TIMER_ACTIVE`
 - `TIMER_ROOM`
 - `TIMER_WATER`
@@ -141,6 +143,7 @@ The following `type` values are available:
 - `ELECTRIC_POWER_LEVEL`
 - `ENERGY_MIX`
 - `OPERATING_STATUS`
+- `HEATER_ERROR_CODE`
 
 ### Actions
 

@@ -19,6 +19,9 @@ void TrumaHeaterBinarySensor::setup() {
       case TRUMA_BINARY_SENSOR_TYPE::HEATER_GAS:
         this->publish_state(status_heater->energy_mix_a == EnergyMix::ENERGY_MIX_GAS);
         break;
+      case TRUMA_BINARY_SENSOR_TYPE::HEATER_DIESEL:
+        this->publish_state(status_heater->energy_mix_a == EnergyMix::ENERGY_MIX_DIESEL);
+        break;
       case TRUMA_BINARY_SENSOR_TYPE::HEATER_MIX_1:
         this->publish_state(status_heater->energy_mix_a == EnergyMix::ENERGY_MIX_MIX &&
                             status_heater->el_power_level_a == ElectricPowerLevel::ELECTRIC_POWER_LEVEL_900);

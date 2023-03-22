@@ -52,7 +52,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   u_int8_t message_counter = 1;
 
   // Truma heater conected to CP Plus.
-  TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
+  TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::UNKNOWN;
   TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKNOWN;
 
   TrumaiNetBoxAppAirconAuto airconAuto_;
