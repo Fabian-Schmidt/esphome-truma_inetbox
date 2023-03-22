@@ -27,6 +27,10 @@ jobs:
       matrix:
         include:
           - id: test
+            file: tests/test.esp32_ard.notime.yaml
+            name: Test tests/test.esp32_ard.notime.yaml
+            pio_cache_key: test.esp32_ard.notime
+          - id: test
             file: tests/test.esp32_ard.uart.yaml
             name: Test tests/test.esp32_ard.uart.yaml
             pio_cache_key: test.esp32_ard.uart
