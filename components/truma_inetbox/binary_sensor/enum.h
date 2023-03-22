@@ -4,6 +4,8 @@ namespace esphome {
 namespace truma_inetbox {
 
 enum class TRUMA_BINARY_SENSOR_TYPE {
+  UNKNOWN,
+  
   HEATER_ROOM,
   HEATER_WATER,
   HEATER_GAS,

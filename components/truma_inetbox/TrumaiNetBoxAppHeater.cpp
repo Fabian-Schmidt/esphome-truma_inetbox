@@ -49,6 +49,11 @@ void TrumaiNetBoxAppHeater::create_update_data(StatusFrame *response, u_int8_t *
 
 void TrumaiNetBoxAppHeater::dump_data() const {}
 
+bool TrumaiNetBoxAppHeater::can_update() {
+  return TrumaStausFrameResponseStorage<StatusFrameHeater, StatusFrameHeaterResponse>::can_update() &&
+         this->parent_->get_heater_device() != TRUMA_DEVICE::UNKNOWN;
+}
+
 bool TrumaiNetBoxAppHeater::action_heater_room(u_int8_t temperature, HeatingMode mode) {
   if (!this->can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");

@@ -7,7 +7,8 @@
 namespace esphome {
 namespace truma_inetbox {
 
-class TrumaHeaterNumber : public Component, public number::Number, public Parented<TrumaiNetBoxApp> {
+
+class TrumaAirconManualNumber : public Component, public number::Number, public Parented<TrumaiNetBoxApp> {
  public:
   void setup() override;
   void dump_config() override;

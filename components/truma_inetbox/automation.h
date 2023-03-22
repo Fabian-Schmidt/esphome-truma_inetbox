@@ -56,6 +56,15 @@ template<typename... Ts> class HeaterEnergyMixAction : public Action<Ts...>, pub
   }
 };
 
+template<typename... Ts> class AirconManualTempAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
+ public:
+  TEMPLATABLE_VALUE(u_int8_t, temperature)
+
+  void play(Ts... x) override {
+    this->parent_->get_aircon_manual()->action_set_temp(this->temperature_.value_or(x..., 0));
+  }
+};
+
 template<typename... Ts> class TimerDisableAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
  public:
   void play(Ts... x) override { this->parent_->get_timer()->action_timer_disable(); }

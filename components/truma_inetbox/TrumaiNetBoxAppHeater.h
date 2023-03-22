@@ -11,6 +11,7 @@ class TrumaiNetBoxAppHeater : public TrumaStausFrameResponseStorage<StatusFrameH
   StatusFrameHeaterResponse *update_prepare() override;
   void create_update_data(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter) override;
   void dump_data() const override;
+  bool can_update() override;
 
   bool action_heater_room(u_int8_t temperature, HeatingMode mode = HeatingMode::HEATING_MODE_OFF);
   bool action_heater_water(u_int8_t temperature);

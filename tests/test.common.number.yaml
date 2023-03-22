@@ -7,3 +7,8 @@
   - platform: truma_inetbox
     name: "electric power level"
     type: ELECTRIC_POWER_LEVEL
+
+  - platform: truma_inetbox
+    name: "Aircon manual temp"
+    type: AIRCON_MANUAL_TEMPERATURE
+

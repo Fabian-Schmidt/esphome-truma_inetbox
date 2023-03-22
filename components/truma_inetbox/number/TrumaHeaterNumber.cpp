@@ -19,6 +19,8 @@ void TrumaHeaterNumber::setup() {
       case TRUMA_NUMBER_TYPE::ELECTRIC_POWER_LEVEL:
         this->publish_state(static_cast<float>(status_heater->el_power_level_a));
         break;
+      default:
+        break;
     }
   });
 }
@@ -33,6 +35,8 @@ void TrumaHeaterNumber::control(float value) {
       break;
     case TRUMA_NUMBER_TYPE::ELECTRIC_POWER_LEVEL:
       this->parent_->get_heater()->action_heater_electric_power_level(static_cast<u_int16_t>(value));
+      break;
+    default:
       break;
   }
 }

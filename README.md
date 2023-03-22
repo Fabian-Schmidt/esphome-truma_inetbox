@@ -121,6 +121,7 @@ The following `type` values are available:
 - `TARGET_ROOM_TEMPERATURE`
 - `TARGET_WATER_TEMPERATURE`
 - `ELECTRIC_POWER_LEVEL`
+- `AIRCON_MANUAL_TEMPERATURE`
 
 ### Sensor
 
@@ -161,6 +162,8 @@ The following [ESP Home actions](https://esphome.io/guides/automations.html#acti
 - `truma_inetbox.heater.set_energy_mix`
   - `energy_mix` - Set energy mix to: `GAS`, `MIX`, `ELECTRICITY`.
   - `watt` - Optional: Set electricity level to `0`, `900`, `1800`
+- `truma_inetbox.aircon.manual.set_target_temperature`
+  - `temperature` - Temperature between 16C and 31C. Below 16C will disable the Aircon.
 - `truma_inetbox.timer.disable` - Disable the timer configuration.
 - `truma_inetbox.timer.activate` - Set a new timer configuration.
   - `start` - Start time.

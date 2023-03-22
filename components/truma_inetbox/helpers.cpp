@@ -38,7 +38,7 @@ TargetTemp decimal_to_room_temp(u_int8_t val) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val <= 5) {
-    return TargetTemp::TARGET_TEMP_ROOM_MIN;
+    return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 30) {
     return TargetTemp::TARGET_TEMP_ROOM_MAX;
@@ -51,7 +51,7 @@ TargetTemp decimal_to_room_temp(float val) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val <= 5) {
-    return TargetTemp::TARGET_TEMP_ROOM_MIN;
+    return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 30) {
     return TargetTemp::TARGET_TEMP_ROOM_MAX;
@@ -64,7 +64,7 @@ TargetTemp decimal_to_aircon_temp(u_int8_t val) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val <= 16) {
-    return TargetTemp::TARGET_TEMP_AIRCON_MIN;
+    return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 31) {
     return TargetTemp::TARGET_TEMP_AIRCON_MAX;
@@ -77,7 +77,7 @@ TargetTemp decimal_to_aircon_temp(float val) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val <= 16) {
-    return TargetTemp::TARGET_TEMP_AIRCON_MIN;
+    return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 31) {
     return TargetTemp::TARGET_TEMP_AIRCON_MAX;

@@ -284,6 +284,8 @@ HeaterElecPowerLevelAction = truma_inetbox_ns.class_(
     "HeaterElecPowerLevelAction", automation.Action)
 HeaterEnergyMixAction = truma_inetbox_ns.class_(
     "HeaterEnergyMixAction", automation.Action)
+AirconManualTempAction = truma_inetbox_ns.class_(
+    "AirconManualTempAction", automation.Action)
 TimerDisableAction = truma_inetbox_ns.class_(
     "TimerDisableAction", automation.Action)
 TimerActivateAction = truma_inetbox_ns.class_(
@@ -451,6 +453,27 @@ async def truma_inetbox_heater_set_energy_mix_level_to_code(config, action_id, t
 
     template_ = await cg.templatable(config[CONF_WATT], args, cg.uint16)
     cg.add(var.set_watt(template_))
+
+    return var
+
+
+@automation.register_action(
+    "truma_inetbox.aircon.manual.set_target_temperature",
+    AirconManualTempAction,
+    automation.maybe_conf(
+        CONF_TEMPERATURE,
+        {
+            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
+            cv.Required(CONF_TEMPERATURE): cv.templatable(cv.int_range(min=0, max=31)),
+        }
+    ),
+)
+async def truma_inetbox_aircon_manual_set_target_temperature_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
+
+    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
+    cg.add(var.set_temperature(template_))
 
     return var
 

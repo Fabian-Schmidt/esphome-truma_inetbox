@@ -62,6 +62,18 @@ CONF_SUPPORTED_TYPE = {
         CONF_MIN_VALUE: 0,
         CONF_STEP: 900,
     },
+
+    "AIRCON_MANUAL_TEMPERATURE": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaAirconManualNumber", number.Number, cg.Component),
+        CONF_TYPE: TRUMA_NUMBER_TYPE_dummy_ns.AIRCON_MANUAL_TEMPERATURE,
+        CONF_UNIT_OF_MEASUREMENT: UNIT_CELSIUS,
+        CONF_ICON: ICON_THERMOMETER,
+        CONF_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
+        CONF_MAX_VALUE: 31,
+        # Values between 0 and 16 are handeld as off.
+        CONF_MIN_VALUE: 15,
+        CONF_STEP: 1,
+    },
 }
 
 

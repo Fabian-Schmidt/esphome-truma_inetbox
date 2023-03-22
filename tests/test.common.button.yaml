@@ -35,3 +35,13 @@
     name: "Set electric power level to 1800 Watt"
     on_press:
       - truma_inetbox.heater.set_electric_power_level: 1800
+  - platform: template
+    name: "Switch Aircon off"
+    on_press:
+      - truma_inetbox.aircon.manual.set_target_temperature: 0
+  - platform: template
+    name: "Set Aircon to fixed 21 C"
+    on_press:
+      - truma_inetbox.aircon.manual.set_target_temperature: 21
+
+      

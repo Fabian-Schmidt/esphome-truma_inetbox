@@ -6,6 +6,7 @@
 namespace esphome {
 namespace truma_inetbox {
 enum class TRUMA_SENSOR_TYPE {
+  UNKNOWN,
   CURRENT_ROOM_TEMPERATURE,
   CURRENT_WATER_TEMPERATURE,
   TARGET_ROOM_TEMPERATURE,

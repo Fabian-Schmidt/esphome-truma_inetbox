@@ -2,6 +2,7 @@
 #include "TrumaStatusFrameBuilder.h"
 #include "esphome/core/log.h"
 #include "helpers.h"
+#include "TrumaiNetBoxApp.h"
 
 namespace esphome {
 namespace truma_inetbox {
@@ -26,7 +27,7 @@ StatusFrameAirconManualResponse *TrumaiNetBoxAppAirconManual::update_prepare() {
 }
 
 void TrumaiNetBoxAppAirconManual::create_update_data(StatusFrame *response, u_int8_t *response_len,
-                                                u_int8_t command_counter) {
+                                                     u_int8_t command_counter) {
   status_frame_create_empty(response, STATUS_FRAME_AIRCON_MANUAL_RESPONSE, sizeof(StatusFrameAirconManualResponse),
                             command_counter);
 
@@ -43,6 +44,25 @@ void TrumaiNetBoxAppAirconManual::create_update_data(StatusFrame *response, u_in
 }
 
 void TrumaiNetBoxAppAirconManual::dump_data() const {}
+
+bool TrumaiNetBoxAppAirconManual::can_update() {
+  return TrumaStausFrameResponseStorage<StatusFrameAirconManual, StatusFrameAirconManualResponse>::can_update() &&
+         this->parent_->get_aircon_device() != TRUMA_DEVICE::UNKNOWN;
+}
+
+bool TrumaiNetBoxAppAirconManual::action_set_temp(u_int8_t temperature) {
+  if (!this->can_update()) {
+    ESP_LOGW(TAG, "Cannot update Truma.");
+    return false;
+  }
+
+  auto update_data = this->update_prepare();
+
+  update_data->target_temp_aircon = decimal_to_aircon_temp(temperature);
+
+  this->update_submit();
+  return true;
+}
 
 }  // namespace truma_inetbox
 }  // namespace esphome
