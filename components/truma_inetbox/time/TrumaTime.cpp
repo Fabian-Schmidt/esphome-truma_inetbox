@@ -8,7 +8,7 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.time";
 
 void TrumaTime::setup() {
-  this->parent_->add_on_clock_message_callback([this](const StatusFrameClock *status_clock) {
+  this->parent_->get_clock()->add_on_message_callback([this](const StatusFrameClock *status_clock) {
     if (this->auto_disable_count_ > 0) {
       if (this->read_time() && this->auto_disable_) {
         this->auto_disable_count_--;
@@ -22,10 +22,10 @@ void TrumaTime::update() {}
 void TrumaTime::dump_config() { ESP_LOGCONFIG(TAG, "Truma Time", this); }
 
 bool TrumaTime::read_time() {
-  if (!this->parent_->get_status_clock_valid()) {
+  if (!this->parent_->get_clock()->get_status_valid()) {
     return false;
   }
-  auto status_clock = this->parent_->get_status_clock();
+  auto status_clock = this->parent_->get_clock()->get_status();
 
   time::ESPTime rtc_time{.second = status_clock->clock_second,
                          .minute = status_clock->clock_minute,

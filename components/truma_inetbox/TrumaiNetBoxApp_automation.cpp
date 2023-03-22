@@ -10,11 +10,11 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.TrumaiNetBoxApp";
 
 bool TrumaiNetBoxApp::action_heater_room(u_int8_t temperature, HeatingMode mode) {
-  if (!this->truma_heater_can_update()) {
+  if (!this->heater_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
-  auto heater = this->update_heater_prepare();
+  auto heater = this->heater_.update_prepare();
 
   heater->target_temp_room = decimal_to_room_temp(temperature);
 
@@ -45,16 +45,16 @@ bool TrumaiNetBoxApp::action_heater_room(u_int8_t temperature, HeatingMode mode)
     heater->energy_mix_a = EnergyMix::ENERGY_MIX_GAS;
   }
 
-  this->update_heater_submit();
+  this->heater_.update_submit();
   return true;
 }
 
 bool TrumaiNetBoxApp::action_heater_water(u_int8_t temperature) {
-  if (!this->truma_heater_can_update()) {
+  if (!this->heater_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
-  auto heater = this->update_heater_prepare();
+  auto heater = this->heater_.update_prepare();
 
   heater->target_temp_water = decimal_to_water_temp(temperature);
 
@@ -63,16 +63,16 @@ bool TrumaiNetBoxApp::action_heater_water(u_int8_t temperature) {
     heater->energy_mix_a = EnergyMix::ENERGY_MIX_GAS;
   }
 
-  this->update_heater_submit();
+  this->heater_.update_submit();
   return true;
 }
 
 bool TrumaiNetBoxApp::action_heater_water(TargetTemp temperature) {
-  if (!this->truma_heater_can_update()) {
+  if (!this->heater_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
-  auto heater = this->update_heater_prepare();
+  auto heater = this->heater_.update_prepare();
 
   // If parameter `temperature` contains a valid mode use it or else use `OFF`.
   if (temperature == TargetTemp::TARGET_TEMP_WATER_ECO || temperature == TargetTemp::TARGET_TEMP_WATER_HIGH ||
@@ -87,16 +87,16 @@ bool TrumaiNetBoxApp::action_heater_water(TargetTemp temperature) {
     heater->energy_mix_a = EnergyMix::ENERGY_MIX_GAS;
   }
 
-  this->update_heater_submit();
+  this->heater_.update_submit();
   return true;
 }
 
 bool TrumaiNetBoxApp::action_heater_electric_power_level(u_int16_t value) {
-  if (!this->truma_heater_can_update()) {
+  if (!this->heater_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
-  auto heater = this->update_heater_prepare();
+  auto heater = this->heater_.update_prepare();
 
   heater->el_power_level_a = decimal_to_el_power_level(value);
   if (heater->el_power_level_a != ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0) {
@@ -108,16 +108,16 @@ bool TrumaiNetBoxApp::action_heater_electric_power_level(u_int16_t value) {
     heater->energy_mix_a = EnergyMix::ENERGY_MIX_GAS;
   }
 
-  this->update_heater_submit();
+  this->heater_.update_submit();
   return true;
 }
 
 bool TrumaiNetBoxApp::action_heater_energy_mix(EnergyMix energy_mix, ElectricPowerLevel el_power_level) {
-  if (!this->truma_heater_can_update()) {
+  if (!this->heater_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
-  auto heater = this->update_heater_prepare();
+  auto heater = this->heater_.update_prepare();
 
   // If parameter `el_power_level` contains a valid mode use it.
   if (el_power_level == ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0 ||
@@ -147,27 +147,27 @@ bool TrumaiNetBoxApp::action_heater_energy_mix(EnergyMix energy_mix, ElectricPow
     heater->energy_mix_a = EnergyMix::ENERGY_MIX_GAS;
   }
 
-  this->update_heater_submit();
+  this->heater_.update_submit();
   return true;
 }
 
 bool TrumaiNetBoxApp::action_timer_disable() {
-  if (!this->truma_timer_can_update()) {
+  if (!this->timer_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
-  auto timer = this->update_timer_prepare();
+  auto timer = this->timer_.update_prepare();
 
   timer->timer_resp_active = TimerActive::TIMER_ACTIVE_OFF;
 
-  this->update_timer_submit();
+  this->timer_.update_submit();
   return true;
 }
 
 bool TrumaiNetBoxApp::action_timer_activate(u_int16_t start, u_int16_t stop, u_int8_t room_temperature,
                                             HeatingMode mode, u_int8_t water_temperature, EnergyMix energy_mix,
                                             ElectricPowerLevel el_power_level) {
-  if (!this->truma_timer_can_update()) {
+  if (!this->timer_.can_update()) {
     ESP_LOGW(TAG, "Cannot update Truma.");
     return false;
   }
@@ -176,7 +176,7 @@ bool TrumaiNetBoxApp::action_timer_activate(u_int16_t start, u_int16_t stop, u_i
     return false;
   }
 
-  auto timer = this->update_timer_prepare();
+  auto timer = this->timer_.update_prepare();
 
   timer->timer_resp_active = TimerActive::TIMER_ACTIVE_ON;
   timer->timer_resp_start_hours = start / 60;
@@ -235,7 +235,7 @@ bool TrumaiNetBoxApp::action_timer_activate(u_int16_t start, u_int16_t stop, u_i
     }
   }
 
-  this->update_timer_submit();
+  this->timer_.update_submit();
   return true;
 }
 

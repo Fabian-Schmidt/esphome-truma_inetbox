@@ -6,7 +6,7 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.room_climate";
 void TrumaRoomClimate::setup() {
-  this->parent_->add_on_heater_message_callback([this](const StatusFrameHeater *status_heater) {
+  this->parent_->get_heater()->add_on_message_callback([this](const StatusFrameHeater *status_heater) {
     // Publish updated state
     this->target_temperature = temp_code_to_decimal(status_heater->target_temp_room);
     this->current_temperature = temp_code_to_decimal(status_heater->current_temp_room);
@@ -43,7 +43,7 @@ void TrumaRoomClimate::control(const climate::ClimateCall &call) {
   if (call.get_mode().has_value()) {
     // User requested mode change
     climate::ClimateMode mode = *call.get_mode();
-    auto status_heater = this->parent_->get_status_heater();
+    auto status_heater = this->parent_->get_heater()->get_status();
     switch (mode) {
       case climate::CLIMATE_MODE_HEAT:
         if (status_heater->target_temp_room == TargetTemp::TARGET_TEMP_OFF) {
@@ -58,7 +58,7 @@ void TrumaRoomClimate::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     climate::ClimatePreset pres = *call.get_preset();
-    auto status_heater = this->parent_->get_status_heater();
+    auto status_heater = this->parent_->get_heater()->get_status();
     auto current_target_temp = temp_code_to_decimal(status_heater->target_temp_room);
     if (call.get_target_temperature().has_value()) {
       current_target_temp = *call.get_target_temperature();

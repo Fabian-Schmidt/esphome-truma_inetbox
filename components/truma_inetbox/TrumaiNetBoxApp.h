@@ -4,6 +4,12 @@
 #include "LinBusProtocol.h"
 #include "esphome/core/automation.h"
 #include "TrumaEnums.h"
+#include "TrumaiNetBoxAppAirconAuto.h"
+#include "TrumaiNetBoxAppAirconManual.h"
+#include "TrumaiNetBoxAppClock.h"
+#include "TrumaiNetBoxAppConfig.h"
+#include "TrumaiNetBoxAppHeater.h"
+#include "TrumaiNetBoxAppTimer.h"
 #include "TrumaStausFrameResponseStorage.h"
 #include "TrumaStausFrameStorage.h"
 #include "TrumaStructs.h"
@@ -69,7 +75,6 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
   } inner;
 } __attribute__((packed));
 
-
 class TrumaiNetBoxApp : public LinBusProtocol {
  public:
   void update() override;
@@ -78,48 +83,15 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   void lin_heartbeat() override;
   void lin_reset_device() override;
 
-  bool get_status_heater_valid() { return this->heater_.data_valid_; }
-  const StatusFrameHeater *get_status_heater() { return &this->heater_.data_; }
-
-  bool get_status_timer_valid() { return this->timer_.data_valid_; }
-  const StatusFrameTimer *get_status_timer() { return &this->timer_.data_; }
-
-  bool get_status_clock_valid() { return this->clock_.data_valid_; }
-  const StatusFrameClock *get_status_clock() { return &this->clock_.data_; }
-
-  bool get_status_config_valid() { return this->config_.data_valid_; }
-  const StatusFrameConfig *get_status_config() { return &this->config_.data_; }
-
-  bool truma_heater_can_update() { return this->heater_.data_valid_; }
-  StatusFrameHeaterResponse *update_heater_prepare();
-  void update_heater_submit() { this->heater_.update_status_unsubmitted_ = true; }
-
-  bool truma_timer_can_update() { return this->timer_.data_valid_; }
-  StatusFrameTimerResponse *update_timer_prepare();
-  void update_timer_submit() { this->timer_.update_status_unsubmitted_ = true; }
-
-  bool truma_aircon_can_update() { return this->airconManual_.data_valid_; }
-  StatusFrameAirconManualResponse *update_aircon_prepare();
-  void update_aircon_submit() { this->airconManual_.update_status_unsubmitted_ = true; }
+  TrumaiNetBoxAppAirconAuto *get_aircon_auto() { return &this->airconAuto_; }
+  TrumaiNetBoxAppAirconManual *get_aircon_manual() { return &this->airconManual_; }
+  TrumaiNetBoxAppClock *get_clock() { return &this->clock_; }
+  TrumaiNetBoxAppConfig *get_config() { return &this->config_; }
+  TrumaiNetBoxAppHeater *get_heater() { return &this->heater_; }
+  TrumaiNetBoxAppTimer *get_timer() { return &this->timer_; }
 
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
 
-  // Automation
-  void add_on_heater_message_callback(std::function<void(const StatusFrameHeater *)> callback) {
-    this->heater_.state_callback_.add(std::move(callback));
-  }
-  void add_on_timer_message_callback(std::function<void(const StatusFrameTimer *)> callback) {
-    this->timer_.state_callback_.add(std::move(callback));
-  }
-  void add_on_clock_message_callback(std::function<void(const StatusFrameClock *)> callback) {
-    this->clock_.state_callback_.add(std::move(callback));
-  }
-  void add_on_config_message_callback(std::function<void(const StatusFrameConfig *)> callback) {
-    this->config_.state_callback_.add(std::move(callback));
-  }
-  void add_on_aircon_manual_message_callback(std::function<void(const StatusFrameAirconManual *)> callback) {
-    this->airconManual_.state_callback_.add(std::move(callback));
-  }
   bool action_heater_room(u_int8_t temperature, HeatingMode mode = HeatingMode::HEATING_MODE_OFF);
   bool action_heater_water(u_int8_t temperature);
   bool action_heater_water(TargetTemp temperature);
@@ -150,11 +122,12 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
   TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKNOWN;
 
-  TrumaStausFrameResponseStorage<StatusFrameHeater, StatusFrameHeaterResponse> heater_;
-  TrumaStausFrameResponseStorage<StatusFrameTimer, StatusFrameTimerResponse> timer_;
-  TrumaStausFrameResponseStorage<StatusFrameAirconManual, StatusFrameAirconManualResponse> airconManual_;
-  TrumaStausFrameStorage<StatusFrameConfig> config_;
-  TrumaStausFrameStorage<StatusFrameClock> clock_;
+  TrumaiNetBoxAppAirconAuto airconAuto_{};
+  TrumaiNetBoxAppAirconManual airconManual_{};
+  TrumaiNetBoxAppClock clock_{};
+  TrumaiNetBoxAppConfig config_{};
+  TrumaiNetBoxAppHeater heater_{};
+  TrumaiNetBoxAppTimer timer_{};
 
   // last time CP plus was informed I got an update msg.
   uint32_t update_time_ = 0;

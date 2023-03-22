@@ -6,7 +6,7 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.water_climate";
 void TrumaWaterClimate::setup() {
-  this->parent_->add_on_heater_message_callback([this](const StatusFrameHeater *status_heater) {
+  this->parent_->get_heater()->add_on_message_callback([this](const StatusFrameHeater *status_heater) {
     // Publish updated state
     this->target_temperature = temp_code_to_decimal(status_heater->target_temp_water);
     this->current_temperature = temp_code_to_decimal(status_heater->current_temp_water);
@@ -26,7 +26,7 @@ void TrumaWaterClimate::control(const climate::ClimateCall &call) {
 
   if (call.get_mode().has_value()) {
     climate::ClimateMode mode = *call.get_mode();
-    auto status_heater = this->parent_->get_status_heater();
+    auto status_heater = this->parent_->get_heater()->get_status();
     switch (mode) {
       case climate::CLIMATE_MODE_HEAT:
         if (status_heater->target_temp_water == TargetTemp::TARGET_TEMP_OFF) {

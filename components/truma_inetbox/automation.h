@@ -85,7 +85,7 @@ template<typename... Ts> class WriteTimeAction : public Action<Ts...>, public Pa
 class TrumaiNetBoxAppHeaterMessageTrigger : public Trigger<const StatusFrameHeater *> {
  public:
   explicit TrumaiNetBoxAppHeaterMessageTrigger(TrumaiNetBoxApp *parent) {
-    parent->add_on_heater_message_callback([this](const StatusFrameHeater *message) { this->trigger(message); });
+    parent->get_heater()->add_on_message_callback([this](const StatusFrameHeater *message) { this->trigger(message); });
   }
 };
 

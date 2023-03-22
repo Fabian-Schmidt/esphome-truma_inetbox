@@ -8,6 +8,9 @@ namespace truma_inetbox {
 template<typename T, typename TResponse> class TrumaStausFrameResponseStorage : public TrumaStausFrameStorage<T> {
  public:
   void reset();
+  bool can_update() { return this->data_valid_; }
+  virtual TResponse *update_prepare() = 0;
+  void update_submit() { this->update_status_unsubmitted_ = true; }
 
   // Prepared means `update_status_` was copied from `data_`.
   bool update_status_prepared_ = false;

@@ -8,7 +8,7 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.heater_number";
 
 void TrumaHeaterNumber::setup() {
-  this->parent_->add_on_heater_message_callback([this](const StatusFrameHeater *status_heater) {
+  this->parent_->get_heater()->add_on_message_callback([this](const StatusFrameHeater *status_heater) {
     switch (this->type_) {
       case TRUMA_NUMBER_TYPE::TARGET_ROOM_TEMPERATURE:
         this->publish_state(temp_code_to_decimal(status_heater->target_temp_room, 0));

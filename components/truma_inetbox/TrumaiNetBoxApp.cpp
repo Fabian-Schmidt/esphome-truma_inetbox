@@ -92,68 +92,6 @@ template<typename T, typename TResponse> void TrumaStausFrameResponseStorage<T, 
   this->update_status_stale_ = false;
 }
 
-StatusFrameHeaterResponse *TrumaiNetBoxApp::update_heater_prepare() {
-  // An update is currently going on.
-  if (this->heater_.update_status_prepared_ || this->heater_.update_status_stale_) {
-    return &this->heater_.update_status_;
-  }
-
-  // prepare status heater response
-  this->heater_.update_status_ = {};
-  this->heater_.update_status_.target_temp_room = this->heater_.data_.target_temp_room;
-  this->heater_.update_status_.heating_mode = this->heater_.data_.heating_mode;
-  this->heater_.update_status_.el_power_level_a = this->heater_.data_.el_power_level_a;
-  this->heater_.update_status_.target_temp_water = this->heater_.data_.target_temp_water;
-  this->heater_.update_status_.el_power_level_b = this->heater_.data_.el_power_level_b;
-  this->heater_.update_status_.energy_mix_a = this->heater_.data_.energy_mix_a;
-  this->heater_.update_status_.energy_mix_b = this->heater_.data_.energy_mix_b;
-
-  this->heater_.update_status_prepared_ = true;
-  return &this->heater_.update_status_;
-}
-
-StatusFrameTimerResponse *TrumaiNetBoxApp::update_timer_prepare() {
-  // An update is currently going on.
-  if (this->timer_.update_status_prepared_ || this->timer_.update_status_stale_) {
-    return &this->timer_.update_status_;
-  }
-
-  // prepare status heater response
-  this->timer_.update_status_ = {};
-  this->timer_.update_status_.timer_target_temp_room = this->timer_.data_.timer_target_temp_room;
-  this->timer_.update_status_.timer_heating_mode = this->timer_.data_.timer_heating_mode;
-  this->timer_.update_status_.timer_el_power_level_a = this->timer_.data_.timer_el_power_level_a;
-  this->timer_.update_status_.timer_target_temp_water = this->timer_.data_.timer_target_temp_water;
-  this->timer_.update_status_.timer_el_power_level_b = this->timer_.data_.timer_el_power_level_b;
-  this->timer_.update_status_.timer_energy_mix_a = this->timer_.data_.timer_energy_mix_a;
-  this->timer_.update_status_.timer_energy_mix_b = this->timer_.data_.timer_energy_mix_b;
-  this->timer_.update_status_.timer_resp_active = this->timer_.data_.timer_active;
-  this->timer_.update_status_.timer_resp_start_minutes = this->timer_.data_.timer_start_minutes;
-  this->timer_.update_status_.timer_resp_start_hours = this->timer_.data_.timer_start_hours;
-  this->timer_.update_status_.timer_resp_stop_minutes = this->timer_.data_.timer_stop_minutes;
-  this->timer_.update_status_.timer_resp_stop_hours = this->timer_.data_.timer_stop_hours;
-
-  this->timer_.update_status_prepared_ = true;
-  return &this->timer_.update_status_;
-}
-
-StatusFrameAirconManualResponse *TrumaiNetBoxApp::update_aircon_prepare() {
-  // An update is currently going on.
-   if (this->airconManual_.update_status_prepared_ || this->airconManual_.update_status_stale_) {
-    return &this->airconManual_.update_status_;
-  }
-
-  // prepare status response
-  this->airconManual_.update_status_ = {};
-  this->airconManual_.update_status_.mode = this->airconManual_.data_.mode;
-  this->airconManual_.update_status_.operation = this->airconManual_.data_.operation;
-  this->airconManual_.update_status_.energy_mix = this->airconManual_.data_.energy_mix;
-  this->airconManual_.update_status_.target_temp_aircon = this->airconManual_.data_.target_temp_aircon;
-
-  this->airconManual_.update_status_prepared_ = true;
-  return &this->airconManual_.update_status_;
-}
-
 bool TrumaiNetBoxApp::answer_lin_order_(const u_int8_t pid) {
   // Alive message
   if (pid == LIN_PID_TRUMA_INET_BOX) {

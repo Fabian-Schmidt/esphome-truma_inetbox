@@ -229,6 +229,21 @@ struct StatusFrameAirconAuto {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp;
 } __attribute__((packed));
 
+// TODO
+struct StatusFrameAirconAutoResponse {  // NOLINT(altera-struct-pack-align)
+  EnergyMix energy_mix_a;
+  u_int8_t unknown_02;  // 0x00
+  EnergyMix energy_mix_b;
+  u_int8_t unknown_04;  // 0x00
+  u_int8_t unknown_05;  // 0x00
+  u_int8_t unknown_06;  // 0x00
+  TargetTemp target_temp_aircon_auto;
+  ElectricPowerLevel el_power_level_a;
+  u_int8_t unknown_11;  // 0x00
+  u_int8_t unknown_12;  // 0x00
+  ElectricPowerLevel el_power_level_b;
+} __attribute__((packed));
+
 // Length 20 (0x14)
 // TODO
 struct StatusFrameAirconAutoInit {  // NOLINT(altera-struct-pack-align)

@@ -8,7 +8,7 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.heater_binary_sensor";
 
 void TrumaHeaterBinarySensor::setup() {
-  this->parent_->add_on_heater_message_callback([this](const StatusFrameHeater *status_heater) {
+  this->parent_->get_heater()->add_on_message_callback([this](const StatusFrameHeater *status_heater) {
     switch (this->type_) {
       case TRUMA_BINARY_SENSOR_TYPE::HEATER_ROOM:
         this->publish_state(status_heater->target_temp_room != TargetTemp::TARGET_TEMP_OFF);
