@@ -1,5 +1,5 @@
 #include "TrumaiNetBoxApp.h"
-#include "TrumaStatusFrame.h"
+#include "TrumaStatusFrameBuilder.h"
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 #include "helpers.h"
@@ -9,15 +9,26 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.TrumaiNetBoxApp";
 
+TrumaiNetBoxApp::TrumaiNetBoxApp() {
+  this->airconAuto_.set_parent(this);
+  this->airconManual_.set_parent(this);
+  this->clock_.set_parent(this);
+  // this->config_.set_parent(this);
+  this->heater_.set_parent(this);
+  this->timer_.set_parent(this);
+}
+
 void TrumaiNetBoxApp::update() {
   // Call listeners in after method 'lin_multiframe_recieved' call.
   // Because 'lin_multiframe_recieved' is time critical an all these sensors can take some time.
 
   // Run through callbacks
-  heater_.update();
-  timer_.update();
-  clock_.update();
-  config_.update();
+  this->airconAuto_.update();
+  this->airconManual_.update();
+  this->clock_.update();
+  this->config_.update();
+  this->heater_.update();
+  this->timer_.update();
 
   LinBusProtocol::update();
 
@@ -29,17 +40,10 @@ void TrumaiNetBoxApp::update() {
   if (this->time_ != nullptr && !this->update_status_clock_done && this->init_recieved_ > 0) {
     if (micros() > ((30 * 1000 * 1000) + this->init_recieved_ /* 30 seconds after init recieved */)) {
       this->update_status_clock_done = true;
-      this->action_write_time();
+      this->clock_.action_write_time();
     }
   }
 #endif  // USE_TIME
-}
-
-template<typename T> void TrumaStausFrameStorage<T>::update() {
-  if (this->data_updated_) {
-    this->state_callback_.call(&this->data_);
-  }
-  this->data_updated_ = false;
 }
 
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
@@ -71,25 +75,14 @@ void TrumaiNetBoxApp::lin_reset_device() {
   this->device_registered_ = micros();
   this->init_recieved_ = 0;
 
-  this->heater_.reset();
-  this->timer_.reset();
+  this->airconAuto_.reset();
   this->airconManual_.reset();
   this->clock_.reset();
   this->config_.reset();
+  this->heater_.reset();
+  this->timer_.reset();
 
   this->update_time_ = 0;
-}
-
-template<typename T> void TrumaStausFrameStorage<T>::reset() {
-  this->data_valid_ = false;
-  this->data_updated_ = false;
-}
-
-template<typename T, typename TResponse> void TrumaStausFrameResponseStorage<T, TResponse>::reset() {
-  TrumaStausFrameStorage<T>::reset();
-  this->update_status_prepared_ = false;
-  this->update_status_unsubmitted_ = false;
-  this->update_status_stale_ = false;
 }
 
 bool TrumaiNetBoxApp::answer_lin_order_(const u_int8_t pid) {
@@ -155,64 +148,31 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
       ESP_LOGD(TAG, "Requested read: Sending init");
       status_frame_create_init(response_frame, return_len, this->message_counter++);
       return response;
-    } else if (this->heater_.update_status_unsubmitted_) {
+    } else if (this->heater_.has_update()) {
       ESP_LOGD(TAG, "Requested read: Sending heater update");
-      status_frame_create_update_heater(
-          response_frame, return_len, this->message_counter++, this->heater_.update_status_.target_temp_room,
-          this->heater_.update_status_.target_temp_water, this->heater_.update_status_.heating_mode,
-          this->heater_.update_status_.energy_mix_a, this->heater_.update_status_.el_power_level_a);
-
+      this->heater_.create_update_data(response_frame, return_len, this->message_counter++);
       this->update_time_ = 0;
-      this->heater_.update_status_prepared_ = false;
-      this->heater_.update_status_unsubmitted_ = false;
-      this->heater_.update_status_stale_ = true;
       return response;
-    } else if (this->timer_.update_status_unsubmitted_) {
+    } else if (this->timer_.has_update()) {
       ESP_LOGD(TAG, "Requested read: Sending timer update");
-      status_frame_create_update_timer(
-          response_frame, return_len, this->message_counter++, this->timer_.update_status_.timer_resp_active,
-          this->timer_.update_status_.timer_resp_start_hours, this->timer_.update_status_.timer_resp_start_minutes,
-          this->timer_.update_status_.timer_resp_stop_hours, this->timer_.update_status_.timer_resp_stop_minutes,
-          this->timer_.update_status_.timer_target_temp_room, this->timer_.update_status_.timer_target_temp_water,
-          this->timer_.update_status_.timer_heating_mode, this->timer_.update_status_.timer_energy_mix_a,
-          this->timer_.update_status_.timer_el_power_level_a);
-
+      this->timer_.create_update_data(response_frame, return_len, this->message_counter++);
       this->update_time_ = 0;
-      this->timer_.update_status_prepared_ = false;
-      this->timer_.update_status_unsubmitted_ = false;
-      this->timer_.update_status_stale_ = true;
       return response;
-    } else if (this->airconManual_.update_status_unsubmitted_) {
-      ESP_LOGD(TAG, "Requested read: Sending aircon update");
-
-      status_frame_create_empty(response_frame, STATUS_FRAME_AIRCON_MANUAL_RESPONSE, sizeof(StatusFrameAirconManualResponse),
-                                this->message_counter++);
-
-      response_frame->inner.airconManualResponse.mode = this->airconManual_.update_status_.mode;
-      response_frame->inner.airconManualResponse.unknown_02 = this->airconManual_.update_status_.unknown_02;
-      response_frame->inner.airconManualResponse.operation = this->airconManual_.update_status_.operation;
-      response_frame->inner.airconManualResponse.energy_mix = this->airconManual_.update_status_.energy_mix;
-      response_frame->inner.airconManualResponse.target_temp_aircon = this->airconManual_.update_status_.target_temp_aircon;
-
-      status_frame_calculate_checksum(response_frame);
-      (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAirconManualResponse);
-
+    } else if (this->airconManual_.has_update()) {
+      ESP_LOGD(TAG, "Requested read: Sending aircon manual update");
+      this->airconManual_.create_update_data(response_frame, return_len, this->message_counter++);
       this->update_time_ = 0;
-      this->airconManual_.update_status_prepared_ = false;
-      this->airconManual_.update_status_unsubmitted_ = false;
-      this->airconManual_.update_status_stale_ = true;
+      return response;
+    } else if (this->airconAuto_.has_update()) {
+      ESP_LOGD(TAG, "Requested read: Sending aircon auto update");
+      this->airconAuto_.create_update_data(response_frame, return_len, this->message_counter++);
+      this->update_time_ = 0;
       return response;
 #ifdef USE_TIME
-    } else if (this->update_status_clock_unsubmitted_) {
-      if (this->time_ != nullptr) {
-        ESP_LOGD(TAG, "Requested read: Sending clock update");
-        // read time live
-        auto now = this->time_->now();
-
-        status_frame_create_update_clock(response_frame, return_len, this->message_counter++, now.hour, now.minute,
-                                         now.second, this->clock_.data_.clock_mode);
-      }
-      this->update_status_clock_unsubmitted_ = false;
+    } else if (this->clock_.has_update()) {
+      ESP_LOGD(TAG, "Requested read: Sending clock update");
+      this->clock_.create_update_data(response_frame, return_len, this->message_counter++);
+      this->update_time_ = 0;
       return response;
 #endif  // USE_TIME
     } else {
@@ -242,13 +202,10 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|cWate|cRoom|st|err  |  |
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.14.33.00.12.00.00.00.00.00.00.00.00.00.00.01.01.CC.0B.6C.0B.00.00.00.00
-    this->heater_.data_ = statusFrame->inner.heater;
-    this->heater_.data_valid_ = true;
-    this->heater_.data_updated_ = true;
-
-    this->heater_.update_status_stale_ = false;
+    this->heater_.set_status(statusFrame->inner.heater);
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL && header->message_length == sizeof(StatusFrameAirconManual)) {
+  } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL &&
+             header->message_length == sizeof(StatusFrameAirconManual)) {
     ESP_LOGI(TAG, "StatusFrameAirconManual");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
@@ -269,11 +226,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.C2.04.00.71.01.D6.0B.00.00.88.0B.00.00.00.00.00.00.AA.0A
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.13.04.00.71.01.86.0B.00.00.88.0B.00.00.00.00.00.00.AA.0A
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.A8.00.00.71.01.00.00.00.00.88.0B.00.00.00.00.00.00.AA.0A
-    this->airconManual_.data_ = statusFrame->inner.airconManual;
-    this->airconManual_.data_valid_ = true;
-    this->airconManual_.data_updated_ = true;
-
-    this->airconManual_.update_status_stale_ = false;
+    this->airconManual_.set_status(statusFrame->inner.airconManual);
     return response;
   } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL_INIT &&
              header->message_length == sizeof(StatusFrameAirconManualInit)) {
@@ -282,11 +235,13 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.16.3F.00.E2.00.00.71.01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
     return response;
-  } else if (header->message_type == STATUS_FRAME_AIRCON_AUTO && header->message_length == sizeof(StatusFrameAirconAuto)) {
+  } else if (header->message_type == STATUS_FRAME_AIRCON_AUTO &&
+             header->message_length == sizeof(StatusFrameAirconAuto)) {
     ESP_LOGI(TAG, "StatusFrameAirconAuto");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.37.00.BF.01.00.01.00.00.00.00.00.00.00.00.00.00.00.49.0B.40.0B
+    this->airconAuto_.set_status(statusFrame->inner.airconAuto);
     return response;
   } else if (header->message_type == STATUS_FRAME_AIRCON_AUTO_INIT &&
              header->message_length == sizeof(StatusFrameAirconAutoInit)) {
@@ -301,18 +256,26 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|??|elecA|tWate|elecB|mi|mi|<--response-->|??|??|on|start|stop-|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.1D.18.0B.01.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.13.18.0B.0B.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
-    this->timer_.data_ = statusFrame->inner.timer;
-    this->timer_.data_valid_ = true;
-    this->timer_.data_updated_ = true;
+    this->timer_.set_status(statusFrame->inner.timer);
+    return response;
 
-    this->timer_.update_status_stale_ = false;
-
-    ESP_LOGD(TAG, "StatusFrameTimer target_temp_room: %f target_temp_water: %f %02u:%02u -> %02u:%02u %s",
-             temp_code_to_decimal(this->timer_.data_.timer_target_temp_room),
-             temp_code_to_decimal(this->timer_.data_.timer_target_temp_water), this->timer_.data_.timer_start_hours,
-             this->timer_.data_.timer_start_minutes, this->timer_.data_.timer_stop_hours,
-             this->timer_.data_.timer_stop_minutes, ((u_int8_t) this->timer_.data_.timer_active ? " ON" : " OFF"));
-
+  } else if (header->message_type == STATUS_FRAME_CLOCK && header->message_length == sizeof(StatusFrameClock)) {
+    ESP_LOGI(TAG, "StatusFrameClock");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.5B.0D.20.00.01.01.00.00.01.00.00
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.71.16.00.00.01.01.00.00.02.00.00
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.2B.16.1F.28.01.01.00.00.01.00.00
+    this->clock_.set_status(statusFrame->inner.clock);
+    return response;
+  } else if (header->message_type == STAUTS_FRAME_CONFIG && header->message_length == sizeof(StatusFrameConfig)) {
+    ESP_LOGI(TAG, "StatusFrameConfig");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.41.06.01.B4.0A.78.0A.00.00.00.00
+    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
+    this->config_.set_status(statusFrame->inner.config);
     return response;
   } else if (header->message_type == STATUS_FRAME_RESPONSE_ACK &&
              header->message_length == sizeof(StatusFrameResponseAck)) {
@@ -336,35 +299,6 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     }
 
     return response;
-  } else if (header->message_type == STATUS_FRAME_CLOCK && header->message_length == sizeof(StatusFrameClock)) {
-    ESP_LOGI(TAG, "StatusFrameClock");
-    // Example:
-    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.5B.0D.20.00.01.01.00.00.01.00.00
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.71.16.00.00.01.01.00.00.02.00.00
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.2B.16.1F.28.01.01.00.00.01.00.00
-    this->clock_.data_ = statusFrame->inner.clock;
-    this->clock_.data_valid_ = true;
-    this->clock_.data_updated_ = true;
-
-    ESP_LOGD(TAG, "StatusFrameClock %02d:%02d:%02d", this->clock_.data_.clock_hour, this->clock_.data_.clock_minute,
-             this->clock_.data_.clock_second);
-
-    return response;
-  } else if (header->message_type == STAUTS_FRAME_CONFIG && header->message_length == sizeof(StatusFrameConfig)) {
-    ESP_LOGI(TAG, "StatusFrameConfig");
-    // Example:
-    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.41.06.01.B4.0A.78.0A.00.00.00.00
-    // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
-    this->config_.data_ = statusFrame->inner.config;
-    this->config_.data_valid_ = true;
-    this->config_.data_updated_ = true;
-
-    ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", temp_code_to_decimal(this->config_.data_.temp_offset));
-
-    return response;
   } else if (header->message_type == STATUS_FRAME_DEVICES && header->message_length == sizeof(StatusFrameDevice)) {
     ESP_LOGI(TAG, "StatusFrameDevice");
     // This message is special. I recieve one response per registered (at CP plus) device.
@@ -380,7 +314,6 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.C7.03.00.01.00.50.00.00.04.03.00.60.10
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.71.03.01.01.00.10.03.02.06.00.02.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.7C.03.02.01.00.01.0C.00.01.02.01.00.00
-
     auto device = statusFrame->inner.device;
 
     this->init_recieved_ = micros();
@@ -439,8 +372,8 @@ bool TrumaiNetBoxApp::has_update_to_submit_() {
       this->init_requested_ = micros();
       return true;
     }
-  } else if (this->heater_.update_status_unsubmitted_ || this->timer_.update_status_unsubmitted_ ||
-             this->update_status_clock_unsubmitted_ || this->airconManual_.update_status_unsubmitted_) {
+  } else if (this->airconAuto_.has_update() || this->airconManual_.has_update() || this->clock_.has_update() ||
+             this->heater_.has_update() || this->timer_.has_update()) {
     if (this->update_time_ == 0) {
       // ESP_LOGD(TAG, "Notify CP Plus I got updates.");
       this->update_time_ = micros();

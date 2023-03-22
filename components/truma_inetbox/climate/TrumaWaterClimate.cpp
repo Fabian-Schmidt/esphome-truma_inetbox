@@ -21,7 +21,7 @@ void TrumaWaterClimate::dump_config() { LOG_CLIMATE(TAG, "Truma Climate", this);
 void TrumaWaterClimate::control(const climate::ClimateCall &call) {
   if (call.get_target_temperature().has_value()) {
     float temp = *call.get_target_temperature();
-    this->parent_->action_heater_water(static_cast<u_int8_t>(temp));
+    this->parent_->get_heater()->action_heater_water(static_cast<u_int8_t>(temp));
   }
 
   if (call.get_mode().has_value()) {
@@ -30,11 +30,11 @@ void TrumaWaterClimate::control(const climate::ClimateCall &call) {
     switch (mode) {
       case climate::CLIMATE_MODE_HEAT:
         if (status_heater->target_temp_water == TargetTemp::TARGET_TEMP_OFF) {
-          this->parent_->action_heater_water(40);
+          this->parent_->get_heater()->action_heater_water(40);
         }
         break;
       default:
-        this->parent_->action_heater_water(0);
+        this->parent_->get_heater()->action_heater_water(0);
         break;
     }
   }

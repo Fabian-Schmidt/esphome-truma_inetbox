@@ -1,16 +1,39 @@
 #pragma once
 
 #include "TrumaStausFrameStorage.h"
+#include "TrumaStructs.h"
+#include "esphome/core/helpers.h"
 
 namespace esphome {
 namespace truma_inetbox {
 
-template<typename T, typename TResponse> class TrumaStausFrameResponseStorage : public TrumaStausFrameStorage<T> {
+class TrumaiNetBoxApp;
+
+template<typename T, typename TResponse>
+class TrumaStausFrameResponseStorage : public TrumaStausFrameStorage<T>, public Parented<TrumaiNetBoxApp> {
  public:
-  void reset();
+  void reset() override {
+    TrumaStausFrameStorage<T>::reset();
+    this->update_status_prepared_ = false;
+    this->update_status_unsubmitted_ = false;
+    this->update_status_stale_ = false;
+  }
   bool can_update() { return this->data_valid_; }
   virtual TResponse *update_prepare() = 0;
   void update_submit() { this->update_status_unsubmitted_ = true; }
+  const bool has_update() const { return this->update_status_unsubmitted_; }
+  void set_status(T val) override {
+    TrumaStausFrameStorage<T>::set_status(val);
+    this->update_status_stale_ = false;
+  };
+  virtual void create_update_data(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter) = 0;
+
+ protected:
+  inline void update_submitted() {
+    this->update_status_prepared_ = false;
+    this->update_status_unsubmitted_ = false;
+    this->update_status_stale_ = true;
+  }
 
   // Prepared means `update_status_` was copied from `data_`.
   bool update_status_prepared_ = false;

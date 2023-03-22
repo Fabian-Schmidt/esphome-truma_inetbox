@@ -1,6 +1,7 @@
 #pragma once
 
-#include "TrumaiNetBoxApp.h"
+#include "TrumaEnums.h"
+#include "esphome/core/helpers.h"
 
 namespace esphome {
 namespace truma_inetbox {

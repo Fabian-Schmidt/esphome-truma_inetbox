@@ -1,6 +1,4 @@
 #include "helpers.h"
-#include "esphome/core/helpers.h"
-#include "TrumaiNetBoxApp.h"
 
 namespace esphome {
 namespace truma_inetbox {

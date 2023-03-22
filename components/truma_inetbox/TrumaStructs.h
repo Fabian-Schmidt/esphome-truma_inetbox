@@ -5,6 +5,37 @@
 namespace esphome {
 namespace truma_inetbox {
 
+#define LIN_SID_RESPONSE 0x40
+#define LIN_SID_READ_STATE_BUFFER 0xBA
+#define LIN_SID_FIll_STATE_BUFFFER 0xBB
+
+// Response to init are the following frames:
+// - 2 * STATUS_FRAME_DEVICES
+// - STATUS_FRAME_HEATER
+// - STATUS_FRAME_TIMER
+// - STAUTS_FRAME_CONFIG
+// - STATUS_FRAME_CLOCK
+#define STATUS_FRAME_RESPONSE_INIT_REQUEST 0x0A
+#define STATUS_FRAME_DEVICES 0x0B
+#define STATUS_FRAME_RESPONSE_ACK 0x0D
+#define STATUS_FRAME_CLOCK_RESPONSE (STATUS_FRAME_CLOCK - 1)
+#define STATUS_FRAME_CLOCK 0x15
+// TODO: Documentation and testing of config response.
+#define STAUTS_FRAME_CONFIG_RESPONSE (STAUTS_FRAME_CONFIG - 1)
+#define STAUTS_FRAME_CONFIG 0x17
+#define STATUS_FRAME_HEATER_RESPONSE (STATUS_FRAME_HEATER - 1)
+#define STATUS_FRAME_HEATER 0x33
+#define STATUS_FRAME_AIRCON_MANUAL_RESPONSE (STATUS_FRAME_AIRCON_MANUAL - 1)
+#define STATUS_FRAME_AIRCON_MANUAL 0x35
+#define STATUS_FRAME_AIRCON_AUTO_RESPONSE (STATUS_FRAME_AIRCON_AUTO - 1)
+#define STATUS_FRAME_AIRCON_AUTO 0x37
+#define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
+#define STATUS_FRAME_TIMER 0x3D
+#define STATUS_FRAME_AIRCON_MANUAL_INIT_RESPONSE (STATUS_FRAME_AIRCON_MANUAL_INIT - 1)
+#define STATUS_FRAME_AIRCON_MANUAL_INIT 0x3F
+#define STATUS_FRAME_AIRCON_AUTO_INIT_RESPONSE (STATUS_FRAME_AIRCON_AUTO_INIT - 1)
+#define STATUS_FRAME_AIRCON_AUTO_INIT 0x41
+
 struct StatusFrameHeader {  // NOLINT(altera-struct-pack-align)
   // sid
   u_int8_t service_identifier;
@@ -267,6 +298,29 @@ struct StatusFrameAirconAutoInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_18;  // 0x00
   u_int8_t unknown_19;  // 0x00
   u_int8_t unknown_20;  // 0x00
+} __attribute__((packed));
+
+union StatusFrame {  // NOLINT(altera-struct-pack-align)
+  u_int8_t raw[41];
+  struct inner {  // NOLINT(altera-struct-pack-align)
+    StatusFrameHeader genericHeader;
+    union {  // NOLINT(altera-struct-pack-align)
+      StatusFrameHeater heater;
+      StatusFrameHeaterResponse heaterResponse;
+      StatusFrameTimer timer;
+      StatusFrameTimerResponse timerResponse;
+      StatusFrameResponseAck responseAck;
+      StatusFrameClock clock;
+      StatusFrameConfig config;
+      StatusFrameDevice device;
+      StatusFrameAirconManual airconManual;
+      StatusFrameAirconManualResponse airconManualResponse;
+      StatusFrameAirconManualInit airconManualInit;
+      StatusFrameAirconAuto airconAuto;
+      StatusFrameAirconAutoResponse airconAutoResponse;
+      StatusFrameAirconAutoInit airconAutoInit;
+    } __attribute__((packed));
+  } inner;
 } __attribute__((packed));
 
 }  // namespace truma_inetbox

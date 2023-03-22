@@ -1,18 +1,13 @@
 #pragma once
 
-#include <vector>
 #include "LinBusProtocol.h"
-#include "esphome/core/automation.h"
-#include "TrumaEnums.h"
+#include "TrumaStructs.h"
 #include "TrumaiNetBoxAppAirconAuto.h"
 #include "TrumaiNetBoxAppAirconManual.h"
 #include "TrumaiNetBoxAppClock.h"
 #include "TrumaiNetBoxAppConfig.h"
 #include "TrumaiNetBoxAppHeater.h"
 #include "TrumaiNetBoxAppTimer.h"
-#include "TrumaStausFrameResponseStorage.h"
-#include "TrumaStausFrameStorage.h"
-#include "TrumaStructs.h"
 
 #ifdef USE_TIME
 #include "esphome/components/time/real_time_clock.h"
@@ -22,66 +17,18 @@ namespace esphome {
 namespace truma_inetbox {
 
 #define LIN_PID_TRUMA_INET_BOX 0x18
-#define LIN_SID_RESPONSE 0x40
-#define LIN_SID_READ_STATE_BUFFER 0xBA
-#define LIN_SID_FIll_STATE_BUFFFER 0xBB
-
-// Response to init are the following frames:
-// - 2 * STATUS_FRAME_DEVICES
-// - STATUS_FRAME_HEATER
-// - STATUS_FRAME_TIMER
-// - STAUTS_FRAME_CONFIG
-// - STATUS_FRAME_CLOCK
-#define STATUS_FRAME_RESPONSE_INIT_REQUEST 0x0A
-#define STATUS_FRAME_DEVICES 0x0B
-#define STATUS_FRAME_RESPONSE_ACK 0x0D
-#define STATUS_FRAME_CLOCK_RESPONSE (STATUS_FRAME_CLOCK - 1)
-#define STATUS_FRAME_CLOCK 0x15
-// TODO: Documentation and testing of config response.
-#define STAUTS_FRAME_CONFIG_RESPONSE (STAUTS_FRAME_CONFIG - 1)
-#define STAUTS_FRAME_CONFIG 0x17
-#define STATUS_FRAME_HEATER_RESPONSE (STATUS_FRAME_HEATER - 1)
-#define STATUS_FRAME_HEATER 0x33
-#define STATUS_FRAME_AIRCON_MANUAL_RESPONSE (STATUS_FRAME_AIRCON_MANUAL - 1)
-#define STATUS_FRAME_AIRCON_MANUAL 0x35
-#define STATUS_FRAME_AIRCON_AUTO_RESPONSE (STATUS_FRAME_AIRCON_AUTO - 1)
-#define STATUS_FRAME_AIRCON_AUTO 0x37
-#define STATUS_FRAME_TIMER_RESPONSE (STATUS_FRAME_TIMER - 1)
-#define STATUS_FRAME_TIMER 0x3D
-#define STATUS_FRAME_AIRCON_MANUAL_INIT_RESPONSE (STATUS_FRAME_AIRCON_MANUAL_INIT - 1)
-#define STATUS_FRAME_AIRCON_MANUAL_INIT 0x3F
-#define STATUS_FRAME_AIRCON_AUTO_INIT_RESPONSE (STATUS_FRAME_AIRCON_AUTO_INIT - 1)
-#define STATUS_FRAME_AIRCON_AUTO_INIT 0x41
-
-union StatusFrame {  // NOLINT(altera-struct-pack-align)
-  u_int8_t raw[41];
-  struct inner {  // NOLINT(altera-struct-pack-align)
-    StatusFrameHeader genericHeader;
-    union {  // NOLINT(altera-struct-pack-align)
-      StatusFrameHeater heater;
-      StatusFrameHeaterResponse heaterResponse;
-      StatusFrameTimer timer;
-      StatusFrameTimerResponse timerResponse;
-      StatusFrameResponseAck responseAck;
-      StatusFrameClock clock;
-      StatusFrameConfig config;
-      StatusFrameDevice device;
-      StatusFrameAirconManual airconManual;
-      StatusFrameAirconManualResponse airconManualResponse;
-      StatusFrameAirconManualInit airconManualInit;
-      StatusFrameAirconAuto airconAuto;
-      StatusFrameAirconAutoInit airconAutoInit;
-    } __attribute__((packed));
-  } inner;
-} __attribute__((packed));
 
 class TrumaiNetBoxApp : public LinBusProtocol {
  public:
+  TrumaiNetBoxApp();
   void update() override;
 
   const std::array<u_int8_t, 4> lin_identifier() override;
   void lin_heartbeat() override;
   void lin_reset_device() override;
+
+  const TRUMA_DEVICE get_heater_device() const { return this->heater_device_; }
+  const TRUMA_DEVICE get_aircon_device() const { return this->aircon_device_; }
 
   TrumaiNetBoxAppAirconAuto *get_aircon_auto() { return &this->airconAuto_; }
   TrumaiNetBoxAppAirconManual *get_aircon_manual() { return &this->airconManual_; }
@@ -92,23 +39,9 @@ class TrumaiNetBoxApp : public LinBusProtocol {
 
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
 
-  bool action_heater_room(u_int8_t temperature, HeatingMode mode = HeatingMode::HEATING_MODE_OFF);
-  bool action_heater_water(u_int8_t temperature);
-  bool action_heater_water(TargetTemp temperature);
-  bool action_heater_electric_power_level(u_int16_t value);
-  bool action_heater_energy_mix(EnergyMix energy_mix,
-                                ElectricPowerLevel el_power_level = ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0);
-  bool action_timer_disable();
-  bool action_timer_activate(u_int16_t start, u_int16_t stop, u_int8_t room_temperature,
-                             HeatingMode mode = HeatingMode::HEATING_MODE_OFF, u_int8_t water_temperature = 0,
-                             EnergyMix energy_mix = EnergyMix::ENERGY_MIX_NONE,
-                             ElectricPowerLevel el_power_level = ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0);
-
 #ifdef USE_TIME
   void set_time(time::RealTimeClock *time) { time_ = time; }
-  bool truma_clock_can_update() { return this->clock_.data_valid_; }
-  void update_clock_submit() { this->update_status_clock_unsubmitted_ = true; }
-  bool action_write_time();
+  time::RealTimeClock *get_time() const { return time_; }
 #endif  // USE_TIME
 
  protected:
@@ -122,12 +55,12 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
   TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKNOWN;
 
-  TrumaiNetBoxAppAirconAuto airconAuto_{};
-  TrumaiNetBoxAppAirconManual airconManual_{};
-  TrumaiNetBoxAppClock clock_{};
-  TrumaiNetBoxAppConfig config_{};
-  TrumaiNetBoxAppHeater heater_{};
-  TrumaiNetBoxAppTimer timer_{};
+  TrumaiNetBoxAppAirconAuto airconAuto_;
+  TrumaiNetBoxAppAirconManual airconManual_;
+  TrumaiNetBoxAppClock clock_;
+  TrumaiNetBoxAppConfig config_;
+  TrumaiNetBoxAppHeater heater_;
+  TrumaiNetBoxAppTimer timer_;
 
   // last time CP plus was informed I got an update msg.
   uint32_t update_time_ = 0;
@@ -135,15 +68,8 @@ class TrumaiNetBoxApp : public LinBusProtocol {
 #ifdef USE_TIME
   time::RealTimeClock *time_ = nullptr;
 
-  // The behaviour of `update_status_clock_unsubmitted_` is special.
-  // Just an update is marked. The actual package is prepared when CP Plus asks for the data in the
-  // `lin_multiframe_recieved` method.
-  bool update_status_clock_unsubmitted_ = false;
-
   // Mark if the initial clock sync was done.
   bool update_status_clock_done = false;
-#else
-  const bool update_status_clock_unsubmitted_ = false;
 #endif  // USE_TIME
 
   bool answer_lin_order_(const u_int8_t pid) override;
