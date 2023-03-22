@@ -45,13 +45,16 @@ template<typename T> void TrumaStausFrameStorage<T>::update() {
 const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
   // Supplier Id: 0x4617 - Truma (Phone: +49 (0)89 4617-0)
   // Unknown:
-  // 17.46.01.03 - Unknown more comms required for init.
+  // 17.46.01.03 - old Combi model
   // 17.46.10.03 - Unknown more comms required for init.
+  // 17.46.20.03 - Unknown more comms required for init.
   // Heater:
   // 17.46.40.03 - H2.00.01 - 0340.xx Combi 4/6
   // Aircon:
   // 17.46.00.0C - A23.70.0 - 0C00.xx (with light option: OFF/1..5)
   // 17.46.01.0C - A23.70.0 - 0C01.xx
+  // 17.46.02.0C
+  // 17.46.03.0C
   // 17.46.04.0C - A23.70.0 - 0C04.xx (with light option: OFF/1..5)
   // 17.46.05.0C - A23.70.0 - 0C05.xx
   // 17.46.06.0C - A23.70.0 - 0C06.xx (with light option: OFF/1..5)
