@@ -13,6 +13,7 @@ enum class TRUMA_NUMBER_TYPE {
   AIRCON_MANUAL_TEMPERATURE,
 };
 
+#ifdef ESPHOME_LOG_HAS_CONFIG
 static const char *enum_to_c_str(const TRUMA_NUMBER_TYPE val) {
   switch (val) {
     case TRUMA_NUMBER_TYPE::TARGET_ROOM_TEMPERATURE:
@@ -34,6 +35,7 @@ static const char *enum_to_c_str(const TRUMA_NUMBER_TYPE val) {
       break;
   }
 }
+#endif // ESPHOME_LOG_HAS_CONFIG
 
 }  // namespace truma_inetbox
 }  // namespace esphome

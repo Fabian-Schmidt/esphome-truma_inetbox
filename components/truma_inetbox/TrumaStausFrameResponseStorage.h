@@ -21,7 +21,7 @@ class TrumaStausFrameResponseStorage : public TrumaStausFrameStorage<T>, public 
   virtual bool can_update() { return this->data_valid_; }
   virtual TResponse *update_prepare() = 0;
   void update_submit() { this->update_status_unsubmitted_ = true; }
-  const bool has_update() const { return this->update_status_unsubmitted_; }
+  bool has_update() const { return this->update_status_unsubmitted_; }
   void set_status(T val) override {
     TrumaStausFrameStorage<T>::set_status(val);
     this->update_status_stale_ = false;

@@ -27,8 +27,8 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   void lin_heartbeat() override;
   void lin_reset_device() override;
 
-  const TRUMA_DEVICE get_heater_device() const { return this->heater_device_; }
-  const TRUMA_DEVICE get_aircon_device() const { return this->aircon_device_; }
+  TRUMA_DEVICE get_heater_device() const { return this->heater_device_; }
+  TRUMA_DEVICE get_aircon_device() const { return this->aircon_device_; }
 
   TrumaiNetBoxAppAirconAuto *get_aircon_auto() { return &this->airconAuto_; }
   TrumaiNetBoxAppAirconManual *get_aircon_manual() { return &this->airconManual_; }

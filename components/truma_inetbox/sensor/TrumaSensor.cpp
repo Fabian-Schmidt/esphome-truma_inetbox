@@ -34,9 +34,12 @@ void TrumaSensor::setup() {
       case TRUMA_SENSOR_TYPE::OPERATING_STATUS:
         this->publish_state(static_cast<float>(status_heater->operating_status));
         break;
-      case TRUMA_SENSOR_TYPE::HEATER_ERROR_CODE:
+      case TRUMA_SENSOR_TYPE::HEATER_ERROR_CODE: {
         float errorcode = status_heater->error_code_high * 100.0f + status_heater->error_code_low;
         this->publish_state(errorcode);
+        break;
+      }
+      default:
         break;
     }
   });

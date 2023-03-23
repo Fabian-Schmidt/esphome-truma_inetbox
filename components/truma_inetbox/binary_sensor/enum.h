@@ -5,7 +5,7 @@ namespace truma_inetbox {
 
 enum class TRUMA_BINARY_SENSOR_TYPE {
   UNKNOWN,
-  
+
   HEATER_ROOM,
   HEATER_WATER,
   HEATER_GAS,
@@ -20,6 +20,7 @@ enum class TRUMA_BINARY_SENSOR_TYPE {
   TIMER_WATER,
 };
 
+#ifdef ESPHOME_LOG_HAS_CONFIG
 static const char *enum_to_c_str(const TRUMA_BINARY_SENSOR_TYPE val) {
   switch (val) {
     case TRUMA_BINARY_SENSOR_TYPE::HEATER_ROOM:
@@ -61,6 +62,7 @@ static const char *enum_to_c_str(const TRUMA_BINARY_SENSOR_TYPE val) {
       break;
   }
 }
+#endif // ESPHOME_LOG_HAS_CONFIG
 
 }  // namespace truma_inetbox
 }  // namespace esphome

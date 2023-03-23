@@ -18,6 +18,7 @@ enum class TRUMA_SENSOR_TYPE {
   HEATER_ERROR_CODE,
 };
 
+#ifdef ESPHOME_LOG_HAS_CONFIG
 static const char *enum_to_c_str(const TRUMA_SENSOR_TYPE val) {
   switch (val) {
     case TRUMA_SENSOR_TYPE::CURRENT_ROOM_TEMPERATURE:
@@ -52,6 +53,7 @@ static const char *enum_to_c_str(const TRUMA_SENSOR_TYPE val) {
       break;
   }
 }
+#endif // ESPHOME_LOG_HAS_CONFIG
 
 class TrumaSensor : public Component, public sensor::Sensor, public Parented<TrumaiNetBoxApp> {
  public:

@@ -8,7 +8,7 @@ namespace truma_inetbox {
 static const char *const TAG = "truma_inetbox.TrumaiNetBoxAppConfig";
 
 void TrumaiNetBoxAppConfig::dump_data() const {
-  ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", temp_code_to_decimal(this->config_.data_.temp_offset));
+  ESP_LOGD(TAG, "StatusFrameConfig Offset: %.1f", temp_code_to_decimal(this->data_.temp_offset));
 }
 
 }  // namespace truma_inetbox
