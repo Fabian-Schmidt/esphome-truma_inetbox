@@ -316,8 +316,6 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.7C.03.02.01.00.01.0C.00.01.02.01.00.00
     auto device = statusFrame->inner.device;
 
-    this->init_recieved_ = micros();
-
     ESP_LOGD(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X (%02X %02X)", device.device_id + 1,
              device.device_count, device.software_revision[0], device.software_revision[1], device.software_revision[2],
              device.hardware_revision_major, device.hardware_revision_minor, device.unknown_2, device.unknown_3);
@@ -346,6 +344,15 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     if (truma_device == TRUMA_DEVICE::AIRCON_DEVICE) {
       this->aircon_device_ = TRUMA_DEVICE::AIRCON_DEVICE;
+    }
+
+    if (device.device_count == 2 && this->heater_device_ != TRUMA_DEVICE::UNKNOWN) {
+      // Assumption 2 devices mean CP Plus and Heater.
+      this->init_recieved_ = micros();
+    } else if (device.device_count == 3 && this->heater_device_ != TRUMA_DEVICE::UNKNOWN &&
+               this->aircon_device_ != TRUMA_DEVICE::UNKNOWN) {
+      // Assumption 3 devices mean CP Plus, Heater and Aircon.
+      this->init_recieved_ = micros();
     }
 
     return response;

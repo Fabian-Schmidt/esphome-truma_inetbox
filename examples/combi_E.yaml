@@ -58,7 +58,15 @@ sensor:
     name: "Current Water Temperature"
     type: CURRENT_WATER_TEMPERATURE
 
-number:
+select:
   - platform: truma_inetbox
-    name: "electric power level"
-    type: ELECTRIC_POWER_LEVEL
+    name: "Fan Mode"
+    type: HEATER_FAN_MODE_COMBI
+  # Combi 4E / 6E:
+  - platform: truma_inetbox
+    name: "Energy Mix"
+    type: HEATER_ENERGY_MIX_GAS
+  # Combi 4DE / 6DE:
+  - platform: truma_inetbox
+    name: "Energy Mix"
+    type: HEATER_ENERGY_MIX_DIESEL

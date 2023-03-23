@@ -34,5 +34,6 @@ binary_sensor: !include test.common.binary_sensor.yaml
 button: !include test.common.button.yaml
 climate: !include test.common.climate.yaml
 number: !include test.common.number.yaml
+select: !include test.common.select.yaml
 sensor: !include test.common.sensor.yaml
 switch: !include test.common.switch.yaml

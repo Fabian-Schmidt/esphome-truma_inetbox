@@ -1,0 +1,12 @@
+  - platform: truma_inetbox
+    name: "Fan Mode Combi"
+    type: HEATER_FAN_MODE_COMBI
+  - platform: truma_inetbox
+    name: "Fan Mode Vario Heat"
+    type: HEATER_FAN_MODE_VARIO_HEAT
+  - platform: truma_inetbox
+    name: "Energy Mix Gas"
+    type: HEATER_ENERGY_MIX_GAS
+  - platform: truma_inetbox
+    name: "Energy Mix Diesel"
+    type: HEATER_ENERGY_MIX_DIESEL

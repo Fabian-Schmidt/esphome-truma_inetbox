@@ -123,6 +123,24 @@ The following `type` values are available:
 - `ELECTRIC_POWER_LEVEL`
 - `AIRCON_MANUAL_TEMPERATURE`
 
+### Select
+
+Select components support read and write.
+
+```yaml
+select:
+  - platform: truma_inetbox
+    name: "Fan Mode"
+    type: HEATER_FAN_MODE_COMBI
+```
+
+The following `type` values are available:
+
+- `HEATER_FAN_MODE_COMBI`
+- `HEATER_FAN_MODE_VARIO_HEAT`
+- `HEATER_ENERGY_MIX_GAS`
+- `HEATER_ENERGY_MIX_DIESEL`
+
 ### Sensor
 
 Sensors are read-only.

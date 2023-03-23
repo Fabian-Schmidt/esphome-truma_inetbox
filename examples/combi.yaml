@@ -57,3 +57,8 @@ sensor:
   - platform: truma_inetbox
     name: "Current Water Temperature"
     type: CURRENT_WATER_TEMPERATURE
+
+select:
+  - platform: truma_inetbox
+    name: "Fan Mode"
+    type: HEATER_FAN_MODE_COMBI
