@@ -1,0 +1,59 @@
+esphome:
+  name: "Truma Combi"
+
+external_components:
+  - source: github://Fabian-Schmidt/esphome-truma_inetbox
+
+esp32:
+  board: esp32dev
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: ""
+
+ota:
+  password: ""
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+uart:
+  - id: lin_uart_bus
+    tx_pin: 17
+    rx_pin: 16
+    baud_rate: 9600
+    data_bits: 8
+    parity: NONE
+    stop_bits: 2
+
+truma_inetbox:
+  uart_id: lin_uart_bus
+
+climate:
+  - platform: truma_inetbox
+    name: "Room"
+    type: ROOM
+  - platform: truma_inetbox
+    name: "Water"
+    type: WATER
+
+binary_sensor:
+  - platform: truma_inetbox
+    name: "CP Plus alive"
+    type: CP_PLUS_CONNECTED
+  - platform: truma_inetbox
+    name: "Heater has error"
+    type: HEATER_HAS_ERROR
+
+sensor:
+  - platform: truma_inetbox
+    name: "Current Room Temperature"
+    type: CURRENT_ROOM_TEMPERATURE
+  - platform: truma_inetbox
+    name: "Current Water Temperature"
+    type: CURRENT_WATER_TEMPERATURE

@@ -20,6 +20,7 @@ TargetTemp decimal_to_room_temp(float val);
 TargetTemp decimal_to_aircon_temp(u_int8_t val);
 TargetTemp decimal_to_aircon_temp(float val);
 TargetTemp decimal_to_water_temp(u_int8_t val);
+TargetTemp decimal_to_water_temp(float val);
 const std::string operating_status_to_str(OperatingStatus val);
 ElectricPowerLevel decimal_to_el_power_level(u_int16_t val);
 

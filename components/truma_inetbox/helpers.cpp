@@ -37,7 +37,7 @@ TargetTemp decimal_to_room_temp(u_int8_t val) {
   if (val == 0) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
-  if (val <= 5) {
+  if (val < 5) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 30) {
@@ -47,10 +47,10 @@ TargetTemp decimal_to_room_temp(u_int8_t val) {
 }
 
 TargetTemp decimal_to_room_temp(float val) {
-  if (val == NAN) {
+  if (std::isnan(val)) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
-  if (val <= 5) {
+  if (val < 5) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 30) {
@@ -63,7 +63,7 @@ TargetTemp decimal_to_aircon_temp(u_int8_t val) {
   if (val == 0) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
-  if (val <= 16) {
+  if (val < 16) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 31) {
@@ -73,10 +73,10 @@ TargetTemp decimal_to_aircon_temp(u_int8_t val) {
 }
 
 TargetTemp decimal_to_aircon_temp(float val) {
-  if (val == NAN) {
+  if (std::isnan(val)) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
-  if (val <= 16) {
+  if (val < 16) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
   if (val >= 31) {
@@ -87,6 +87,18 @@ TargetTemp decimal_to_aircon_temp(float val) {
 
 TargetTemp decimal_to_water_temp(u_int8_t val) {
   if (val < 40) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  } else if (val >= 40 && val < 60) {
+    return TargetTemp::TARGET_TEMP_WATER_ECO;
+  } else if (val >= 60 && val < 80) {
+    return TargetTemp::TARGET_TEMP_WATER_HIGH;
+  } else {
+    return TargetTemp::TARGET_TEMP_WATER_BOOST;
+  }
+}
+
+TargetTemp decimal_to_water_temp(float val) {
+  if (std::isnan(val) || val < 40) {
     return TargetTemp::TARGET_TEMP_OFF;
   } else if (val >= 40 && val < 60) {
     return TargetTemp::TARGET_TEMP_WATER_ECO;
