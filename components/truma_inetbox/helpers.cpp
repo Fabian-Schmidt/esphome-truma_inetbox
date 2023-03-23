@@ -59,7 +59,7 @@ TargetTemp decimal_to_room_temp(float val) {
   return decimal_to_temp(val);
 }
 
-TargetTemp decimal_to_aircon_temp(u_int8_t val) {
+TargetTemp decimal_to_aircon_manual_temp(u_int8_t val) {
   if (val == 0) {
     return TargetTemp::TARGET_TEMP_OFF;
   }
@@ -72,7 +72,33 @@ TargetTemp decimal_to_aircon_temp(u_int8_t val) {
   return decimal_to_temp(val);
 }
 
-TargetTemp decimal_to_aircon_temp(float val) {
+TargetTemp decimal_to_aircon_manual_temp(float val) {
+  if (std::isnan(val)) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  }
+  if (val < 16) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  }
+  if (val >= 31) {
+    return TargetTemp::TARGET_TEMP_AIRCON_MAX;
+  }
+  return decimal_to_temp(val);
+}
+
+TargetTemp decimal_to_aircon_auto_temp(u_int8_t val) {
+  if (val == 0) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  }
+  if (val < 16) {
+    return TargetTemp::TARGET_TEMP_OFF;
+  }
+  if (val >= 31) {
+    return TargetTemp::TARGET_TEMP_AIRCON_MAX;
+  }
+  return decimal_to_temp(val);
+}
+
+TargetTemp decimal_to_aircon_auto_temp(float val) {
   if (std::isnan(val)) {
     return TargetTemp::TARGET_TEMP_OFF;
   }

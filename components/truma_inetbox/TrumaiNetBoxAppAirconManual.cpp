@@ -58,7 +58,7 @@ bool TrumaiNetBoxAppAirconManual::action_set_temp(u_int8_t temperature) {
 
   auto update_data = this->update_prepare();
 
-  update_data->target_temp_aircon = decimal_to_aircon_temp(temperature);
+  update_data->target_temp_aircon = decimal_to_aircon_manual_temp(temperature);
 
   this->update_submit();
   return true;
