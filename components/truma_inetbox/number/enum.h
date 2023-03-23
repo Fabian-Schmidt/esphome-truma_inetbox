@@ -1,5 +1,7 @@
 #pragma once
 
+#include "esphome/core/log.h"
+
 namespace esphome {
 namespace truma_inetbox {
 
