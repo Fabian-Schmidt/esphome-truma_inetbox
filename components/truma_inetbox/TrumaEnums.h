@@ -141,16 +141,21 @@ enum class ClockSource : u_int8_t {
 
 enum class TRUMA_DEVICE : u_int8_t {
   UNKNOWN = 0x00,
+  
   // Saphir Compact AC
   AIRCON_DEVICE = 0x01,
-  // Combi 4
-  HEATER_COMBI4 = 0x02,
-  // Vario Heat Comfort (non E)
-  HEATER_VARIO = 0x03,
+
   // CP Plus for Combi
   CPPLUS_COMBI = 0x04,
   // CP Plus for Vario Heat
   CPPLUS_VARIO = 0x05,
+
+  // Combi 4
+  HEATER_COMBI4 = 0x02,
+  // Vario Heat Comfort (non E)
+  HEATER_VARIO = 0x03,
+  // Old Truma CP6 (MY 2015)
+  HEATER_CP6 = 0x05,
   // Combi 6 D
   HEATER_COMBI6D = 0x06,
 };

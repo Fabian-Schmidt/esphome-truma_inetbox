@@ -334,16 +334,18 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
         ESP_LOGW(TAG, "Unknown information in StatusFrameDevice found. Please report.");
     }
 
-    if (truma_device == TRUMA_DEVICE::HEATER_COMBI4) {
-      this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI4;
-    } else if (truma_device == TRUMA_DEVICE::HEATER_COMBI6D) {
-      this->heater_device_ = TRUMA_DEVICE::HEATER_COMBI6D;
-    } else if (truma_device == TRUMA_DEVICE::HEATER_VARIO) {
-      this->heater_device_ = TRUMA_DEVICE::HEATER_VARIO;
-    }
+    // first submitted device is CP Plus device
+    const auto is_CPPLUSDevice = device.device_id == 0;
 
-    if (truma_device == TRUMA_DEVICE::AIRCON_DEVICE) {
-      this->aircon_device_ = TRUMA_DEVICE::AIRCON_DEVICE;
+    if (!is_CPPLUSDevice) {
+      // Assumption first device is Heater
+      if (device.device_id == 1) {
+        this->heater_device_ = truma_device;
+      }
+      // Assumption second device is Aircon
+      if (device.device_id == 2) {
+        this->aircon_device_ = TRUMA_DEVICE::AIRCON_DEVICE;
+      }
     }
 
     if (device.device_count == 2 && this->heater_device_ != TRUMA_DEVICE::UNKNOWN) {
