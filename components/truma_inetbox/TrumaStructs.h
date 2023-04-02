@@ -10,7 +10,7 @@ namespace truma_inetbox {
 #define LIN_SID_FIll_STATE_BUFFFER 0xBB
 
 // Response to init are the following frames:
-// - 2 * STATUS_FRAME_DEVICES
+// - 2/3 STATUS_FRAME_DEVICES
 // - STATUS_FRAME_HEATER
 // - STATUS_FRAME_TIMER
 // - STAUTS_FRAME_CONFIG
@@ -302,7 +302,7 @@ struct StatusFrameAirconAutoInit {  // NOLINT(altera-struct-pack-align)
 
 union StatusFrame {  // NOLINT(altera-struct-pack-align)
   u_int8_t raw[41];
-  struct inner {  // NOLINT(altera-struct-pack-align)
+  struct {  // NOLINT(altera-struct-pack-align)
     StatusFrameHeader genericHeader;
     union {  // NOLINT(altera-struct-pack-align)
       StatusFrameHeater heater;
@@ -320,7 +320,7 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameAirconAutoResponse airconAutoResponse;
       StatusFrameAirconAutoInit airconAutoInit;
     } __attribute__((packed));
-  } inner;
+  };
 } __attribute__((packed));
 
 }  // namespace truma_inetbox

@@ -31,11 +31,11 @@ void TrumaiNetBoxAppAirconManual::create_update_data(StatusFrame *response, u_in
   status_frame_create_empty(response, STATUS_FRAME_AIRCON_MANUAL_RESPONSE, sizeof(StatusFrameAirconManualResponse),
                             command_counter);
 
-  response->inner.airconManualResponse.mode = this->update_status_.mode;
-  response->inner.airconManualResponse.unknown_02 = this->update_status_.unknown_02;
-  response->inner.airconManualResponse.operation = this->update_status_.operation;
-  response->inner.airconManualResponse.energy_mix = this->update_status_.energy_mix;
-  response->inner.airconManualResponse.target_temp_aircon = this->update_status_.target_temp_aircon;
+  response->airconManualResponse.mode = this->update_status_.mode;
+  response->airconManualResponse.unknown_02 = this->update_status_.unknown_02;
+  response->airconManualResponse.operation = this->update_status_.operation;
+  response->airconManualResponse.energy_mix = this->update_status_.energy_mix;
+  response->airconManualResponse.target_temp_aircon = this->update_status_.target_temp_aircon;
 
   status_frame_calculate_checksum(response);
   (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAirconManualResponse);

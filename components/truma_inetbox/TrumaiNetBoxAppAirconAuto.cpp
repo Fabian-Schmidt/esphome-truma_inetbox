@@ -38,17 +38,17 @@ void TrumaiNetBoxAppAirconAuto::create_update_data(StatusFrame *response, u_int8
   status_frame_create_empty(response, STATUS_FRAME_AIRCON_AUTO_RESPONSE, sizeof(StatusFrameAirconAutoResponse),
                             command_counter);
 
-  response->inner.airconAutoResponse.energy_mix_a = this->update_status_.energy_mix_a;
-  response->inner.airconAutoResponse.unknown_02 = this->update_status_.unknown_02;
-  response->inner.airconAutoResponse.energy_mix_b = this->update_status_.energy_mix_b;
-  response->inner.airconAutoResponse.unknown_04 = this->update_status_.unknown_04;
-  response->inner.airconAutoResponse.unknown_05 = this->update_status_.unknown_05;
-  response->inner.airconAutoResponse.unknown_06 = this->update_status_.unknown_06;
-  response->inner.airconAutoResponse.target_temp_aircon_auto = this->update_status_.target_temp_aircon_auto;
-  response->inner.airconAutoResponse.el_power_level_a = this->update_status_.el_power_level_a;
-  response->inner.airconAutoResponse.unknown_11 = this->update_status_.unknown_11;
-  response->inner.airconAutoResponse.unknown_12 = this->update_status_.unknown_12;
-  response->inner.airconAutoResponse.el_power_level_b = this->update_status_.el_power_level_b;
+  response->airconAutoResponse.energy_mix_a = this->update_status_.energy_mix_a;
+  response->airconAutoResponse.unknown_02 = this->update_status_.unknown_02;
+  response->airconAutoResponse.energy_mix_b = this->update_status_.energy_mix_b;
+  response->airconAutoResponse.unknown_04 = this->update_status_.unknown_04;
+  response->airconAutoResponse.unknown_05 = this->update_status_.unknown_05;
+  response->airconAutoResponse.unknown_06 = this->update_status_.unknown_06;
+  response->airconAutoResponse.target_temp_aircon_auto = this->update_status_.target_temp_aircon_auto;
+  response->airconAutoResponse.el_power_level_a = this->update_status_.el_power_level_a;
+  response->airconAutoResponse.unknown_11 = this->update_status_.unknown_11;
+  response->airconAutoResponse.unknown_12 = this->update_status_.unknown_12;
+  response->airconAutoResponse.el_power_level_b = this->update_status_.el_power_level_b;
 
   status_frame_calculate_checksum(response);
   (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAirconAutoResponse);

@@ -185,7 +185,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   }
 
   auto statusFrame = reinterpret_cast<const StatusFrame *>(message);
-  auto header = &statusFrame->inner.genericHeader;
+  auto header = &statusFrame->genericHeader;
   // Validate Truma frame checksum
   if (header->checksum != data_checksum(&statusFrame->raw[10], sizeof(StatusFrame) - 10, (0xFF - header->checksum)) ||
       header->header_2 != 'T' || header->header_3 != 0x01) {
@@ -202,7 +202,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|  |elecA|tWate|elecB|mi|mi|cWate|cRoom|st|err  |  |
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.14.33.00.12.00.00.00.00.00.00.00.00.00.00.01.01.CC.0B.6C.0B.00.00.00.00
-    this->heater_.set_status(statusFrame->inner.heater);
+    this->heater_.set_status(statusFrame->heater);
     return response;
   } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL &&
              header->message_length == sizeof(StatusFrameAirconManual)) {
@@ -226,7 +226,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.C2.04.00.71.01.D6.0B.00.00.88.0B.00.00.00.00.00.00.AA.0A
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.13.04.00.71.01.86.0B.00.00.88.0B.00.00.00.00.00.00.AA.0A
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.35.00.A8.00.00.71.01.00.00.00.00.88.0B.00.00.00.00.00.00.AA.0A
-    this->airconManual_.set_status(statusFrame->inner.airconManual);
+    this->airconManual_.set_status(statusFrame->airconManual);
     return response;
   } else if (header->message_type == STATUS_FRAME_AIRCON_MANUAL_INIT &&
              header->message_length == sizeof(StatusFrameAirconManualInit)) {
@@ -241,7 +241,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.12.37.00.BF.01.00.01.00.00.00.00.00.00.00.00.00.00.00.49.0B.40.0B
-    this->airconAuto_.set_status(statusFrame->inner.airconAuto);
+    this->airconAuto_.set_status(statusFrame->airconAuto);
     return response;
   } else if (header->message_type == STATUS_FRAME_AIRCON_AUTO_INIT &&
              header->message_length == sizeof(StatusFrameAirconAutoInit)) {
@@ -256,7 +256,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|tRoom|mo|??|elecA|tWate|elecB|mi|mi|<--response-->|??|??|on|start|stop-|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.1D.18.0B.01.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.18.3D.00.13.18.0B.0B.00.00.00.00.00.00.00.01.01.00.00.00.00.00.00.00.01.00.08.00.09
-    this->timer_.set_status(statusFrame->inner.timer);
+    this->timer_.set_status(statusFrame->timer);
     return response;
 
   } else if (header->message_type == STATUS_FRAME_CLOCK && header->message_length == sizeof(StatusFrameClock)) {
@@ -266,7 +266,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.5B.0D.20.00.01.01.00.00.01.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.71.16.00.00.01.01.00.00.02.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.15.00.2B.16.1F.28.01.01.00.00.01.00.00
-    this->clock_.set_status(statusFrame->inner.clock);
+    this->clock_.set_status(statusFrame->clock);
     return response;
   } else if (header->message_type == STAUTS_FRAME_CONFIG && header->message_length == sizeof(StatusFrameConfig)) {
     ESP_LOGI(TAG, "StatusFrameConfig");
@@ -275,21 +275,21 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.41.06.01.B4.0A.78.0A.00.00.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0A.17.00.0F.06.01.B4.0A.AA.0A.00.00.00.00
-    this->config_.set_status(statusFrame->inner.config);
+    this->config_.set_status(statusFrame->config);
     return response;
   } else if (header->message_type == STATUS_FRAME_RESPONSE_ACK &&
              header->message_length == sizeof(StatusFrameResponseAck)) {
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.02.0D.01.98.02.00
-    auto data = statusFrame->inner.responseAck;
+    auto data = statusFrame->responseAck;
 
     if (data.error_code != ResponseAckResult::RESPONSE_ACK_RESULT_OKAY) {
       ESP_LOGW(TAG, "StatusFrameResponseAck");
     } else {
       ESP_LOGI(TAG, "StatusFrameResponseAck");
     }
-    ESP_LOGD(TAG, "StatusFrameResponseAck %02X %s %02X", statusFrame->inner.genericHeader.command_counter,
+    ESP_LOGD(TAG, "StatusFrameResponseAck %02X %s %02X", statusFrame->genericHeader.command_counter,
              data.error_code == ResponseAckResult::RESPONSE_ACK_RESULT_OKAY ? " OKAY " : " FAILED ",
              (u_int8_t) data.error_code);
 
@@ -314,7 +314,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.C7.03.00.01.00.50.00.00.04.03.00.60.10
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.71.03.01.01.00.10.03.02.06.00.02.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.7C.03.02.01.00.01.0C.00.01.02.01.00.00
-    auto device = statusFrame->inner.device;
+    auto device = statusFrame->device;
 
     ESP_LOGD(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X (%02X %02X)", device.device_id + 1,
              device.device_count, device.software_revision[0], device.software_revision[1], device.software_revision[2],

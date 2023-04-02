@@ -47,12 +47,12 @@ void TrumaiNetBoxAppClock::create_update_data(StatusFrame *response, u_int8_t *r
 
     status_frame_create_empty(response, STATUS_FRAME_CLOCK_RESPONSE, sizeof(StatusFrameClock), command_counter);
 
-    response->inner.clock.clock_hour = now.hour;
-    response->inner.clock.clock_minute = now.minute;
-    response->inner.clock.clock_second = now.second;
-    response->inner.clock.display_1 = 0x1;
-    response->inner.clock.display_2 = 0x1;
-    response->inner.clock.clock_mode = this->data_.clock_mode;
+    response->clock.clock_hour = now.hour;
+    response->clock.clock_minute = now.minute;
+    response->clock.clock_second = now.second;
+    response->clock.display_1 = 0x1;
+    response->clock.display_2 = 0x1;
+    response->clock.clock_mode = this->data_.clock_mode;
 
     status_frame_calculate_checksum(response);
     (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameClock);

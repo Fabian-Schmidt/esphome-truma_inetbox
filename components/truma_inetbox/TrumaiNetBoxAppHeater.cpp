@@ -33,13 +33,13 @@ void TrumaiNetBoxAppHeater::create_update_data(StatusFrame *response, u_int8_t *
                                                u_int8_t command_counter) {
   status_frame_create_empty(response, STATUS_FRAME_HEATER_RESPONSE, sizeof(StatusFrameHeaterResponse), command_counter);
 
-  response->inner.heaterResponse.target_temp_room = this->update_status_.target_temp_room;
-  response->inner.heaterResponse.heating_mode = this->update_status_.heating_mode;
-  response->inner.heaterResponse.target_temp_water = this->update_status_.target_temp_water;
-  response->inner.heaterResponse.energy_mix_a = this->update_status_.energy_mix_a;
-  response->inner.heaterResponse.energy_mix_b = this->update_status_.energy_mix_a;
-  response->inner.heaterResponse.el_power_level_a = this->update_status_.el_power_level_a;
-  response->inner.heaterResponse.el_power_level_b = this->update_status_.el_power_level_a;
+  response->heaterResponse.target_temp_room = this->update_status_.target_temp_room;
+  response->heaterResponse.heating_mode = this->update_status_.heating_mode;
+  response->heaterResponse.target_temp_water = this->update_status_.target_temp_water;
+  response->heaterResponse.energy_mix_a = this->update_status_.energy_mix_a;
+  response->heaterResponse.energy_mix_b = this->update_status_.energy_mix_a;
+  response->heaterResponse.el_power_level_a = this->update_status_.el_power_level_a;
+  response->heaterResponse.el_power_level_b = this->update_status_.el_power_level_a;
 
   status_frame_calculate_checksum(response);
   (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameHeaterResponse);
