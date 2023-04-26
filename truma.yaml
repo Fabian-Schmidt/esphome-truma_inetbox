@@ -8,13 +8,13 @@ esphome:
 
 external_components:
   - source: github://Fabian-Schmidt/esphome-truma_inetbox
-  #- source:
-  #    type: local
-  #    path: ./components
-  #  components: ["truma_inetbox", "uart"]
+  # - source:
+  #     type: local
+  #     path: ./components
+    components: ["truma_inetbox"]
 
 esp32:
-  board: mhetesp32devkit
+  board: esp32dev
   framework:
     type: arduino
 
@@ -111,6 +111,9 @@ number:
   - platform: truma_inetbox
     name: "electric power level"
     type: ELECTRIC_POWER_LEVEL
+  - platform: truma_inetbox
+    name: "Aircon Temperature"
+    type: AIRCON_MANUAL_TEMPERATURE
 
 sensor:
   - platform: truma_inetbox

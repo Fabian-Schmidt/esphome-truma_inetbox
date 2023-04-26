@@ -18,6 +18,7 @@ esphome:
 
 external_components:
   - source: github://Fabian-Schmidt/esphome-truma_inetbox
+    components: ["truma_inetbox"]
 
 esp32:
   board: mhetesp32devkit
@@ -54,11 +55,12 @@ sensor:
 
 This project contains the following ESPHome components:
 
-- `uart` will overwrite the default uart component to expose internal fields.
 - `truma_inetbox` has the following settings:
   - `cs_pin` (optional) if you connect the pin of your lin driver chip.
   - `fault_pin` (optional) if you connect the pin of your lin driver chip.
   - `on_heater_message` (optional) [ESPHome Trigger](https://esphome.io/guides/automations.html) when a message from CP Plus is recieved.
+
+Requires ESP Home 2023.4 or higher.
 
 ### Binary sensor
 
