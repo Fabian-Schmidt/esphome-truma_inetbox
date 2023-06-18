@@ -128,25 +128,45 @@ void TrumaRoomClimate::control(const climate::ClimateCall &call) {
 }
 
 climate::ClimateTraits TrumaRoomClimate::traits() {
+  auto heater_device = this->parent_->get_heater_device();
+  auto aircon_device = this->parent_->get_aircon_device();
+
   // The capabilities of the climate device
   auto traits = climate::ClimateTraits();
-  traits.set_supports_current_temperature(true);
-  traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT});
-  traits.set_supported_fan_modes({{
-      climate::CLIMATE_FAN_OFF,
-      climate::CLIMATE_FAN_LOW,
-      climate::CLIMATE_FAN_MEDIUM,
-      climate::CLIMATE_FAN_HIGH,
-  }});
-  // traits.set_supported_presets({{
-  //     climate::CLIMATE_PRESET_NONE,
-  //     climate::CLIMATE_PRESET_ECO,
-  //     climate::CLIMATE_PRESET_COMFORT,
-  //     climate::CLIMATE_PRESET_BOOST,
-  // }});
-  traits.set_visual_min_temperature(5);
-  traits.set_visual_max_temperature(30);
-  traits.set_visual_temperature_step(1);
+
+  if (heater_device != TRUMA_DEVICE::UNKNOWN && aircon_device == TRUMA_DEVICE::UNKNOWN) {
+    traits.set_supports_current_temperature(true);
+    traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT});
+    traits.set_supported_fan_modes({{
+        climate::CLIMATE_FAN_OFF,
+        climate::CLIMATE_FAN_LOW,
+        climate::CLIMATE_FAN_MEDIUM,
+        climate::CLIMATE_FAN_HIGH,
+    }});
+    // traits.set_supported_presets({{
+    //     climate::CLIMATE_PRESET_NONE,
+    //     climate::CLIMATE_PRESET_ECO,
+    //     climate::CLIMATE_PRESET_COMFORT,
+    //     climate::CLIMATE_PRESET_BOOST,
+    // }});
+    traits.set_visual_min_temperature(5);
+    traits.set_visual_max_temperature(30);
+    traits.set_visual_temperature_step(1);
+  } else if (heater_device != TRUMA_DEVICE::UNKNOWN && aircon_device != TRUMA_DEVICE::UNKNOWN) {
+    traits.set_supports_current_temperature(true);
+    traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT, climate::CLIMATE_MODE_COOL,
+                                climate::CLIMATE_MODE_AUTO});
+    traits.set_supported_fan_modes({{
+        climate::CLIMATE_FAN_OFF,
+        climate::CLIMATE_FAN_LOW,
+        climate::CLIMATE_FAN_MEDIUM,
+        climate::CLIMATE_FAN_HIGH,
+    }});
+    traits.set_visual_min_temperature(5);
+    traits.set_visual_max_temperature(30);
+    traits.set_visual_temperature_step(1);
+  }
+  
   return traits;
 }
 }  // namespace truma_inetbox
