@@ -166,10 +166,12 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   TRUMA_DEVICE_STATE state;
   // 0x00
   u_int8_t unknown_1;
-  u_int16_t hardware_revision_major;
+  union {  // NOLINT(altera-struct-pack-align)
+    u_int16_t hardware_revision_major;
+    TRUMA_DEVICE hardware_truma_device;
+  } __attribute__((packed));
   u_int8_t hardware_revision_minor;
   // `software_revision[0].software_revision[1].software_revision[2]`
-  // software_revision[0] -> TRUMA_DEVICE
   u_int8_t software_revision[3];
   // 0xAD, 0x0B on CPplus with Combi4 or 0x66 on CPplus with Vario Heat Comfort ohne E
   // 0x00 on Combi4, Vario Heat
