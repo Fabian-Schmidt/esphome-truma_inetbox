@@ -132,32 +132,39 @@ enum class TimerActive : u_int8_t {
   TIMER_ACTIVE_OFF = 0x0,
 };
 
-enum class ClockSource : u_int8_t {
+enum class ClockSource : u_int16_t {
   // Set by user
   CLOCK_SOURCE_MANUAL = 0x1,
   // Set by message
   CLOCK_SOURCE_PROG = 0x2,
 };
 
-enum class TRUMA_DEVICE : u_int8_t {
-  UNKNOWN = 0x00,
-  
-  // Saphir Compact AC
-  AIRCON_DEVICE = 0x01,
+enum class TRUMA_DEVICE_TYPE : u_int8_t {
+  // Subset of TRUMA_DEVICE information. Only first byte.
+  CPPLUS = 0x00,
+  HEATER_COMBI = 0x03,
+  HEATER_VARIO = 0x06,
+  AIRCON = 0x0C,
+};
+
+enum class TRUMA_DEVICE : u_int16_t {
+  UNKNOWN = 0x0000,
 
   // CP Plus for Combi
-  CPPLUS_COMBI = 0x04,
+  CPPLUS_COMBI = 0x0050,
   // CP Plus for Vario Heat
-  CPPLUS_VARIO = 0x05,
+  CPPLUS_VARIO = 0x0051,
 
-  // Combi 4
-  HEATER_COMBI4 = 0x02,
+  // Combi 4, 4E
+  HEATER_COMBI4 = 0x0340,
+  // Combi 6DE
+  HEATER_CP6 = 0x0310,
+
   // Vario Heat Comfort (non E)
-  HEATER_VARIO = 0x03,
-  // Old Truma CP6 (MY 2015)
-  HEATER_CP6 = 0x05,
-  // Combi 6 D
-  HEATER_COMBI6D = 0x06,
+  HEATER_VARIO = 0x0620,
+
+  // Saphir Compact AC
+  AIRCON_DEVICE = 0x0C01
 };
 
 enum class TRUMA_DEVICE_STATE : u_int8_t{
