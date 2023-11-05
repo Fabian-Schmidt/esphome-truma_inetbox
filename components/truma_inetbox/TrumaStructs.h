@@ -168,6 +168,7 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_1;
   union {  // NOLINT(altera-struct-pack-align)
     u_int16_t hardware_revision_major;
+    TRUMA_DEVICE_TYPE hardware_truma_device_type;
     TRUMA_DEVICE hardware_truma_device;
   } __attribute__((packed));
   u_int8_t hardware_revision_minor;
