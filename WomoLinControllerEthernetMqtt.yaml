@@ -1,6 +1,6 @@
 esphome:
   # https://womolin.de/products/womolin-lin-controller/
-  name: "womo_lin_controller"
+  name: "womo_lin_controller_mqtt"
 
 external_components:
   - source: github://Fabian-Schmidt/esphome-truma_inetbox
@@ -32,6 +32,7 @@ ethernet:
 mqtt:
   id: mqtt_client
   broker: 192.168.1.1
+  username: womo_lin_controller
 
 uart:
   - id: lin_uart_bus
@@ -48,12 +49,16 @@ truma_inetbox:
   # # Advanced users can use `on_heater_message` action. The heater data is in the `message` variable.
   # on_heater_message:
   #   then:
-  #   - logger.log: "Message from CP Plus."
+  #   - logger.log: 
+  #       format: "Message from CP Plus."
+  #       level: INFO
   #   - if:
   #       condition:
   #         lambda: return message->operating_status == truma_inetbox::OperatingStatus::OPERATING_STATUS_OFF;
   #       then:
-  #         - logger.log: "Heater is off."
+  #         - logger.log: 
+  #             format: "Heater is off."
+  #             level: INFO
 
 binary_sensor:
   - platform: truma_inetbox
