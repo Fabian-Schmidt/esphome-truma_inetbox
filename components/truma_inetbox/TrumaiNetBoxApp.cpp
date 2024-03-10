@@ -132,7 +132,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   if (message_len < truma_message_header.size()) {
     return nullptr;
   }
-  for (u_int8_t i = 1; i < truma_message_header.size(); i++) {
+  for (u_int8_t i = 1; i < truma_message_header.size() - 3; i++) {
     if (message[i] != truma_message_header[i]) {
       return nullptr;
     }
