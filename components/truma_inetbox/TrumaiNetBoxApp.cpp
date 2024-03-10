@@ -133,9 +133,13 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     return nullptr;
   }
   for (u_int8_t i = 1; i < truma_message_header.size() - 3; i++) {
-    if (message[i] != truma_message_header[i]) {
+    if (message[i] != truma_message_header[i] && message[i] != alde_message_header[i]) {
       return nullptr;
     }
+  }
+  if (message[4] != (u_int8_t) this->company_) {
+    ESP_LOGI(TAG, "Switch company to 0x%02x", message[4]);
+    this->company_ = (TRUMA_COMPANY) message[4];
   }
 
   if (message[0] == LIN_SID_READ_STATE_BUFFER) {

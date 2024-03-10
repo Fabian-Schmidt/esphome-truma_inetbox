@@ -139,9 +139,15 @@ enum class ClockSource : u_int8_t {
   CLOCK_SOURCE_PROG = 0x2,
 };
 
+enum class TRUMA_COMPANY : u_int8_t {
+  UNKNOWN = 0x00,
+  TRUMA = 0x1E,
+  ALDE = 0x1A,
+};
+
 enum class TRUMA_DEVICE : u_int8_t {
   UNKNOWN = 0x00,
-  
+
   // Saphir Compact AC
   AIRCON_DEVICE = 0x01,
 
@@ -160,7 +166,7 @@ enum class TRUMA_DEVICE : u_int8_t {
   HEATER_COMBI6D = 0x06,
 };
 
-enum class TRUMA_DEVICE_STATE : u_int8_t{
+enum class TRUMA_DEVICE_STATE : u_int8_t {
   OFFLINE = 0x00,
   ONLINE = 0x01,
 };
