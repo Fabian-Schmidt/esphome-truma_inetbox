@@ -15,6 +15,13 @@
 #include <queue.h>
 #endif  // USE_RP2040
 
+#ifndef  TRUMA_MSG_QUEUE_LENGTH
+#define TRUMA_MSG_QUEUE_LENGTH 6
+#endif
+#ifndef  TRUMA_LOG_QUEUE_LENGTH
+#define TRUMA_LOG_QUEUE_LENGTH 6
+#endif
+
 namespace esphome {
 namespace truma_inetbox {
 
@@ -109,18 +116,18 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   void clear_uart_buffer_();
   void setup_framework();
 
-  uint8_t lin_msg_static_queue_storage[6 * sizeof(QUEUE_LIN_MSG)];
+  uint8_t lin_msg_static_queue_storage[TRUMA_MSG_QUEUE_LENGTH * sizeof(QUEUE_LIN_MSG)];
   StaticQueue_t lin_msg_static_queue_;
   QueueHandle_t lin_msg_queue_ =
-      xQueueCreateStatic(/* uxQueueLength */ 6,
+      xQueueCreateStatic(/* uxQueueLength */ TRUMA_MSG_QUEUE_LENGTH,
                          /* uxItemSize */ sizeof(QUEUE_LIN_MSG),
                          /* pucQueueStorageBuffer */ lin_msg_static_queue_storage, &lin_msg_static_queue_);
 
 #if ESPHOME_LOG_LEVEL > ESPHOME_LOG_LEVEL_NONE
-  uint8_t log_static_queue_storage[6 * sizeof(QUEUE_LOG_MSG)];
+  uint8_t log_static_queue_storage[TRUMA_LOG_QUEUE_LENGTH * sizeof(QUEUE_LOG_MSG)];
   StaticQueue_t log_static_queue_;
   QueueHandle_t log_queue_ =
-      xQueueCreateStatic(/* uxQueueLength */ 6,
+      xQueueCreateStatic(/* uxQueueLength */ TRUMA_LOG_QUEUE_LENGTH,
                          /* uxItemSize */ sizeof(QUEUE_LOG_MSG),
                          /* pucQueueStorageBuffer */ log_static_queue_storage, &log_static_queue_);
 #endif
