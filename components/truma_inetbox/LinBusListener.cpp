@@ -238,7 +238,7 @@ void LinBusListener::read_lin_frame_() {
       // Even on error read data.
       this->current_state_ = READ_STATE_DATA;
       break;
-    case READ_STATE_DATA:
+    case READ_STATE_DATA: {
       auto current = micros();
       if (current > (this->last_data_recieved_ + this->time_per_first_byte_)) {
         // timeout occured.
@@ -254,6 +254,7 @@ void LinBusListener::read_lin_frame_() {
         this->current_state_ = READ_STATE_ACT;
       }
       break;
+    }
     default:
       break;
   }
