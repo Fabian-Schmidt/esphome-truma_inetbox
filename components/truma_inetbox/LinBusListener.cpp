@@ -164,6 +164,7 @@ void LinBusListener::onReceive_() {
 void LinBusListener::read_lin_frame_() {
   u_int8_t buf;
   QUEUE_LOG_MSG log_msg = QUEUE_LOG_MSG();
+
   switch (this->current_state_) {
     case READ_STATE_BREAK:
       // Check if there was an unanswered message before break.
@@ -187,14 +188,19 @@ void LinBusListener::read_lin_frame_() {
       // Reset current state
       this->current_state_reset_();
 
-      // First is Break expected
-      if (!this->read_byte(&buf) || buf != LIN_BREAK) {
+      // First is Break expected. Arduino platform does not relay BREAK if send as special.
+      if (!this->read_byte(&buf) || (buf != LIN_BREAK && buf != LIN_SYNC)) {
         log_msg.type = QUEUE_LOG_MSG_TYPE::VV_READ_LIN_FRAME_BREAK_EXPECTED;
         log_msg.current_PID = buf;
         TRUMA_LOGVV_ISR(log_msg);
       } else {
-        // ESP_LOGVV(TAG, "%02X BREAK received.", buf);
-        this->current_state_ = READ_STATE_SYNC;
+        if (buf == LIN_BREAK) {
+          // ESP_LOGVV(TAG, "%02X BREAK received.", buf);
+          this->current_state_ = READ_STATE_SYNC;
+        } else if (buf == LIN_SYNC) {
+          // ESP_LOGVV(TAG, "%02X SYNC found.", buf);
+          this->current_state_ = READ_STATE_SID;
+        }
       }
       break;
     case READ_STATE_SYNC:
@@ -232,14 +238,13 @@ void LinBusListener::read_lin_frame_() {
       // Even on error read data.
       this->current_state_ = READ_STATE_DATA;
       break;
-    case READ_STATE_DATA: {
+    case READ_STATE_DATA:
       auto current = micros();
       if (current > (this->last_data_recieved_ + this->time_per_first_byte_)) {
         // timeout occured.
         this->current_state_ = READ_STATE_BREAK;
         return;
       }
-    }
       this->read_byte(&buf);
       this->current_data_[this->current_data_count_] = buf;
       this->current_data_count_++;
