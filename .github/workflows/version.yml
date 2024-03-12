@@ -5,13 +5,12 @@ on:
       - main
 
 jobs:
-  write-version:
+  build:
     runs-on: ubuntu-latest
-    name: Write Version to File
     steps:
-    - uses: actions/checkout@main
-    - name: Update version
-      uses: brettdorrans/write-version-to-file@main
+    - name: Generate build number
+      uses: einaregilsson/build-number@v3
       with:
-        filename: '/.VERSION'
-        placeholder: '${VERSION}'
+        token: ${{secrets.github_token}}        
+    - name: Print new build number
+      run: echo "Build number is $BUILD_NUMBER"
