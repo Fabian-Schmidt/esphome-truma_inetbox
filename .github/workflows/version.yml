@@ -2,7 +2,7 @@ name: Write Version to File
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   write-version:
