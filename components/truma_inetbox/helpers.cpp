@@ -28,7 +28,7 @@ float temp_code_to_decimal(u_int16_t val, float zero) {
 }
 
 float water_temp_200_fix(float val) {
-  if (val == 200) {
+  if (val > 80) {
     return 80;
   }
   return val;
