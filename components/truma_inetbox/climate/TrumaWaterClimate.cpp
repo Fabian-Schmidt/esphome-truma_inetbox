@@ -11,7 +11,6 @@ void TrumaWaterClimate::setup() {
    
     // Publish updated state
     this->target_temperature = water_temp_200_fix(temp_code_to_decimal(status_heater->target_temp_water));
-    // LOG_CLIMATE(TAG, this->target_temperature, this);
     this->current_temperature = temp_code_to_decimal(status_heater->current_temp_water);
     this->mode = (status_heater->target_temp_water == TargetTemp::TARGET_TEMP_OFF) ? climate::CLIMATE_MODE_OFF
                                                                                    : climate::CLIMATE_MODE_HEAT;
