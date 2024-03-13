@@ -27,6 +27,13 @@ float temp_code_to_decimal(u_int16_t val, float zero) {
   return ((float) val) / 10.0f - 273.0f;
 }
 
+float water_temp_200_fix(float val) {
+  if (val == 200) {
+    return 80;
+  }
+  return val;
+}
+
 float temp_code_to_decimal(TargetTemp val, float zero) { return temp_code_to_decimal((u_int16_t) val, zero); }
 
 TargetTemp decimal_to_temp(u_int8_t val) { return (TargetTemp) ((((u_int16_t) val) + 273) * 10); }

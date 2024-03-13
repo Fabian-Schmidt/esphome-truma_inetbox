@@ -16,6 +16,7 @@ u_int8_t addr_parity(const u_int8_t pid);
 u_int8_t data_checksum(const u_int8_t *message, u_int8_t length, uint16_t sum);
 float temp_code_to_decimal(u_int16_t val, float zero = NAN);
 float temp_code_to_decimal(TargetTemp val, float zero = NAN);
+float water_temp_200_fix(float val);
 TargetTemp decimal_to_temp(u_int8_t val);
 TargetTemp decimal_to_temp(float val);
 TargetTemp decimal_to_room_temp(u_int8_t val);
