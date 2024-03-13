@@ -14,7 +14,7 @@ void TrumaSensor::setup() {
         this->publish_state(temp_code_to_decimal(status_heater->current_temp_room));
         break;
       case TRUMA_SENSOR_TYPE::CURRENT_WATER_TEMPERATURE:
-        this->publish_state(temp_code_to_decimal(status_heater->current_temp_water));
+        this->publish_state(water_temp_200_fix(temp_code_to_decimal(status_heater->current_temp_water)));
         break;
       case TRUMA_SENSOR_TYPE::TARGET_ROOM_TEMPERATURE:
         this->publish_state(temp_code_to_decimal(status_heater->target_temp_room));
