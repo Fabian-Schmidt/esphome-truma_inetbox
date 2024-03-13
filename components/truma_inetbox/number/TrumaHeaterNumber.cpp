@@ -14,7 +14,7 @@ void TrumaHeaterNumber::setup() {
         this->publish_state(temp_code_to_decimal(status_heater->target_temp_room, 0));
         break;
       case TRUMA_NUMBER_TYPE::TARGET_WATER_TEMPERATURE:
-        this->publish_state(water_temp_200_fix(temp_code_to_decimal(status_heater->target_temp_water, 0)));
+        this->publish_state(temp_code_to_decimal(status_heater->target_temp_water, 0));
         break;
       case TRUMA_NUMBER_TYPE::ELECTRIC_POWER_LEVEL:
         this->publish_state(static_cast<float>(status_heater->el_power_level_a));
@@ -43,7 +43,6 @@ void TrumaHeaterNumber::control(float value) {
 
 void TrumaHeaterNumber::dump_config() {
   LOG_NUMBER("", "Truma Heater Number", this);
-  LOG_NUMBER("", "water_temp_200_fix", this);
   ESP_LOGCONFIG(TAG, "  Type '%s'", enum_to_c_str(this->type_));
 }
 }  // namespace truma_inetbox

@@ -5,10 +5,13 @@ namespace esphome {
 namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.water_climate";
+
 void TrumaWaterClimate::setup() {
   this->parent_->get_heater()->add_on_message_callback([this](const StatusFrameHeater *status_heater) {
+   
     // Publish updated state
-    this->target_temperature = temp_code_to_decimal(status_heater->target_temp_water);
+    this->target_temperature = water_temp_200_fix(temp_code_to_decimal(status_heater->target_temp_water));
+    LOG_CLIMATE(TAG, "Target temp: %d", this->target_temperature, this);
     this->current_temperature = temp_code_to_decimal(status_heater->current_temp_water);
     this->mode = (status_heater->target_temp_water == TargetTemp::TARGET_TEMP_OFF) ? climate::CLIMATE_MODE_OFF
                                                                                    : climate::CLIMATE_MODE_HEAT;
@@ -16,7 +19,7 @@ void TrumaWaterClimate::setup() {
   });
 }
 
-void TrumaWaterClimate::dump_config() { LOG_CLIMATE(TAG, "Truma Climate", this); }
+void TrumaWaterClimate::dump_config() { LOG_CLIMATE(TAG, "Truma Climate 200", this); }
 
 void TrumaWaterClimate::control(const climate::ClimateCall &call) {
   if (call.get_target_temperature().has_value()) {
