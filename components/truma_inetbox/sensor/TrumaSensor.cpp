@@ -14,12 +14,13 @@ void TrumaSensor::setup() {
         this->publish_state(temp_code_to_decimal(status_heater->current_temp_room));
         break;
       case TRUMA_SENSOR_TYPE::CURRENT_WATER_TEMPERATURE:
-        this->publish_state(water_temp_200_fix(temp_code_to_decimal(status_heater->current_temp_water)));
+        this->publish_state(temp_code_to_decimal(status_heater->current_temp_water));
         break;
       case TRUMA_SENSOR_TYPE::TARGET_ROOM_TEMPERATURE:
         this->publish_state(temp_code_to_decimal(status_heater->target_temp_room));
         break;
       case TRUMA_SENSOR_TYPE::TARGET_WATER_TEMPERATURE:
+        LOG_SENSOR("", water_temp_200_fix(temp_code_to_decimal(status_heater->target_temp_water)), this);
         this->publish_state(water_temp_200_fix(temp_code_to_decimal(status_heater->target_temp_water)));
         break;
       case TRUMA_SENSOR_TYPE::HEATING_MODE:
@@ -47,6 +48,7 @@ void TrumaSensor::setup() {
 
 void TrumaSensor::dump_config() {
   LOG_SENSOR("", "Truma Sensor", this);
+  LOG_SENSOR("", "water_temp_200_fix", this);
   ESP_LOGCONFIG(TAG, "  Type '%s'", enum_to_c_str(this->type_));
 }
 }  // namespace truma_inetbox

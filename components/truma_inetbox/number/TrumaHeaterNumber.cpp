@@ -43,6 +43,7 @@ void TrumaHeaterNumber::control(float value) {
 
 void TrumaHeaterNumber::dump_config() {
   LOG_NUMBER("", "Truma Heater Number", this);
+  LOG_NUMBER("", "water_temp_200_fix", this);
   ESP_LOGCONFIG(TAG, "  Type '%s'", enum_to_c_str(this->type_));
 }
 }  // namespace truma_inetbox
