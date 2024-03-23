@@ -1,0 +1,49 @@
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.40.12.18.20.FF.FF.FF.00.01.00.FF (27)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.42.12.16.20.FF.FF.FF.00.01.00.FF (27)
+
+# x51 - ?Status
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.86.01.00.5E.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.12.71.0B.FE.FF.FA.0A.00.1E.FF.FF.FF.FF (45)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.35.01.00.59.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.1C.81.0B.FE.FF.36.0B.00.1E.FF.FF.FF.FF (45)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.34.01.00.59.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.1C.82.0B.FE.FF.36.0B.00.1E.FF.FF.FF.FF (45)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.30.01.00.68.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.2A.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45) - Nachtmodus Temperatur auf 18 Grad geändert
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.39.01.00.5E.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.2B.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45) - Nachtmodus Temperatur auf 19 Grad geändert
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.3B.01.00.5E.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.29.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45) - Nachtmodus eingeschaltet
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.50.01.00.4A.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.28.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45) - Nachtmodus ausgeschaltet
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.22.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF (45)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.21.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF (45)
+                                                                                                                   .Night.              .??.              .CC.TempI.     .TempO. - Night - target night temp, CC Counter, TempI - inside temp , TempO - outside temp
+
+# x53
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.34.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.03.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+//                                                         SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+
+# x55 - Heater
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.FD.5E.0B.DE.03.C2.01.07.07.17.03.FF.14 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.F7.59.0B.DE.03.C2.01.07.07.17.03.FF.1F (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.F7.59.0B.DE.03.C2.01.07.07.17.03.FF.1F (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.F1.5E.0B.DE.03.C2.01.07.07.17.03.FF.20 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.DC.72.0B.DE.03.C2.01.07.07.17.03.FF.21 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EF.5E.0B.DE.03.C2.01.07.07.17.03.FF.22 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.ED.5E.0B.DE.03.C2.01.07.07.17.03.FF.24 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.ED.5E.0B.DE.03.C2.01.07.07.17.03.FF.24 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EE.5E.0B.DE.03.C2.01.07.07.16.02.FF.25 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EB.5E.0B.DE.03.C2.01.07.07.17.03.FF.26 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.E8.5E.0B.DE.03.C2.01.07.07.17.03.FF.29 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EA.5E.0B.DE.03.C2.01.07.07.17.03.FF.27 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.08.40.0B.DE.03.C2.01.07.07.17.03.FF.28 (29)
+
+# x57 - ??
+//                                                         SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[D][truma_inetbox.LinBusProtocol:226]Multi package request BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+
+Requested read: Sending init
+[D][truma_inetbox.LinBusProtocol:232]: Multi package response FA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.01.9F (17) 
+[D][truma_inetbox.LinBusProtocol:226]: Multi package request BA.00.1F.00.1A.00.00.22.FF.FF.FF (11) 

@@ -387,6 +387,8 @@ void LinBusListener::process_log_queue(TickType_t xTicksToWait) {
       case QUEUE_LOG_MSG_TYPE::VERBOSE_READ_LIN_FRAME_MSG:
         // Mark the PID of the TRUMA Combi heater as very verbose message.
         if (current_PID == 0x20 || current_PID == 0x21 || current_PID == 0x22 ||
+        // Also mark PID of ALDE heater as very verbose message.
+            current_PID == 0x05 || current_PID == 0x06 || current_PID == 0x13 || current_PID == 0x15 ||
             ((current_PID == DIAGNOSTIC_FRAME_MASTER || current_PID == DIAGNOSTIC_FRAME_SLAVE) &&
              log_msg.data[0] == 0x01 /* ID of heater */)) {
           ESP_LOGVV(TAG, "PID %02X      %s %s %s", current_PID_, format_hex_pretty(log_msg.data, log_msg.len).c_str(),

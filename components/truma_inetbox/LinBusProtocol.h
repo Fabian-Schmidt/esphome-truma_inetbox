@@ -8,6 +8,7 @@ namespace truma_inetbox {
 class LinBusProtocol : public LinBusListener {
  public:
   virtual const std::array<u_int8_t, 4> lin_identifier() = 0;
+  virtual const std::array<u_int8_t, 3> lin_identifier_version() = 0;
   virtual void lin_heartbeat() = 0;
   virtual void lin_reset_device();
 

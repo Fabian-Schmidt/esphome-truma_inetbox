@@ -1,0 +1,228 @@
+Temperatur auf 18 Grad geändert
+[18:22:47][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:22:47][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:22:47][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.1F.81 (17)
+[18:22:48][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.1E.7D.00.FF (19)
+[18:22:50][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.E8.5E.0B.DE.03.C2.01.07.07.17.03.FF.29 (29)
+
+Temperatur auf 15 Grad geändert
+[18:21:38][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EA.5E.0B.DE.03.C2.01.07.07.17.03.FF.27 (29)
+[18:21:53][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:21:53][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:21:53][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.1E.82 (17)
+[18:21:55][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.1D.7E.00.FF (19)
+[18:21:56][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.08.40.0B.DE.03.C2.01.07.07.17.03.FF.28 (29)
+
+Routinemeldung 12 Grad ausstemp, 21 Grad Innentemp, 18:19 Uhr
+[18:18:32][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[18:18:34][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.45.12.11.1F.FF.FF.FF.00.01.03.FF (27)
+[18:18:36][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.34.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.03.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+
+Nachtmodus Temperatur auf 18 Grad geändert
+[18:17:03][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:17:03][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:17:03][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.1D.83 (17)
+[18:17:04][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.1C.7F.00.FF (19)
+[18:17:05][D][internal_temperature:052]: Ignoring invalid temperature (success=0, value=53.3)
+[18:17:05][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.39.01.00.5E.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.2B.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45)
+
+Nachtmodus Temperatur auf 19 Grad geändert
+[18:16:04][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:16:04][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:16:04][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.1C.84 (17)
+[18:16:05][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.1B.80.00.FF (19)
+[18:16:05][D][sensor:094]: '${device_name} Interne Temperatur': Sending state 44.44445 °C with 1decimals of accuracy
+[18:16:07][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.30.01.00.68.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.2A.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45)
+
+Nachtmodus eingeschaltet
+[18:15:35][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:15:35][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:15:35][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.1B.85 (17)
+[18:15:35][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.1A.81.00.FF (19)
+[18:15:37][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EB.5E.0B.DE.03.C2.01.07.07.17.03.FF.26 (29)
+[18:15:39][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.3B.01.00.5E.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.29.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45)
+
+Nachtmodus ausgeschaltet
+[18:14:32][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[18:14:33][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.49.12.0D.1F.FF.FF.FF.00.01.03.FF (27)
+[18:14:36][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.34.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.03.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[18:14:41][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:14:41][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:14:41][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.1A.86 (17)
+[18:14:42][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.19.82.00.FF (19)
+[18:14:44][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.50.01.00.4A.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.28.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF (45)
+[18:14:45][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EE.5E.0B.DE.03.C2.01.07.07.16.02.FF.25 (29)
+
+Temperatursensor von Panel auf Auto geändert
+[18:13:17][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:13:17][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:13:17][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.19.87 (17)
+[18:13:18][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.18.83.00.FF (19)
+
+Temperatursensor von Bett auf Panel geändert
+[18:12:50][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:12:50][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:12:51][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.18.88 (17)
+[18:12:51][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.17.84.00.FF (19)
+
+Temperatursensor von Auto auf Bett geändert
+[18:12:00][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:12:00][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:12:00][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.17.89 (17)
+[18:12:01][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.16.85.00.FF (19)
+
+Priorität von Gas auf Elektro geändert
+[18:11:37][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:11:37][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:11:37][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.16.8A (17)
+[18:11:38][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.15.86.00.FF (19)
+
+Priorität von Elektro auf Gas geändert
+[18:10:49][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:10:49][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:10:50][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.15.8B (17)
+[18:10:51][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.14.87.00.FF (19)
+
+Temperatur auf 18.0 geändert
+[18:10:04][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:10:04][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:10:04][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.14.8C (17)
+[18:10:05][D][internal_temperature:052]: Ignoring invalid temperature (success=0, value=53.3)
+[18:10:05][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.13.88.00.FF (19)
+[18:10:07][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.ED.5E.0B.DE.03.C2.01.07.07.17.03.FF.24 (29)
+
+Warmwasser ausgeschaltet
+[18:08:10][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:08:10][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:08:10][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.13.8D (17)
+[18:08:11][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.12.89.00.FF (19)
+
+Warmwasser Boost eingeschaltet
+[18:07:47][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:07:47][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:07:47][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.12.8E (17)
+[18:07:48][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.11.8A.00.FF (19)
+
+Warmwasser normal eingeschaltet
+[18:07:03][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:07:03][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:07:03][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.11.8F (17)
+[18:07:04][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.10.8B.00.FF (19)
+
+Gas wieder zugeschaltet
+[18:06:28][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:06:28][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:06:28][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.10.90 (17)
+[18:06:29][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.0F.8C.00.FF (19)
+[18:06:30][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.22.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF (45)
+[18:06:32][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[18:06:33][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.51.12.05.1F.FF.FF.FF.00.01.03.FF (27)
+[18:06:34][D][truma_inetbox.LinBusProtocol:226]: Multi package request
+
+Heizung wieder eingeschaltet(18.5 Grad, Elektro off, Gas off)
+[18:05:40][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:05:40][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:05:40][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.0F.91 (17)
+[18:05:40][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.0E.8D.00.FF (19)
+
+Heizung ganz ausgeschaltet
+[18:05:02][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:05:02][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.0E.92 (17)
+[18:05:02][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.0D.8E.00.FF (19)
+
+Temperatur auf 18.5 Grad geändert:
+[18:04:23][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:04:23][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:04:23][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.0D.93 (17)
+[18:04:24][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.0C.8F.00.FF (19)
+[18:04:26][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.E9.63.0B.DE.03.C2.01.07.07.17.03.FF.23 (29)
+[18:04:28][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[18:04:30][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.21.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF (45)
+[18:04:31][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[18:04:33][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.53.12.03.1F.FF.FF.FF.00.01.03.FF (27)
+
+Temperatur auf 18.0 Grad geändert:
+[18:03:40][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:03:40][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:03:40][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.0C.94 (17)
+[18:03:41][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.0B.90.00.FF (19)
+[18:03:43][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.EF.5E.0B.DE.03.C2.01.07.07.17.03.FF.22 (29)
+
+Temperatur auf 20.0 Grad geändert:
+[18:02:55][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:02:55][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:02:55][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.0B.95 (17)
+[18:02:57][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.0A.91.00.FF (19)
+[18:02:58][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.DC.72.0B.DE.03.C2.01.07.07.17.03.FF.21 (29)
+
+Elektro war aus, nun Gas eingeschaltet
+[18:02:03][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:02:03][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:02:03][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.0A.96 (17)
+[18:02:04][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.09.92.00.FF (19)
+
+Elektro 3kw ausgeschaltet, Gas war schon ausgeschaltet
+[18:01:21][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:01:21][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:01:21][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.09.97 (17)
+[18:01:22][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.08.93.00.FF (19)
+
+Elektro 3kw eingeschaltet, Gas nun ausgeschaltet
+[18:00:47][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:00:47][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:00:47][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.08.98 (17)
+[18:00:48][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.07.94.00.FF (19)
+
+Elektro 3kw eingeschaltet
+[18:00:18][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[18:00:18][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[18:00:18][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.07.99 (17)
+[18:00:19][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.06.95.00.FF (19)
+
+Elektro 2kw eingeschaltet
+[17:59:53][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[17:59:53][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[17:59:53][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.06.9A (17)
+[17:59:53][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.05.96.00.FF (19)
+
+Elektro 1kw eingeschaltet
+[17:59:19][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[17:59:19][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[17:59:19][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.05.9B (17)
+[17:59:20][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.04.97.00.FF (19)
+
+Gas eingeschaltet
+[17:58:14][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[17:58:14][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[17:58:14][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.04.9C (17)
+[17:58:16][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.03.98.00.FF (19)
+
+Gas ausgeschaltet
+[17:57:16][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
+[17:57:16][D][truma_inetbox.TrumaiNetBoxApp:152]: Requested read: Sending init
+[17:57:16][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.03.9D (17)
+[17:57:17][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.02.99.00.FF (19)
+
+Temperatur von 17.5 auf 18 geändert
+//                                                                    SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+[17:55:32][D][truma_inetbox.LinBusProtocol:232]: Multi package responseFA.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.00.0A.02.9E (17)
+[17:55:33][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.08.00.00.22.FF.FF.FF.54.01.02.0D.01.9A.00.FF (19)
+[17:55:35][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.F1.5E.0B.DE.03.C2.01.07.07.17.03.FF.20 (29)
+
+Routinemeldungen(ohne Eingaben)
+[17:50:27][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[17:50:28][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.F7.59.0B.DE.03.C2.01.07.07.17.03.FF.1F (29)
+[17:50:29][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[17:50:31][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.29.11.31.1C.FF.FF.FF.00.01.03.FF (27)
+[17:50:32][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.34.01.00.59.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.1C.82.0B.FE.FF.36.0B.00.1E.FF.FF.FF.FF (45)
+[17:51:05][D][internal_temperature:052]: Ignoring invalid temperature (success=0, value=53.3)
+[17:51:26][D][sensor:094]: 'Alde WiFi Signal': Sending state -37.00000 dBm with 0 decimals ofaccuracy
+[17:52:02][D][binary_sensor:036]: 'CP Plus alive': Sending state OFF
+[17:52:05][D][sensor:094]: '${device_name} Interne Temperatur': Sending state 44.44445 °C with 1decimals of accuracy
+[17:52:06][D][binary_sensor:036]: 'CP Plus alive': Sending state ON
+[17:52:06][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.35.01.00.59.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.1C.81.0B.FE.FF.36.0B.00.1E.FF.FF.FF.FF (45)
+[17:52:27][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF (53)
+[17:52:29][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.F7.59.0B.DE.03.C2.01.07.07.17.03.FF.1F (29)
+[17:52:30][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
+[17:52:31][D][truma_inetbox.LinBusProtocol:226]: Multi package requestBB.00.1F.00.10.00.00.22.FF.FF.FF.54.01.0A.15.00.26.11.33.1D.FF.FF.FF.00.01.03.FF (27)
+[17:53:05][D][internal_temperature:052]: Ignoring invalid temperature (success=0, value=53.3)

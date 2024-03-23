@@ -139,12 +139,6 @@ enum class ClockSource : u_int8_t {
   CLOCK_SOURCE_PROG = 0x2,
 };
 
-enum class TRUMA_COMPANY : u_int8_t {
-  UNKNOWN = 0x00,
-  TRUMA = 0x1E,
-  ALDE = 0x1A,
-};
-
 enum class TRUMA_DEVICE : u_int8_t {
   UNKNOWN = 0x00,
 

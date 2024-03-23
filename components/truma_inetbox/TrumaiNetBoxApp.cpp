@@ -66,7 +66,12 @@ const std::array<uint8_t, 4> TrumaiNetBoxApp::lin_identifier() {
   // iNet Box:
   // 17.46.00.1F - T23.70.0 - 1F00.xx iNet Box
   return {0x17 /*Supplied Id*/, 0x46 /*Supplied Id*/, 0x00 /*Function Id*/, 0x1F /*Function Id*/};
+  // 17.46.30.03 - Alde Compact 3020 HE
+  // DE.41.01.01 - Alde-Paneel 3020 113
+  // DE.41.02.01
 }
+
+const std::array<u_int8_t, 3> TrumaiNetBoxApp::lin_identifier_version() { return {0x02, 0x0E, 0x00}; }
 
 void TrumaiNetBoxApp::lin_heartbeat() { this->device_registered_ = micros(); }
 
@@ -74,6 +79,8 @@ void TrumaiNetBoxApp::lin_reset_device() {
   LinBusProtocol::lin_reset_device();
   this->device_registered_ = micros();
   this->init_recieved_ = 0;
+  this->init_state_ = 0;
+  this->alde_device_ = false;
 
   this->airconAuto_.reset();
   this->airconManual_.reset();
@@ -109,13 +116,13 @@ bool TrumaiNetBoxApp::lin_read_field_by_identifier_(u_int8_t identifier, std::ar
     (*response)[4] = 0x01;  // Variant
     return true;
   } else if (identifier == 0x20 /* Product details to display in CP plus */) {
-    auto lin_identifier = this->lin_identifier();
+    auto lin_identifier_version = this->lin_identifier_version();
     // Only the first three parts are displayed.
-    (*response)[0] = lin_identifier[0];
-    (*response)[1] = lin_identifier[1];
-    (*response)[2] = lin_identifier[2];
-    // (*response)[3] = // unknown
-    // (*response)[4] = // unknown
+    (*response)[0] = lin_identifier_version[0];
+    (*response)[1] = lin_identifier_version[1];
+    (*response)[2] = lin_identifier_version[2];
+    (*response)[3] = 0xFF;  // Empty. Package length by INet Box is 2 shorter.
+    (*response)[4] = 0xFF;  // Empty. Package length by INet Box is 2 shorter.
     return true;
   } else if (identifier == 0x22 /* unknown usage */) {
     // Init is failing if missing
@@ -130,28 +137,69 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
   static u_int8_t response[48] = {};
   // Validate message prefix.
   if (message_len < truma_message_header.size()) {
+    ESP_LOGE(TAG, "Message header too short.");
     return nullptr;
   }
   for (u_int8_t i = 1; i < truma_message_header.size() - 3; i++) {
-    if (message[i] != truma_message_header[i] && message[i] != alde_message_header[i]) {
+    if (i == 4) {
+      // Ignore 5.byte
+    } else if (message[i] != truma_message_header[i]) {
+      ESP_LOGE(TAG, "Message header incorrect.");
       return nullptr;
     }
-  }
-  if (message[4] != (u_int8_t) this->company_) {
-    ESP_LOGI(TAG, "Switch company to 0x%02x", message[4]);
-    this->company_ = (TRUMA_COMPANY) message[4];
   }
 
   if (message[0] == LIN_SID_READ_STATE_BUFFER) {
     // Example: BA.00.1F.00.1E.00.00.22.FF.FF.FF (11)
+    // Alde ex: BA.00.1F.00.1A.00.00.22.FF.FF.FF (11)
     memset(response, 0, sizeof(response));
     auto response_frame = reinterpret_cast<StatusFrame *>(response);
 
+    // if (this->DEBUG_SUBMIT) {
+    //   ESP_LOGD(TAG, "Requested read: DEBUG");
+
+    //   status_frame_create_empty(response_frame, STATUS_FRAME_ALDE_HEATER_DAY_RESPONSE,
+    //   sizeof(StatusFameAldeHeaterDay),
+    //                             this->message_counter++);
+
+    //   response_frame->aldeHeaterDay.target_temp_room = decimal_to_temp((float) this->DEBUG_VALUE);
+
+    //   status_frame_calculate_checksum(response_frame);
+    //   (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFameAldeHeaterDay);
+    //   this->update_time_ = 0;
+
+    //   this->DEBUG_SUBMIT = false;
+    //   return response;
+    // }
+
     // The order must match with the method 'has_update_to_submit_'.
     if (this->init_recieved_ == 0) {
-      ESP_LOGD(TAG, "Requested read: Sending init");
-      status_frame_create_init(response_frame, return_len, this->message_counter++);
-      return response;
+      if (message[4] == 0x1A) {
+        // ALDE init
+        if (this->init_state_ == 0) {
+          this->init_state_ = 1;
+          // Preinit send x25 long empty (xFF) package
+          // Or is this response when I am asked for an update without signaling that I have one?
+          ESP_LOGD(TAG, "Requested read: Flush empty response");
+          this->message_counter = 0x00;
+          status_frame_create_null(response_frame, return_len);
+          return response;
+        } else {
+          // DEBUG: try all possible status frame message_type as init.
+          this->init_state_++;
+          if (this->init_state_ == 0x64) {
+            this->init_state_ = 0;
+          }
+          status_frame_create_init_debug(response_frame, this->init_state_, return_len, this->message_counter++);
+          return response;
+        }
+      } else {
+        // TRUMA init
+        ESP_LOGD(TAG, "Requested read: Sending init");
+        status_frame_create_init(response_frame, return_len, this->message_counter++);
+        return response;
+      }
+
     } else if (this->heater_.has_update()) {
       ESP_LOGD(TAG, "Requested read: Sending heater update");
       this->heater_.create_update_data(response_frame, return_len, this->message_counter++);
@@ -182,17 +230,25 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     } else {
       ESP_LOGW(TAG, "Requested read: CP Plus asks for an update, but I have none.");
     }
+  } else if (message[0] != LIN_SID_FIll_STATE_BUFFFER) {
+    ESP_LOGE(TAG, "Unknown SID %02X .", message[0]);
+    return nullptr;
   }
 
-  if (message_len < sizeof(StatusFrame) && message[0] == LIN_SID_FIll_STATE_BUFFFER) {
+  if (message_len < sizeof(StatusFrameHeader)) {
+    ESP_LOGE(TAG, "Message too short.");
     return nullptr;
   }
 
   auto statusFrame = reinterpret_cast<const StatusFrame *>(message);
   auto header = &statusFrame->genericHeader;
   // Validate Truma frame checksum
-  if (header->checksum != data_checksum(&statusFrame->raw[10], sizeof(StatusFrame) - 10, (0xFF - header->checksum)) ||
+  if (header->checksum != data_checksum(&statusFrame->raw[10], message_len - 10, (0xFF - header->checksum)) ||
       header->header_2 != 'T' || header->header_3 != 0x01) {
+    // auto crc = data_checksum(&statusFrame->raw[10], message_len - 10, (0xFF - header->checksum));
+    // ESP_LOGE(TAG, "Truma checksum fail. - %02X %02X %02X %02X ", header->checksum, crc, header->header_2,
+    //          header->header_3);
+    // ESP_LOGE(TAG, "%s", format_hex_pretty(&statusFrame->raw[10], message_len - 10).c_str());
     ESP_LOGE(TAG, "Truma checksum fail.");
     return nullptr;
   }
@@ -303,8 +359,15 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     }
 
     return response;
-  } else if (header->message_type == STATUS_FRAME_DEVICES && header->message_length == sizeof(StatusFrameDevice)) {
-    ESP_LOGI(TAG, "StatusFrameDevice");
+  } else if ((header->message_type == STATUS_FRAME_DEVICES || header->message_type == STATUS_FRAME_DEVICES_ALDE) &&
+             header->message_length == sizeof(StatusFrameDevice)) {
+    if (header->message_type == STATUS_FRAME_DEVICES_ALDE) {
+      ESP_LOGI(TAG, "StatusFrameDeviceAlde");
+      this->alde_device_ = true;
+    } else {
+      ESP_LOGI(TAG, "StatusFrameDevice");
+      this->alde_device_ = false;
+    }
     // This message is special. I recieve one response per registered (at CP plus) device.
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|count|st|??|Hardware|Software|??|??
@@ -318,6 +381,9 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.C7.03.00.01.00.50.00.00.04.03.00.60.10
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.71.03.01.01.00.10.03.02.06.00.02.00.00
     // BB.00.1F.00.1E.00.00.22.FF.FF.FF.54.01.0C.0B.00.7C.03.02.01.00.01.0C.00.01.02.01.00.00
+    // ALDE Device
+    // BB.00.1F.00.14.00.00.22.FF.FF.FF.54.01.0E.0C.00.58.02.00.01.FF.DE.41.01.00.00.04.10.00 - Alde-Paneel 3020 113
+    // BB.00.1F.00.14.00.00.22.FF.FF.FF.54.01.0E.0C.00.C9.02.01.01.FF.DE.41.30.03.00.02.6D.00 - Alde Compact 3020 HE
     auto device = statusFrame->device;
 
     ESP_LOGD(TAG, "StatusFrameDevice %d/%d - %d.%02d.%02d %04X.%02X (%02X %02X)", device.device_id + 1,
@@ -338,30 +404,91 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
         ESP_LOGW(TAG, "Unknown information in StatusFrameDevice found. Please report.");
     }
 
-    // first submitted device is CP Plus device
-    const auto is_CPPLUSDevice = device.device_id == 0;
+    // first submitted device is CP Plus device (or ALDE paneel)
+    const auto is_master_device = device.device_id == 0;
 
-    if (!is_CPPLUSDevice) {
+    if (!is_master_device) {
       // Assumption first device is Heater
       if (device.device_id == 1) {
         this->heater_device_ = truma_device;
       }
       // Assumption second device is Aircon
       if (device.device_id == 2) {
+        // TODO: Detect aircon because they have a 0x0C as Hardware id?
         this->aircon_device_ = TRUMA_DEVICE::AIRCON_DEVICE;
       }
     }
 
-    if (device.device_count == 2 && this->heater_device_ != TRUMA_DEVICE::UNKNOWN) {
-      // Assumption 2 devices mean CP Plus and Heater.
-      this->init_recieved_ = micros();
-    } else if (device.device_count == 3 && this->heater_device_ != TRUMA_DEVICE::UNKNOWN &&
-               this->aircon_device_ != TRUMA_DEVICE::UNKNOWN) {
-      // Assumption 3 devices mean CP Plus, Heater and Aircon.
+    if (device.device_id + 1 == device.device_count) {
+      // Got all device messages.
       this->init_recieved_ = micros();
     }
 
     return response;
+    //
+    // ALDE SUPPORT START
+    //
+  } else if (header->message_type == STATUS_FRAME_ALDE_STATUS &&
+             header->message_length == sizeof(StatusFameAldeStatus)) {
+    ESP_LOGI(TAG, "StatusFameAldeStatus");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.86.01.00.5E.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.12.71.0B.FE.FF.FA.0A.00.1E.FF.FF.FF.FF
+    // (45)
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.35.01.00.59.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.1C.81.0B.FE.FF.36.0B.00.1E.FF.FF.FF.FF
+    // (45)
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.34.01.00.59.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.1C.82.0B.FE.FF.36.0B.00.1E.FF.FF.FF.FF
+    // (45)
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.30.01.00.68.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.2A.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF
+    // (45) - Nachtmodus Temperatur auf 18 Grad geändert
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.39.01.00.5E.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.2B.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF
+    // (45) - Nachtmodus Temperatur auf 19 Grad geändert
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.3B.01.00.5E.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.29.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF
+    // (45) - Nachtmodus eingeschaltet
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.50.01.00.4A.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.28.7E.0B.FE.FF.22.0B.00.1E.FF.FF.FF.FF
+    // (45) - Nachtmodus ausgeschaltet
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.00.00.64.FF.FF.FF.22.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF
+    // (45)
+    // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.21.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF
+    // (45)
+    ESP_LOGD(TAG,
+             "StatusFameAldeStatus target_temp: %f, message_counter: %u, current_temp_inside: %f, "
+             "current_temp_outside: %f, el: %u, gas: %s,",
+             temp_code_to_decimal(statusFrame->aldeStatus.target_temp_room), statusFrame->aldeStatus.message_counter,
+             temp_code_to_decimal(statusFrame->aldeStatus.current_temp_inside),
+             temp_code_to_decimal(statusFrame->aldeStatus.current_temp_outside),
+             ((u_int8_t) statusFrame->aldeStatus.el_mode) * 100,
+             statusFrame->aldeStatus.gas_mode == GasModeAlde::GAS_MODE_ALDE_OFF ? "OFF" : "ON");
+    return response;
+  } else if (header->message_type == STATUS_FRAME_ALDE_ADDON && header->message_length == sizeof(StatusFameAldeAddon)) {
+    ESP_LOGI(TAG, "StatusFameAldeAddon");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    //
+    return response;
+  } else if (header->message_type == STATUS_FRAME_ALDE_HEATER_NIGHT &&
+             header->message_length == sizeof(StatusFameAldeHeaterNight)) {
+    ESP_LOGI(TAG, "StatusFameAldeHeaterNight");
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    //
+    ESP_LOGD(TAG, "StatusFameAldeHeaterNight target_temp_room: %f",
+             temp_code_to_decimal(statusFrame->aldeHeaterNight.target_temp_room));
+    return response;
+
+  } else if (header->message_type == STATUS_FRAME_ALDE_HEATER_DAY &&
+             header->message_length == sizeof(StatusFameAldeHeaterDay)) {
+    ESP_LOGI(TAG, "StatusFameAldeHeaterDay");
+    ESP_LOGD(TAG, "StatusFameAldeHeaterDay target_temp_room: %f",
+             temp_code_to_decimal(statusFrame->aldeHeaterDay.target_temp_room));
+    // Example:
+    // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+    //
+    return response;
+
+    //
+    // ALDE SUPPORT END
+    //
   } else {
     ESP_LOGW(TAG, "Unknown message type %02X", header->message_type);
   }

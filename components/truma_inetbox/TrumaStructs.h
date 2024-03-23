@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TrumaEnums.h"
+#include "TrumaStructsAlde.h"
 
 namespace esphome {
 namespace truma_inetbox {
@@ -17,6 +18,7 @@ namespace truma_inetbox {
 // - STATUS_FRAME_CLOCK
 #define STATUS_FRAME_RESPONSE_INIT_REQUEST 0x0A
 #define STATUS_FRAME_DEVICES 0x0B
+#define STATUS_FRAME_DEVICES_ALDE 0x0C
 #define STATUS_FRAME_RESPONSE_ACK 0x0D
 #define STATUS_FRAME_CLOCK_RESPONSE (STATUS_FRAME_CLOCK - 1)
 #define STATUS_FRAME_CLOCK 0x15
@@ -35,6 +37,27 @@ namespace truma_inetbox {
 #define STATUS_FRAME_AIRCON_MANUAL_INIT 0x3F
 #define STATUS_FRAME_AIRCON_AUTO_INIT_RESPONSE (STATUS_FRAME_AIRCON_AUTO_INIT - 1)
 #define STATUS_FRAME_AIRCON_AUTO_INIT 0x41
+#define STATUS_FRAME_ALDE_STATUS_RESPONSE (STATUS_FRAME_ALDE_STATUS - 1)
+#define STATUS_FRAME_ALDE_STATUS 0x51
+#define STATUS_FRAME_ALDE_ADDON_RESPONSE (STATUS_FRAME_ALDE_ADDON - 1)
+#define STATUS_FRAME_ALDE_ADDON 0x53
+#define STATUS_FRAME_ALDE_HEATER_NIGHT_RESPONSE (STATUS_FRAME_ALDE_HEATER_NIGHT - 1)
+#define STATUS_FRAME_ALDE_HEATER_NIGHT 0x55
+#define STATUS_FRAME_ALDE_HEATER_DAY_RESPONSE (STATUS_FRAME_ALDE_HEATER_DAY - 1)
+#define STATUS_FRAME_ALDE_HEATER_DAY 0x57
+
+// ALDE
+// SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
+// STATUS_FRAME_ALDE_HEATER_51_RESPONSE (STATUS_FRAME_ALDE_HEATER_51 - 1)
+// STATUS_FRAME_ALDE_HEATER_51 0x51
+// BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.86.01.00.5E.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.12.71.0B.FE.FF.FA.0A.00.1E.FF.FF.FF.FF
+// (45) STATUS_FRAME_ALDE_HEATER_53_RESPONSE (STATUS_FRAME_ALDE_HEATER_53 - 1) STATUS_FRAME_ALDE_HEATER_53 0x53
+// BB.00.1F.00.2A.00.00.22.FF.FF.FF.54.01.24.53.00.36.00.00.00.00.FD.FD.00.00.02.00.00.00.01.FD.FD.00.FF.FF.FF.01.FD.FF.00.00.00.00.00.01.02.00.FF.FF.FF.FF.FF.FF
+// (53) STATUS_FRAME_ALDE_HEATER_55_RESPONSE (STATUS_FRAME_ALDE_HEATER_55 - 1) STATUS_FRAME_ALDE_HEATER_55 0x55
+// BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.55.00.FD.5E.0B.DE.03.C2.01.07.07.17.03.FF.14 (29)
+// STATUS_FRAME_ALDE_HEATER_57_RESPONSE (STATUS_FRAME_ALDE_HEATER_57 - 1)
+// STATUS_FRAME_ALDE_HEATER_57 0x55
+// BB.00.1F.00.12.00.00.22.FF.FF.FF.54.01.0C.57.00.15.63.0B.DE.03.CE.04.07.07.00.00.FF.01 (29)
 
 struct StatusFrameHeader {  // NOLINT(altera-struct-pack-align)
   // sid
@@ -49,7 +72,7 @@ struct StatusFrameHeader {  // NOLINT(altera-struct-pack-align)
   u_int8_t checksum;
 } __attribute__((packed));
 
-// Length 20 (0x14)
+// Length 20 (0x14) - MSG x33
 struct StatusFrameHeater {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_room;
   // Room
@@ -68,7 +91,7 @@ struct StatusFrameHeater {  // NOLINT(altera-struct-pack-align)
   u_int8_t heater_unknown_2;
 } __attribute__((packed));
 
-// Length 12 (0x0C)
+// Length 12 (0x0C) - MSG x32
 struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_room;
   // Room
@@ -81,7 +104,7 @@ struct StatusFrameHeaterResponse {  // NOLINT(altera-struct-pack-align)
   EnergyMix energy_mix_b;
 } __attribute__((packed));
 
-// Length 24 (0x18)
+// Length 24 (0x18) - x3D
 struct StatusFrameTimer {  // NOLINT(altera-struct-pack-align)
   TargetTemp timer_target_temp_room;
   HeatingMode timer_heating_mode;
@@ -101,7 +124,7 @@ struct StatusFrameTimer {  // NOLINT(altera-struct-pack-align)
   u_int8_t timer_stop_hours;
 } __attribute__((packed));
 
-// Length 13 (0x0D)
+// Length 13 (0x0D) - x3C
 struct StatusFrameTimerResponse {  // NOLINT(altera-struct-pack-align)
   TargetTemp timer_target_temp_room;
   HeatingMode timer_heating_mode;
@@ -122,29 +145,34 @@ struct StatusFrameTimerResponse {  // NOLINT(altera-struct-pack-align)
   u_int8_t timer_resp_stop_hours;
 } __attribute__((packed));
 
-// Length 2 (0x02)
+// Length 2 (0x02) - MSG x0D
 struct StatusFrameResponseAck {  // NOLINT(altera-struct-pack-align)
   ResponseAckResult error_code;
   u_int8_t unknown;
 } __attribute__((packed));
 
-// Length 10 (0x0A)
+// Length 10 (0x0A) - MSG x15
 struct StatusFrameClock {  // NOLINT(altera-struct-pack-align)
   u_int8_t clock_hour;
   u_int8_t clock_minute;
   u_int8_t clock_second;
-  // MUST be 0x1, 0x2, 0x3..? (lower than 0x9)
+  // Truma: MUST be 0x1, 0x2, 0x3..? (lower than 0x9)
+  // Alde: 0xFF
   u_int8_t display_1;
-  // MUST be 0x1
+  // Truma: MUST be 0x1
+  // Alde: 0xFF
   u_int8_t display_2;
+  // Alde: 0xFF
   u_int8_t display_3;
   ClockMode clock_mode;
   ClockSource clock_source;
+  // Alde: Day - x4 Friday
   u_int8_t display_4;
+  // Alde: 0xFF
   u_int8_t display_5;
 } __attribute__((packed));
 
-// Length 10 (0x0A)
+// Length 10 (0x0A) - MSG 17
 struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
   // 0x01 .. 0x0A
   u_int8_t display_brightness;
@@ -159,7 +187,7 @@ struct StatusFrameConfig {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_8;
 } __attribute__((packed));
 
-// Length 12 (0x0C)
+// Length 12 (0x0C) - MSG x0B
 struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t device_count;
   u_int8_t device_id;
@@ -173,13 +201,16 @@ struct StatusFrameDevice {  // NOLINT(altera-struct-pack-align)
   u_int8_t software_revision[3];
   // 0xAD, 0x0B on CPplus with Combi4 or 0x66 on CPplus with Vario Heat Comfort ohne E
   // 0x00 on Combi4, Vario Heat
+  // 0x10 on Alde Paneel
+  // 0x6D on Alde Compact 3020 HE
   u_int8_t unknown_2;
   // 0x10, 0x12 on CPplus
   // 0x00 on Combi4, Vario Heat
+  // 0x00 on Alde Paneel & Alde Compact 3020 HE
   u_int8_t unknown_3;
 } __attribute__((packed));
 
-// Length 18 (0x12)
+// Length 18 (0x12) - MSG x35
 // TODO
 struct StatusFrameAirconManual {  // NOLINT(altera-struct-pack-align)
   AirconMode mode;
@@ -215,7 +246,7 @@ struct StatusFrameAirconManualResponse {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_aircon;
 } __attribute__((packed));
 
-// Length 22 (0x16)
+// Length 22 (0x16) - MSG x3F
 // TODO
 struct StatusFrameAirconManualInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_01;                // 0x00
@@ -242,7 +273,7 @@ struct StatusFrameAirconManualInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_22;  // 0x00
 } __attribute__((packed));
 
-// Length 18 (0x12)
+// Length 18 (0x12) - MSG x37
 // TODO
 struct StatusFrameAirconAuto {  // NOLINT(altera-struct-pack-align)
   EnergyMix energy_mix_a;
@@ -300,8 +331,9 @@ struct StatusFrameAirconAutoInit {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_20;  // 0x00
 } __attribute__((packed));
 
+
 union StatusFrame {  // NOLINT(altera-struct-pack-align)
-  u_int8_t raw[41];
+  u_int8_t raw[54];
   struct {  // NOLINT(altera-struct-pack-align)
     StatusFrameHeader genericHeader;
     union {  // NOLINT(altera-struct-pack-align)
@@ -319,6 +351,11 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameAirconAuto airconAuto;
       StatusFrameAirconAutoResponse airconAutoResponse;
       StatusFrameAirconAutoInit airconAutoInit;
+      StatusFameAldeStatusResponse aldeStatusResponse; 
+      StatusFameAldeStatus aldeStatus;
+      StatusFameAldeAddon aldeAddon;
+      StatusFameAldeHeaterNight aldeHeaterNight;
+      StatusFameAldeHeaterDay aldeHeaterDay;
     } __attribute__((packed));
   };
 } __attribute__((packed));

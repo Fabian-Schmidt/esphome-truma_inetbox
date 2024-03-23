@@ -8,6 +8,7 @@
 #include "TrumaiNetBoxAppConfig.h"
 #include "TrumaiNetBoxAppHeater.h"
 #include "TrumaiNetBoxAppTimer.h"
+#include "TrumaiNetBoxAppAldeStatus.h"
 
 #ifdef USE_TIME
 #include "esphome/components/time/real_time_clock.h"
@@ -24,11 +25,13 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   void update() override;
 
   const std::array<u_int8_t, 4> lin_identifier() override;
+  const std::array<u_int8_t, 3> lin_identifier_version() override;
   void lin_heartbeat() override;
   void lin_reset_device() override;
 
   TRUMA_DEVICE get_heater_device() const { return this->heater_device_; }
   TRUMA_DEVICE get_aircon_device() const { return this->aircon_device_; }
+  bool get_is_alde_device() const { return this->alde_device_; }
 
   TrumaiNetBoxAppAirconAuto *get_aircon_auto() { return &this->airconAuto_; }
   TrumaiNetBoxAppAirconManual *get_aircon_manual() { return &this->airconManual_; }
@@ -36,8 +39,16 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   TrumaiNetBoxAppConfig *get_config() { return &this->config_; }
   TrumaiNetBoxAppHeater *get_heater() { return &this->heater_; }
   TrumaiNetBoxAppTimer *get_timer() { return &this->timer_; }
+  TrumaiNetBoxAppAldeStatus *get_alde_satus() { return &this->alde_status_; }
 
   int64_t get_last_cp_plus_request() { return this->device_registered_; }
+
+  void debug(u_int16_t val) {
+    this->DEBUG_VALUE = val;
+    this->DEBUG_SUBMIT = true;
+  }
+  bool DEBUG_SUBMIT = false;
+  u_int16_t DEBUG_VALUE = 0;
 
 #ifdef USE_TIME
   void set_time(time::RealTimeClock *time) { time_ = time; }
@@ -48,11 +59,12 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   // Truma CP Plus needs init (reset). This device is not registered.
   uint32_t device_registered_ = 0;
   uint32_t init_requested_ = 0;
+  // Two stage init. First send null. Next request devices.
+  u_int8_t init_state_ = 0;
   uint32_t init_recieved_ = 0;
   u_int8_t message_counter = 1;
 
   // Truma heater conected to CP Plus.
-  TRUMA_COMPANY company_ = TRUMA_COMPANY::TRUMA;
   TRUMA_DEVICE heater_device_ = TRUMA_DEVICE::UNKNOWN;
   TRUMA_DEVICE aircon_device_ = TRUMA_DEVICE::UNKNOWN;
 
@@ -62,6 +74,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   TrumaiNetBoxAppConfig config_;
   TrumaiNetBoxAppHeater heater_;
   TrumaiNetBoxAppTimer timer_;
+  TrumaiNetBoxAppAldeStatus alde_status_;
 
   // last time CP plus was informed I got an update msg.
   uint32_t update_time_ = 0;
@@ -72,6 +85,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   // Mark if the initial clock sync was done.
   bool update_status_clock_done = false;
 #endif  // USE_TIME
+  bool alde_device_ = false;
 
   bool answer_lin_order_(const u_int8_t pid) override;
 
