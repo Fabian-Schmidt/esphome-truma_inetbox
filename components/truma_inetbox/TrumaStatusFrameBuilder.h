@@ -14,7 +14,7 @@ inline void status_frame_create_empty(StatusFrame *response, u_int8_t message_ty
     response->raw[i] = truma_message_header[i];
   }
   // ALDE has in 5th byte the total msg length including header.
-  response->raw[4] = std::max(message_length + 6, 0x1E);
+  response->raw[4] = message_length + 6; //std::max(message_length + 6, 0x1A);
 
   response->genericHeader.header_2 = 'T';
   response->genericHeader.header_3 = 0x01;
@@ -25,7 +25,7 @@ inline void status_frame_create_empty(StatusFrame *response, u_int8_t message_ty
 
 inline void status_frame_calculate_checksum(StatusFrame *response) {
   response->genericHeader.checksum = 0x0;
-  response->genericHeader.checksum = data_checksum(&response->raw[10], sizeof(StatusFrame) - 10, 0);
+  response->genericHeader.checksum = data_checksum(&response->raw[10], response->raw[4], 0);
 }
 
 inline void status_frame_create_init(StatusFrame *response, u_int8_t *response_len, u_int8_t command_counter) {
