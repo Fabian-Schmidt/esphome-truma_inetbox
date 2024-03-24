@@ -176,8 +176,12 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     if (this->init_recieved_ == 0) {
       if (message[4] == 0x1A) {
         // ALDE init
-        if (this->init_state_ == 0) {
-          this->init_state_ = 1;
+        if (this->init_state_debug_ == 0) {
+          this->init_state_++;
+          if (this->init_state_ == 0x64) {
+            this->init_state_ = 0;
+          }
+          this->init_state_debug_ = 1;
           // Preinit send x25 long empty (xFF) package
           // Or is this response when I am asked for an update without signaling that I have one?
           ESP_LOGD(TAG, "Requested read: Flush empty response");
@@ -186,10 +190,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
           return response;
         } else {
           // DEBUG: try all possible status frame message_type as init.
-          this->init_state_++;
-          if (this->init_state_ == 0x64) {
-            this->init_state_ = 0;
-          }
+          this->init_state_debug_ = 0;
           status_frame_create_init_debug(response_frame, this->init_state_, return_len, this->message_counter++);
           return response;
         }

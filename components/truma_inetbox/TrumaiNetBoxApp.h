@@ -61,6 +61,7 @@ class TrumaiNetBoxApp : public LinBusProtocol {
   uint32_t init_requested_ = 0;
   // Two stage init. First send null. Next request devices.
   u_int8_t init_state_ = 0;
+  u_int8_t init_state_debug_ = 0;
   uint32_t init_recieved_ = 0;
   u_int8_t message_counter = 1;
 
