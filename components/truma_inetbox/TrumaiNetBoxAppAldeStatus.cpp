@@ -17,14 +17,14 @@ StatusFameAldeStatusResponse *TrumaiNetBoxAppAldeStatus::update_prepare() {
 
   // prepare status heater response
   this->update_status_ = {};
-  this->update_status_.unknown_00 = this->data_.unknown_00;
+  this->update_status_.heater_mode = this->data_.heater_mode;
   this->update_status_.unknown_01 = this->data_.unknown_01;
   this->update_status_.target_temp_room = this->data_.target_temp_room;
   this->update_status_.unknown_04 = this->data_.unknown_04;
-  this->update_status_.unknown_06 = this->data_.unknown_06;
+  this->update_status_.water_mode = this->data_.water_mode;
   this->update_status_.el_mode = this->data_.el_mode;
   this->update_status_.gas_mode = this->data_.gas_mode;
-  this->update_status_.unknown_09 = this->data_.unknown_09;
+  this->update_status_.heater_prio = this->data_.heater_prio;
   this->update_status_.unknown_10 = this->data_.unknown_10;
   this->update_status_.unknown_11 = this->data_.unknown_11;
   this->update_status_.unknown_12 = this->data_.unknown_12;
@@ -41,14 +41,14 @@ void TrumaiNetBoxAppAldeStatus::create_update_data(StatusFrame *response, u_int8
   status_frame_create_empty(response, STATUS_FRAME_ALDE_STATUS_RESPONSE, sizeof(StatusFameAldeStatusResponse),
                             command_counter);
 
-  response->aldeStatusResponse.unknown_00 = this->update_status_.unknown_00;
+  response->aldeStatusResponse.heater_mode = this->update_status_.heater_mode;
   response->aldeStatusResponse.unknown_01 = this->update_status_.unknown_01;
   response->aldeStatusResponse.target_temp_room = this->update_status_.target_temp_room;
   response->aldeStatusResponse.unknown_04 = this->update_status_.unknown_04;
-  response->aldeStatusResponse.unknown_06 = this->update_status_.unknown_06;
+  response->aldeStatusResponse.water_mode = this->update_status_.water_mode;
   response->aldeStatusResponse.el_mode = this->update_status_.el_mode;
   response->aldeStatusResponse.gas_mode = this->update_status_.gas_mode;
-  response->aldeStatusResponse.unknown_09 = this->update_status_.unknown_09;
+  response->aldeStatusResponse.heater_prio = this->update_status_.heater_prio;
   response->aldeStatusResponse.unknown_10 = this->update_status_.unknown_10;
   response->aldeStatusResponse.unknown_11 = this->update_status_.unknown_11;
   response->aldeStatusResponse.unknown_12 = this->update_status_.unknown_12;

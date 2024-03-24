@@ -8,14 +8,14 @@ namespace truma_inetbox {
 
 // Length 28 (0x1C) - MSG x51
 struct StatusFameAldeStatus {  // NOLINT(altera-struct-pack-align)
-  u_int8_t unknown_00;         // x01
-  u_int8_t unknown_01;         // x00
+  HeaterAlde heater_mode;
+  u_int8_t unknown_01;  // x00
   TargetTemp target_temp_room;
   u_int16_t unknown_04;  // xFFFE
-  u_int8_t unknown_06;   // x00
+  WaterTempAlde water_mode;
   ElectricPowerLevelAlde el_mode;
   GasModeAlde gas_mode;
-  u_int8_t unknown_09;  // x00, x01 - ?neutral, day or night mod
+  HeaterPriorityAlde heater_prio;
   u_int8_t unknown_10;  // x00
   u_int8_t unknown_11;  // x64
   u_int8_t unknown_12;  // xFF
@@ -33,14 +33,14 @@ struct StatusFameAldeStatus {  // NOLINT(altera-struct-pack-align)
 
 // Length 16 (0x10) - MSG x50
 struct StatusFameAldeStatusResponse {  // NOLINT(altera-struct-pack-align)
-  u_int8_t unknown_00;                 // x01
-  u_int8_t unknown_01;                 // x00
+  HeaterAlde heater_mode;
+  u_int8_t unknown_01;  // x00
   TargetTemp target_temp_room;
   u_int16_t unknown_04;  // xFFFF
-  u_int8_t unknown_06;   // x00
+  WaterTempAlde water_mode;
   ElectricPowerLevelAlde el_mode;
   GasModeAlde gas_mode;
-  u_int8_t unknown_09;  // x00, x01 - ?neutral, day or night mod
+  HeaterPriorityAlde heater_prio;
   u_int8_t unknown_10;  // x00
   u_int8_t unknown_11;  // x64
   u_int8_t unknown_12;  // xFF
