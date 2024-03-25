@@ -174,26 +174,27 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
 
     // The order must match with the method 'has_update_to_submit_'.
     if (this->init_recieved_ == 0) {
+      // message[4] is length.
       if (message[4] == 0x1A) {
         // ALDE init
-        if (this->init_state_debug_ == 0) {
-          this->init_state_++;
-          if (this->init_state_ == 0x64) {
-            this->init_state_ = 0;
-          }
-          this->init_state_debug_ = 1;
-          // Preinit send x25 long empty (xFF) package
-          // Or is this response when I am asked for an update without signaling that I have one?
-          ESP_LOGD(TAG, "Requested read: Flush empty response");
-          this->message_counter = 0x00;
-          status_frame_create_null(response_frame, return_len);
-          return response;
-        } else {
-          // DEBUG: try all possible status frame message_type as init.
-          this->init_state_debug_ = 0;
-          status_frame_create_init_debug(response_frame, this->init_state_, return_len, this->message_counter++);
-          return response;
-        }
+        // if (this->init_state_debug_ == 0) {
+        //   this->init_state_++;
+        //   if (this->init_state_ == 0x64) {
+        //     this->init_state_ = 0;
+        //   }
+        // this->init_state_debug_ = 1;
+        // Preinit send x25 long empty (xFF) package
+        // Or is this response when I am asked for an update without signaling that I have one?
+        ESP_LOGD(TAG, "Requested read: Flush empty response");
+        this->message_counter = 0x00;
+        status_frame_create_null(response_frame, return_len);
+        return response;
+        // } else {
+        //   // DEBUG: try all possible status frame message_type as init.
+        //   this->init_state_debug_ = 0;
+        //   status_frame_create_init_debug(response_frame, this->init_state_, return_len, this->message_counter++);
+        //   return response;
+        // }
       } else {
         // TRUMA init
         ESP_LOGD(TAG, "Requested read: Sending init");
@@ -502,19 +503,23 @@ bool TrumaiNetBoxApp::has_update_to_submit_() {
   // It is called by interrupt. Logging is a blocking operation (especially when Wifi Logging).
   // If logging is necessary use logging queue of LinBusListener class.
   if (this->init_requested_ == 0) {
+    // Init request is send 20 seconds after boot.
+    if (micros() < 1000 * 1000 * 20 /* seconds */) {
+      return false;
+    }
     this->init_requested_ = micros();
     // ESP_LOGD(TAG, "Requesting initial data.");
     return true;
   } else if (this->init_recieved_ == 0) {
     auto init_wait_time = micros() - this->init_requested_;
-    // it has been 5 seconds and i am still awaiting the init data.
-    if (init_wait_time > 1000 * 1000 * 5) {
+    // it has been 15 seconds and I am still awaiting the init data.
+    if (init_wait_time > 1000 * 1000 * 15) {
       // ESP_LOGD(TAG, "Requesting initial data again.");
       this->init_requested_ = micros();
       return true;
     }
   } else if (this->airconAuto_.has_update() || this->airconManual_.has_update() || this->clock_.has_update() ||
-             this->heater_.has_update() || this->timer_.has_update()) {
+             this->heater_.has_update() || this->timer_.has_update() || this->alde_status_.has_update()) {
     if (this->update_time_ == 0) {
       // ESP_LOGD(TAG, "Notify CP Plus I got updates.");
       this->update_time_ = micros();
