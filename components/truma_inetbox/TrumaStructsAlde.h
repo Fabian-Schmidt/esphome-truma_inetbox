@@ -7,7 +7,7 @@ namespace esphome {
 namespace truma_inetbox {
 
 // Length 28 (0x1C) - MSG x51
-struct StatusFameAldeStatus {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAldeStatus {  // NOLINT(altera-struct-pack-align)
   HeaterAlde heater_mode;
   u_int8_t unknown_01;  // x00
   TargetTemp target_temp_room;
@@ -32,7 +32,7 @@ struct StatusFameAldeStatus {  // NOLINT(altera-struct-pack-align)
 } __attribute__((packed));
 
 // Length 16 (0x10) - MSG x50
-struct StatusFameAldeStatusResponse {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAldeStatusResponse {  // NOLINT(altera-struct-pack-align)
   HeaterAlde heater_mode;
   u_int8_t unknown_01;  // x00
   TargetTemp target_temp_room;
@@ -50,7 +50,7 @@ struct StatusFameAldeStatusResponse {  // NOLINT(altera-struct-pack-align)
 } __attribute__((packed));
 
 // Length 36 (0x24) - MSG x53
-struct StatusFameAldeAddon {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAldeAddon {  // NOLINT(altera-struct-pack-align)
   u_int8_t unknown_00[15];
   TempSensorUsageAlde temp_sensor;
   u_int8_t unknown_16[3];  // xFF
@@ -59,7 +59,7 @@ struct StatusFameAldeAddon {  // NOLINT(altera-struct-pack-align)
 } __attribute__((packed));
 
 // Length 12 (0x0C) - MSG x55
-struct StatusFameAldeHeaterNight {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAldeHeaterNight {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_room;
   u_int16_t mode_start_time;  // 0x03DE - 990/60 -> 16.5 -> 16:30
   u_int16_t mode_end_time;    // 0x01C2 - 450/60 -> 07.5 -> 07:30
@@ -72,7 +72,7 @@ struct StatusFameAldeHeaterNight {  // NOLINT(altera-struct-pack-align)
 } __attribute__((packed));
 
 // Length 12 (0x0C) - MSG x57
-struct StatusFameAldeHeaterDay {  // NOLINT(altera-struct-pack-align)
+struct StatusFrameAldeHeaterDay {  // NOLINT(altera-struct-pack-align)
   TargetTemp target_temp_room;
   u_int16_t mode_start_time;  // 0x03DE - 990/60 -> 16.5 -> 16:30
   u_int16_t mode_end_time;    // 0x04CE - 1230/60 -> 20.5 -> 20:30

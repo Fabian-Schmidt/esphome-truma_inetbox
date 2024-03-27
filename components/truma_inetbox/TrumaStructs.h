@@ -351,11 +351,11 @@ union StatusFrame {  // NOLINT(altera-struct-pack-align)
       StatusFrameAirconAuto airconAuto;
       StatusFrameAirconAutoResponse airconAutoResponse;
       StatusFrameAirconAutoInit airconAutoInit;
-      StatusFameAldeStatusResponse aldeStatusResponse; 
-      StatusFameAldeStatus aldeStatus;
-      StatusFameAldeAddon aldeAddon;
-      StatusFameAldeHeaterNight aldeHeaterNight;
-      StatusFameAldeHeaterDay aldeHeaterDay;
+      StatusFrameAldeStatusResponse aldeStatusResponse; 
+      StatusFrameAldeStatus aldeStatus;
+      StatusFrameAldeAddon aldeAddon;
+      StatusFrameAldeHeaterNight aldeHeaterNight;
+      StatusFrameAldeHeaterDay aldeHeaterDay;
     } __attribute__((packed));
   };
 } __attribute__((packed));

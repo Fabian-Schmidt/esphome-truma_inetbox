@@ -159,13 +159,13 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     //   ESP_LOGD(TAG, "Requested read: DEBUG");
 
     //   status_frame_create_empty(response_frame, STATUS_FRAME_ALDE_HEATER_DAY_RESPONSE,
-    //   sizeof(StatusFameAldeHeaterDay),
+    //   sizeof(StatusFrameAldeHeaterDay),
     //                             this->message_counter++);
 
     //   response_frame->aldeHeaterDay.target_temp_room = decimal_to_temp((float) this->DEBUG_VALUE);
 
     //   status_frame_calculate_checksum(response_frame);
-    //   (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFameAldeHeaterDay);
+    //   (*return_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAldeHeaterDay);
     //   this->update_time_ = 0;
 
     //   this->DEBUG_SUBMIT = false;
@@ -431,8 +431,8 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // ALDE SUPPORT START
     //
   } else if (header->message_type == STATUS_FRAME_ALDE_STATUS &&
-             header->message_length == sizeof(StatusFameAldeStatus)) {
-    ESP_LOGI(TAG, "StatusFameAldeStatus");
+             header->message_length == sizeof(StatusFrameAldeStatus)) {
+    ESP_LOGI(TAG, "StatusFrameAldeStatus");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.86.01.00.5E.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.12.71.0B.FE.FF.FA.0A.00.1E.FF.FF.FF.FF
@@ -454,7 +454,7 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
     // BB.00.1F.00.22.00.00.22.FF.FF.FF.54.01.1C.51.00.32.01.00.63.0B.FE.FF.00.00.37.01.00.64.FF.FF.FF.21.7F.0B.FE.FF.2C.0B.00.1E.FF.FF.FF.FF
     // (45)
     ESP_LOGD(TAG,
-             "StatusFameAldeStatus target_temp: %f, message_counter: %u, current_temp_inside: %f, "
+             "StatusFrameAldeStatus target_temp: %f, message_counter: %u, current_temp_inside: %f, "
              "current_temp_outside: %f, el: %u, gas: %s,",
              temp_code_to_decimal(statusFrame->aldeStatus.target_temp_room), statusFrame->aldeStatus.message_counter,
              temp_code_to_decimal(statusFrame->aldeStatus.current_temp_inside),
@@ -462,26 +462,26 @@ const u_int8_t *TrumaiNetBoxApp::lin_multiframe_recieved(const u_int8_t *message
              ((u_int8_t) statusFrame->aldeStatus.el_mode) * 100,
              statusFrame->aldeStatus.gas_mode == GasModeAlde::GAS_MODE_ALDE_OFF ? "OFF" : "ON");
     return response;
-  } else if (header->message_type == STATUS_FRAME_ALDE_ADDON && header->message_length == sizeof(StatusFameAldeAddon)) {
-    ESP_LOGI(TAG, "StatusFameAldeAddon");
+  } else if (header->message_type == STATUS_FRAME_ALDE_ADDON && header->message_length == sizeof(StatusFrameAldeAddon)) {
+    ESP_LOGI(TAG, "StatusFrameAldeAddon");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     //
     return response;
   } else if (header->message_type == STATUS_FRAME_ALDE_HEATER_NIGHT &&
-             header->message_length == sizeof(StatusFameAldeHeaterNight)) {
-    ESP_LOGI(TAG, "StatusFameAldeHeaterNight");
+             header->message_length == sizeof(StatusFrameAldeHeaterNight)) {
+    ESP_LOGI(TAG, "StatusFrameAldeHeaterNight");
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|
     //
-    ESP_LOGD(TAG, "StatusFameAldeHeaterNight target_temp_room: %f",
+    ESP_LOGD(TAG, "StatusFrameAldeHeaterNight target_temp_room: %f",
              temp_code_to_decimal(statusFrame->aldeHeaterNight.target_temp_room));
     return response;
 
   } else if (header->message_type == STATUS_FRAME_ALDE_HEATER_DAY &&
-             header->message_length == sizeof(StatusFameAldeHeaterDay)) {
-    ESP_LOGI(TAG, "StatusFameAldeHeaterDay");
-    ESP_LOGD(TAG, "StatusFameAldeHeaterDay target_temp_room: %f",
+             header->message_length == sizeof(StatusFrameAldeHeaterDay)) {
+    ESP_LOGI(TAG, "StatusFrameAldeHeaterDay");
+    ESP_LOGD(TAG, "StatusFrameAldeHeaterDay target_temp_room: %f",
              temp_code_to_decimal(statusFrame->aldeHeaterDay.target_temp_room));
     // Example:
     // SID<---------PREAMBLE---------->|<---MSG_HEAD---->|

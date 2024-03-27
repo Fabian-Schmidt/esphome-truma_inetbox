@@ -9,7 +9,7 @@ namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.TrumaiNetBoxAppAldeStatus";
 
-StatusFameAldeStatusResponse *TrumaiNetBoxAppAldeStatus::update_prepare() {
+StatusFrameAldeStatusResponse *TrumaiNetBoxAppAldeStatus::update_prepare() {
   // An update is currently going on.
   if (this->update_status_prepared_ || this->update_status_stale_) {
     return &this->update_status_;
@@ -38,7 +38,7 @@ StatusFameAldeStatusResponse *TrumaiNetBoxAppAldeStatus::update_prepare() {
 
 void TrumaiNetBoxAppAldeStatus::create_update_data(StatusFrame *response, u_int8_t *response_len,
                                                    u_int8_t command_counter) {
-  status_frame_create_empty(response, STATUS_FRAME_ALDE_STATUS_RESPONSE, sizeof(StatusFameAldeStatusResponse),
+  status_frame_create_empty(response, STATUS_FRAME_ALDE_STATUS_RESPONSE, sizeof(StatusFrameAldeStatusResponse),
                             command_counter);
 
   response->aldeStatusResponse.heater_mode = this->update_status_.heater_mode;
@@ -57,15 +57,15 @@ void TrumaiNetBoxAppAldeStatus::create_update_data(StatusFrame *response, u_int8
   response->aldeStatusResponse.message_counter = this->update_status_.message_counter;
 
   status_frame_calculate_checksum(response);
-  (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFameAldeStatusResponse);
+  (*response_len) = sizeof(StatusFrameHeader) + sizeof(StatusFrameAldeStatusResponse);
 
-  TrumaStausFrameResponseStorage<StatusFameAldeStatus, StatusFameAldeStatusResponse>::update_submitted();
+  TrumaStausFrameResponseStorage<StatusFrameAldeStatus, StatusFrameAldeStatusResponse>::update_submitted();
 }
 
 void TrumaiNetBoxAppAldeStatus::dump_data() const {}
 
 bool TrumaiNetBoxAppAldeStatus::can_update() {
-  return TrumaStausFrameResponseStorage<StatusFameAldeStatus, StatusFameAldeStatusResponse>::can_update() &&
+  return TrumaStausFrameResponseStorage<StatusFrameAldeStatus, StatusFrameAldeStatusResponse>::can_update() &&
          // this->parent_->get_heater_device() != TRUMA_DEVICE::UNKNOWN;
          this->parent_->get_is_alde_device();
 }

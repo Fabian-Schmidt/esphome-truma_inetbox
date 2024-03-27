@@ -23,7 +23,7 @@ void TrumaHeaterNumber::setup() {
         break;
     }
   });
-  this->parent_->get_alde_satus()->add_on_message_callback([this](const StatusFameAldeStatus *status_alde) {
+  this->parent_->get_alde_satus()->add_on_message_callback([this](const StatusFrameAldeStatus *status_alde) {
     switch (this->type_) {
       case TRUMA_NUMBER_TYPE::TARGET_ROOM_TEMPERATURE:
         this->publish_state(temp_code_to_decimal(status_alde->target_temp_room, 0));
