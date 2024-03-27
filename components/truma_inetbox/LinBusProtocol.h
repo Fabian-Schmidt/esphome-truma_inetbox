@@ -23,11 +23,17 @@ class LinBusProtocol : public LinBusListener {
                                                   u_int8_t *return_len) = 0;
 
   std::queue<std::array<u_int8_t, 8>> updates_to_send_ = {};
+  std::array<u_int8_t, 8> updates_to_send_high_prio_ = {};
+  bool updates_to_send_high_prio_ready_to_send_ = false;
 
  private:
   u_int8_t lin_node_address_ = /*LIN initial node address*/ 0x03;
 
   void prepare_update_msg_(const std::array<u_int8_t, 8> message) { this->updates_to_send_.push(std::move(message)); }
+  void prepare_update_msg_high_prio_(const std::array<u_int8_t, 8> message) {
+    this->updates_to_send_high_prio_ = message;
+    this->updates_to_send_high_prio_ready_to_send_ = true;
+  }
   bool is_matching_identifier_(const u_int8_t *message);
 
   u_int16_t multi_pdu_message_expected_size_ = 0;

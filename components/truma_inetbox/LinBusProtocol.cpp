@@ -19,16 +19,24 @@ static const char *const TAG = "truma_inetbox.LinBusProtocol";
 #define LIN_SID_HEARTBEAT 0xB9
 #define LIN_SID_HEARTBEAT_RESPONSE (LIN_SID_HEARTBEAT | LIN_SID_RESPONSE)
 
-void LinBusProtocol::lin_reset_device(){
-    // clear any messages in send queue of LinBus Protocol handler.
+void LinBusProtocol::lin_reset_device() {
+  // clear any messages in send queue of LinBus Protocol handler.
   while (!this->updates_to_send_.empty()) {
     this->updates_to_send_.pop();
   }
+  this->updates_to_send_high_prio_ready_to_send_ = false;
 }
 
 bool LinBusProtocol::answer_lin_order_(const u_int8_t pid) {
   // Send requested answer
   if (pid == DIAGNOSTIC_FRAME_SLAVE) {
+    if (this->updates_to_send_high_prio_ready_to_send_) {
+      this->updates_to_send_high_prio_ready_to_send_ = false;
+      this->write_lin_answer_(this->updates_to_send_high_prio_.data(),
+                              (u_int8_t) this->updates_to_send_high_prio_.size());
+      return true;
+    }
+
     if (!this->updates_to_send_.empty()) {
       auto update_to_send_ = this->updates_to_send_.front();
       this->updates_to_send_.pop();
@@ -54,7 +62,7 @@ void LinBusProtocol::lin_message_recieved_(const u_int8_t pid, const u_int8_t *m
     //   response[5] = 0xA7;
     //   response[6] = 0x0E;
     //   response[7] = 0x49;
-    //   this->prepare_update_msg_(response);
+    //   this->prepare_update_msg_high_prio_(response);
     // }
 
     {
@@ -135,7 +143,7 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
         response[3] = LIN_SID_READ_BY_IDENTIFIER;
         response[4] = 0x12;
       }
-      this->prepare_update_msg_(response);
+      this->prepare_update_msg_high_prio_(response);
     }
   } else if (my_node_address && service_identifier == LIN_SID_HEARTBEAT && message_length >= 5) {
     // if (message[3] == 0x00 && message[4] == 0x1F && message[5] == 0x00 && message[6] == 0x00) {
@@ -144,7 +152,7 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
     response[1] = 2; /* bytes length*/
     response[2] = LIN_SID_HEARTBEAT_RESPONSE;
     response[3] = 0x00;
-    this->prepare_update_msg_(response);
+    this->prepare_update_msg_high_prio_(response);
 
     this->lin_heartbeat();
     //}
@@ -158,7 +166,7 @@ void LinBusProtocol::lin_msg_diag_single_(const u_int8_t *message, u_int8_t leng
       response[1] = 1; /* bytes length*/
       response[2] = LIN_SID_ASSIGN_NAD_RESPONSE;
 
-      this->prepare_update_msg_(response);
+      this->prepare_update_msg_high_prio_(response);
       this->lin_node_address_ = message[7];
     }
   } else {
