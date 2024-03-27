@@ -19,7 +19,7 @@
 #define TRUMA_MSG_QUEUE_LENGTH 12
 #endif
 #ifndef  TRUMA_LOG_QUEUE_LENGTH
-#define TRUMA_LOG_QUEUE_LENGTH 6
+#define TRUMA_LOG_QUEUE_LENGTH 32
 #endif
 
 namespace esphome {
